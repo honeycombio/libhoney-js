@@ -1,0 +1,42 @@
+{
+  "name": "libhoney",
+  "version": "1.0.0-beta.1",
+  "description": "Javascript library for sending data to Honeycomb",
+  "bugs": "https://github.com/honeycombio/libhoney-js/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/honeycombio/libhoney-js.git"
+  },
+  "main": "lib/libhoney.js",
+  "files": [
+    "lib",
+    "docs",
+    "examples",
+    "README.md",
+    "LICENSE",
+    "gulpfile.js"
+  ],
+  "scripts": {
+    "prepublish": "gulp build docs",
+    "build": "gulp build",
+    "docs": "gulp docs",
+    "test": "npm run build && mocha --compilers js:babel-register test"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "babel-preset-es2015": "^6.9.0",
+    "babel-register": "^6.11.6",
+    "esdoc": "^0.4.8",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-esdoc": "^0.3.0",
+    "gulp-gh-pages": "^0.5.4",
+    "gulp-replace": "^0.5.4",
+    "jsdoc": "^3.4.0",
+    "mocha": "^3.0.2"
+  },
+  "dependencies": {
+    "superagent": "^1.5.0"
+  }
+}

@@ -1,0 +1,5 @@
+((nil . ((fill-column . 100)))
+ (js2-mode . ((indent-tabs-mode . nil)
+              (tab-width . 2)
+              (js2-basic-offset . 2)))
+ )
