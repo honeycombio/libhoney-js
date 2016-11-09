@@ -1,6 +1,6 @@
 {
   "name": "libhoney",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "description": "Javascript library for sending data to Honeycomb",
   "bugs": "https://github.com/honeycombio/libhoney-js/issues",
   "repository": {
