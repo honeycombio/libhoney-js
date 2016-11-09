@@ -26,6 +26,10 @@ export default class Transmission {
     this._batchTimeTrigger = batchTimeTrigger;
     this._sendTimeoutId = -1;
     this._eventQueue = [];
+    // Included for testing; to stub out randomness and verify that an event
+    // was dropped.
+    this._randomFn = Math.random;
+    this._droppedCallback = emptyResponseCallback;
 
     if (typeof options.responseCallback == "function") {
       this._responseCallback = options.responseCallback;
@@ -41,6 +45,7 @@ export default class Transmission {
   sendEvent (ev) {
     // bail early if we aren't sampling this event
     if (!this._shouldSendEvent(ev)) {
+      this._droppedCallback();
       return;
     }
 
@@ -79,7 +84,7 @@ export default class Transmission {
     if (sampleRate <= 1) {
       return true;
     }
-    return (Math.random() >= 1/sampleRate);
+    return (this._randomFn() < 1/sampleRate);
   }
 
   _ensureSendTimeout () {
