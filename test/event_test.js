@@ -60,13 +60,15 @@ describe('libhoney events', function() {
     map.set("boolean", true);
 
     // Date does not convert
-    map.set("Date", new Date(1,2,3,4,5,6,7));
+    var d = new Date(1,2,3,4,5,6,7)
+    map.set("Date", d);
 
     // Null/undefined both end up being null in the output
     map.set("null", null);
     map.set("undefined", undefined);
     
     ev.add(map);
-    assert.equal(JSON.stringify(ev.data), '{"obj":\"{\\"a\\":1,\\"b\\":2}\","String":"a:1","string":"a:1","Number":5,"number":5,"Boolean":true,"boolean":true,"Date":"1901-03-03T12:05:06.007Z","null":null,"undefined":null}');
+
+    assert.equal(JSON.stringify(ev.data), `{"obj":\"{\\"a\\":1,\\"b\\":2}\","String":"a:1","string":"a:1","Number":5,"number":5,"Boolean":true,"boolean":true,"Date":${ JSON.stringify(d) },"null":null,"undefined":null}`);
   });
 });
