@@ -34,9 +34,11 @@
     "gulp-gh-pages": "^0.5.4",
     "gulp-replace": "^0.5.4",
     "jsdoc": "^3.4.0",
-    "mocha": "^3.0.2"
+    "mocha": "^3.0.2",
+    "superagent-mock": "^2.0.1"
   },
   "dependencies": {
-    "superagent": "^1.5.0"
+    "superagent": "^2.3.0",
+    "urljoin": "^0.1.5"
   }
 }

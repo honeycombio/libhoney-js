@@ -5,7 +5,8 @@
 /**
  * @module
  */
-import * as superagent from 'superagent';
+let superagent = require('superagent');
+import urljoin from 'urljoin';
 
 const libhoney_js_version = "LIBHONEY_JS_VERSION";
 
@@ -63,7 +64,7 @@ export default class Transmission {
     var batch = this._eventQueue.splice(0, this._batchSizeTrigger);
 
     for (var ev of batch) {
-      var url = ev.apiHost + "/1/events/" + ev.dataset;
+      var url = urljoin(ev.apiHost, "/1/events", ev.dataset);
       var req = superagent.post(url);
       req
         .set('X-Hny-Team', ev.writeKey)
