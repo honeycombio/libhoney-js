@@ -1,7 +1,7 @@
 A JS library for sending data to Honeycomb (https://honeycomb.io)
 =================================================================
 
-[![Build Status](https://travis-ci.com/honeycombio/libhoney-js-private.svg?token=pycxQxHKSNdG7LiWg3Nt&branch=master)](https://travis-ci.com/honeycombio/libhoney-js-private)
+[![Build Status](https://travis-ci.org/honeycombio/libhoney-js.svg?branch=master)](https://travis-ci.org/honeycombio/libhoney-js)
 
 ## Summary
 
