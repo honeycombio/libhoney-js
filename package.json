@@ -35,7 +35,7 @@
     "gulp-replace": "^0.5.4",
     "jsdoc": "^3.4.0",
     "mocha": "^3.0.2",
-    "superagent-mock": "^2.0.1"
+    "superagent-mocker": "^0.5.2"
   },
   "dependencies": {
     "superagent": "^2.3.0",
