@@ -205,12 +205,7 @@ export default class Libhoney {
    *                                  });
    */
   newBuilder (fields, dyn_fields) {
-    var b = new Builder(this, this._fields, this._dyn_fields);
-    
-    foreach(fields, (v,k) => b.addField(k, v));
-    foreach(dyn_fields, (v,k) => b.addDynamicField(k, v));
-
-    return b;
+    return this._builder.newBuilder(fields, dyn_fields);
   }
 }
 

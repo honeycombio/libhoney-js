@@ -1,18 +1,7 @@
 import assert from 'assert';
 import libhoney from '../lib/libhoney';
 
-var _transmissionConstructorArg = null;
-var _transmissionSendEventArg = null;
-
-class MockTransmission {
-  constructor(options) {
-    _transmissionConstructorArg = options;
-  }
-
-  sendEvent (ev) {
-    _transmissionSendEventArg = ev;
-  }
-}
+import { _transmissionConstructorArg, _transmissionSendEventArg, MockTransmission } from './mock_transmission';
 
 describe('libhoney', function() {
   describe("constructor options", function() {
