@@ -6,7 +6,7 @@ A node module for interacting with [Honeycomb](https://honeycomb.io). (See here 
 
 ## Installation
 
-```bash
+```
 npm install libhoney --save-dev
 ```
 
@@ -22,8 +22,8 @@ Honeycomb can calculate all sorts of statistics, so send the values you care abo
 var libhoney = require('libhoney').default;
 
 var hny = new libhoney({
-  writeKey: "YOUR-WRITE-KEY",
-  dataset: "honeycomb-example"
+  writeKey: "YOUR_WRITE_KEY",
+  dataset: "honeycomb-js-example"
 });
 
 hny.sendNow({
