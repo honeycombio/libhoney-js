@@ -1,19 +1,14 @@
-A JS library for sending data to Honeycomb (https://honeycomb.io)
-=================================================================
+# libhoney [![Build Status](https://travis-ci.org/honeycombio/libhoney-js.svg?branch=master)](https://travis-ci.org/honeycombio/libhoney-js)
 
-[![Build Status](https://travis-ci.org/honeycombio/libhoney-js.svg?branch=master)](https://travis-ci.org/honeycombio/libhoney-js)
+A node module for interacting with [Honeycomb](https://honeycomb.io). (See here for more information about [using Honeycomb](https://honeycomb.io/intro/) and [its libraries](https://honeycomb.io/docs/send-data/sdks).)
 
-## Summary
+**NOT** for use in browser-side JavaScript applications. Write keys are your auth tokens for sending data to Honeycomb and should be kept secure -- they're not per-site keys. Don't leave yourself vulnerable to malicious users.
 
-libhoney is written to ease the process of sending data to Honeycomb from within
-your js server code.
+## Installation
 
-For an overview of how to use a honeycomb library, see our documentation at
-https://honeycomb.io/docs/send-data/sdks/
-
-Do NOT use this in your browser-side JS.  Honeycomb uses write keys as auth tokens for sending data,
-and they are not per-site keys.  If someone has your write key they can write whatever they want to
-whatever dataset they want.  Don't do this.
+```bash
+npm install libhoney --save-dev
+```
 
 ## Documentation
 
@@ -21,8 +16,26 @@ An API reference is available at https://honeycombio.github.io/libhoney-js/
 
 ## Example
 
-See the `examples/` directory for sample code demonstrating how to use events,
-builders, fields, and dynamic fields.
+Honeycomb can calculate all sorts of statistics, so send the values you care about and let us crunch the averages, percentiles, lower/upper bounds, cardinality -- whatever you want -- for you.
+
+```js
+var libhoney = require('libhoney').default;
+
+var hny = new libhoney({
+  writeKey: "YOUR-WRITE-KEY",
+  dataset: "honeycomb-example"
+});
+
+hny.sendNow({
+  message: "Test Honeycomb event",
+  randomFloat: Math.random(),
+  hostname: os.hostname(),
+  favoriteColor: "chartreuse"
+});
+```
+
+For more, see the `examples/` directory for sample code demonstrating how to use events,
+builders, fields, and dynamic fields in an Express app.
 
 ## Contributions
 
@@ -31,4 +44,3 @@ open issues or a pull request with your change. Remember to add your name to the
 CONTRIBUTORS file!
 
 All contributions will be released under the Apache License 2.0.
-

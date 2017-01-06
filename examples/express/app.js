@@ -3,10 +3,8 @@ var honey = require('./express-honey');
 var app = express();
 
 app.use(honey({
-  apiHost: process.env["HONEY_API_HOST"],
   writeKey: process.env["HONEY_WRITE_KEY"],
-  dataset: process.env["HONEY_DATASET"],
-  sampleRate: 5 // log 1 out of every 5 events
+  dataset: "express-example",
 }));
 
 app.get('/', function (req, res) {

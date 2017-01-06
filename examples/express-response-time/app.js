@@ -4,9 +4,8 @@ var responseTime = require('response-time');
 var app = express();
 
 var honey = new libhoney({
-  apiHost: process.env["HONEY_API_HOST"],  
   writeKey: process.env["HONEY_WRITE_KEY"],
-  dataset: process.env["HONEY_DATASET"]
+  dataset: "express-example-response-time"
 });
 
 app.use(responseTime(function (req, res, time) {
