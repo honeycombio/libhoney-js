@@ -34,7 +34,7 @@ hny.sendNow({
 });
 ```
 
-For more, see the `examples/` directory for sample code demonstrating how to use events,
+For more, see the [`examples/`](examples/) directory for sample code demonstrating how to use events,
 builders, fields, and dynamic fields in an Express app.
 
 ## Contributions
