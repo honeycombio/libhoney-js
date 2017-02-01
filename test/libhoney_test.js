@@ -25,12 +25,11 @@ describe('libhoney', function() {
         transmission: MockTransmission
       });
       var postData = { a : 1, b : 2};
-      honey.sendEvent({
-        data: postData
-      });
+      honey.sendNow(postData);
 
       assert.equal(_transmissionSendEventArg.apiHost, "https://api.honeycomb.io/");
       assert.equal(_transmissionSendEventArg.writeKey, "12345");
+
       assert.equal(_transmissionSendEventArg.dataset, "testing");
       assert.equal(_transmissionSendEventArg.sampleRate, 1);
       assert(_transmissionSendEventArg.timestamp instanceof Date);
@@ -45,9 +44,7 @@ describe('libhoney', function() {
         transmission: MockTransmission
       });
       var postData = { a : 1, b : 2};
-      honey.sendEvent({
-        data: postData
-      });
+      honey.sendNow(postData);
 
       assert.equal(_transmissionSendEventArg.apiHost, "http://foo/bar");
       assert.equal(_transmissionSendEventArg.writeKey, "12345");

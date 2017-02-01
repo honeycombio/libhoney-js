@@ -10,7 +10,7 @@ import Builder from './builder';
 import Event from './event';
 import foreach from './foreach';
 
-const defaults = {
+const defaults = Object.freeze({
   // host to send data to
   apiHost: "https://api.honeycomb.io/",
 
@@ -28,7 +28,7 @@ const defaults = {
   // batch triggers
   batchSizeTrigger: 100, // we send a batch to the api when we have this many outstanding events
   batchTimeTrigger: 100 // ... or after this many ms has passed.
-};
+});
 
 /**
  * Represents a honeycomb context.  Each honeycomb context has 
@@ -51,6 +51,39 @@ export default class Libhoney {
     this._transmission = getAndInitTransmission(this._options.transmission, this._options);
     this._usable = this._transmission != null;
     this._builder = new Builder(this);
+
+    this._builder.apiHost = this._options.apiHost;
+    this._builder.writeKey = this._options.writeKey;
+    this._builder.dataset = this._options.dataset;
+    this._builder.sampleRate = this._options.sampleRate;
+  }
+
+  set apiHost(v) {
+    this._builder.apiHost = v;
+  }
+  get apiHost() {
+    return this._builder.apiHost;
+  }
+
+  set writeKey(v) {
+    this._builder.writeKey = v;
+  }
+  get writeKey() {
+    return this._builder.writeKey;
+  }
+
+  set dataset(v) {
+    this._builder.dataset = v;
+  }
+  get dataset() {
+    return this._builder.dataset;
+  }
+
+  set sampleRate(v) {
+    this._builder.sampleRate = v;
+  }
+  get sampleRate() {
+    return this._builder.sampleRate;
   }
 
   /**
@@ -85,25 +118,25 @@ export default class Libhoney {
       return;
     }
 
-    var apiHost = event.apiHost || this._options.apiHost;
-    if (typeof apiHost !== 'string') {
-      console.error(".apiHost must be a string");
+    var apiHost = event.apiHost;
+    if (typeof apiHost !== 'string' || apiHost === "") {
+      console.error(".apiHost must be a non-empty string");
       return;
     }
 
-    var writeKey = event.writeKey || this._options.writeKey;
-    if (typeof writeKey !== 'string') {
-      console.error(".writeKey must be a string");
+    var writeKey = event.writeKey;
+    if (typeof writeKey !== 'string' || writeKey === "") {
+      console.error(".writeKey must be a non-empty string");
       return;
     }
 
-    var dataset = event.dataset || this._options.dataset;
-    if (typeof dataset !== 'string') {
-      console.error(".dataset must be a string");
+    var dataset = event.dataset;
+    if (typeof dataset !== 'string' || dataset === "") {
+      console.error(".dataset must be a non-empty string");
       return;
     }
 
-    var sampleRate = event.sampleRate || this._options.sampleRate;
+    var sampleRate = event.sampleRate;
     if (typeof sampleRate !== 'number') {
       console.error(".sampleRate must be a number");
       return;
@@ -117,6 +150,26 @@ export default class Libhoney {
       dataset: dataset,
       sampleRate: sampleRate
     });
+  }
+
+  /**
+   * a shortcut to create an event, add data, and send the event immediately.
+   * @param {Object|Map<string, any>} data field->value mapping.
+   * @example <caption>using an object</caption>
+   *   honey.sendNow ({
+   *     responseTime_ms: 100,
+   *     httpStatusCode: 200
+   *   });
+   * @example <caption>using an ES2015 map</caption>
+   *   let map = new Map();
+   *   map.set("responseTime_ms", 100);
+   *   map.set("httpStatusCode", 200);
+   *   honey.sendNow (map);
+   */
+  sendNow (data) {
+    var ev = this.newEvent();
+    ev.add(data);
+    this.sendEvent(ev);
   }
 
   /**
