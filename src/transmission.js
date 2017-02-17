@@ -10,7 +10,7 @@
 let superagent = require('superagent');
 import urljoin from 'urljoin';
 
-const libhoney_js_version = "LIBHONEY_JS_VERSION";
+const userAgent = "libhoney-js/LIBHONEY_JS_VERSION";
 
 const _global = (typeof window !== "undefined" ? window :
                  typeof global !== "undefined" ? global : undefined);
@@ -27,7 +27,7 @@ const pendingWorkCapacity = 10000;
 
 const emptyResponseCallback = function() { };
 
-const eachSeries = (arr, iteratorFn) =>
+const eachPromise = (arr, iteratorFn) =>
     arr.reduce(function(p, item) {
         return p.then(function() {
             return iteratorFn(item);
@@ -98,7 +98,7 @@ export default class Transmission {
 
     var batch = this._eventQueue.splice(0, this._batchSizeTrigger);
 
-    eachSeries(batch, (ev) => {
+    eachPromise(batch, (ev) => {
       var url = urljoin(ev.apiHost, "/1/events", ev.dataset);
       var req = superagent.post(url);
 
@@ -107,7 +107,7 @@ export default class Transmission {
           .set('X-Hny-Team', ev.writeKey)
           .set('X-Hny-Samplerate', ev.sampleRate)
           .set('X-Hny-Event-Time', ev.timestamp.toISOString())
-          .set('User-Agent', `libhoney-js/${libhoney_js_version}`)
+          .set('User-Agent', userAgent)
           .type("json")
           .send(ev.postData)
           .end((err, res) => {
