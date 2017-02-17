@@ -92,4 +92,4 @@ export default class Event {
   send () {
     this._libhoney.sendEvent(this);
   }
-};
+}

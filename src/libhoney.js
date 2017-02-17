@@ -7,8 +7,6 @@
  */
 import Transmission from './transmission';
 import Builder from './builder';
-import Event from './event';
-import foreach from './foreach';
 
 const defaults = Object.freeze({
   // host to send data to
@@ -26,8 +24,15 @@ const defaults = Object.freeze({
   transmission: "base",
 
   // batch triggers
-  batchSizeTrigger: 100, // we send a batch to the api when we have this many outstanding events
-  batchTimeTrigger: 100 // ... or after this many ms has passed.
+  batchSizeTrigger: 50,  // we send a batch to the api when we have this many outstanding events
+  batchTimeTrigger: 100, // ... or after this many ms has passed.
+
+  // batches are sent serially (one event at a time), so we allow multiple concurrent batches
+  // to increase parallelism while sending.
+  maxConcurrentBatches: 10,
+
+  // the maximum number of pending events we allow in our queue before they get batched
+  pendingWorkCapacity: 10000
 });
 
 /**

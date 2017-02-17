@@ -142,4 +142,4 @@ export default class Builder {
 
     return b;
   }
-};
+}
