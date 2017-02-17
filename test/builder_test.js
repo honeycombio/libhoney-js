@@ -1,3 +1,4 @@
+/* global describe, it */
 import assert from 'assert';
 import libhoney from '../lib/libhoney';
 

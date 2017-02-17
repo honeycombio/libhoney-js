@@ -22,6 +22,33 @@ export default class Event {
     this.data = Object.create(null);
     this.metadata = null;
 
+    /**
+     * The hostname for the Honeycomb API server to which to send this event.  default:
+     * https://api.honeycomb.io/
+     *
+     * @type {string}
+     */
+    this.apiHost = "";
+    /**
+     * The Honeycomb authentication token for this event.  Find your team write key at
+     * https://ui.honeycomb.io/account
+     *
+     * @type {string}
+     */
+    this.writeKey = "";
+    /**
+     * The name of the Honeycomb dataset to which to send this event.
+     *
+     * @type {string}
+     */
+    this.dataset = "";
+    /**
+     * The rate at which to sample this event.
+     *
+     * @type {number}
+     */
+    this.sampleRate = 1;
+
     foreach(fields, (v, k) => this.addField(k, v));
     foreach(dyn_fields, (v, k) => this.addField(k, v()));
 
