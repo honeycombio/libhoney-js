@@ -7,8 +7,6 @@
  */
 import Transmission from './transmission';
 import Builder from './builder';
-import Event from './event';
-import foreach from './foreach';
 
 const defaults = Object.freeze({
   // host to send data to
@@ -26,8 +24,15 @@ const defaults = Object.freeze({
   transmission: "base",
 
   // batch triggers
-  batchSizeTrigger: 100, // we send a batch to the api when we have this many outstanding events
-  batchTimeTrigger: 100 // ... or after this many ms has passed.
+  batchSizeTrigger: 50,  // we send a batch to the api when we have this many outstanding events
+  batchTimeTrigger: 100, // ... or after this many ms has passed.
+
+  // batches are sent serially (one event at a time), so we allow multiple concurrent batches
+  // to increase parallelism while sending.
+  maxConcurrentBatches: 10,
+
+  // the maximum number of pending events we allow in our queue before they get batched
+  pendingWorkCapacity: 10000
 });
 
 /**
@@ -58,30 +63,82 @@ export default class Libhoney {
     this._builder.sampleRate = this._options.sampleRate;
   }
 
+  /**
+   * The hostname for the Honeycomb API server to which to send events created through this libhoney
+   * instance. default: https://api.honeycomb.io/
+   *
+   * @type {string}
+   */
   set apiHost(v) {
     this._builder.apiHost = v;
   }
+  /**
+   * The hostname for the Honeycomb API server to which to send events created through this libhoney
+   * instance. default: https://api.honeycomb.io/
+   *
+   * @type {string}
+   */
   get apiHost() {
     return this._builder.apiHost;
   }
 
+  /**
+   * The Honeycomb authentication token. If it is set on a libhoney instance it will be used as the
+   * default write key for all events. If absent, it must be explicitly set on a Builder or
+   * Event. Find your team write key at https://ui.honeycomb.io/account
+   *
+   * @type {string}
+   */
   set writeKey(v) {
     this._builder.writeKey = v;
   }
+  /**
+   * The Honeycomb authentication token. If it is set on a libhoney instance it will be used as the
+   * default write key for all events. If absent, it must be explicitly set on a Builder or
+   * Event. Find your team write key at https://ui.honeycomb.io/account
+   *
+   * @type {string}
+   */
   get writeKey() {
     return this._builder.writeKey;
   }
 
+  /**
+   * The name of the Honeycomb dataset to which to send events through this libhoney instance.  If
+   * it is specified during libhoney initialization, it will be used as the default dataset for all
+   * events. If absent, dataset must be explicitly set on a builder or event.
+   *
+   * @type {string}
+   */
   set dataset(v) {
     this._builder.dataset = v;
   }
+  /**
+   * The name of the Honeycomb dataset to which to send these events through this libhoney instance.
+   * If it is specified during libhoney initialization, it will be used as the default dataset for
+   * all events. If absent, dataset must be explicitly set on a builder or event.
+   *
+   * @type {string}
+   */
   get dataset() {
     return this._builder.dataset;
   }
 
+  /**
+   * The rate at which to sample events. Default is 1, meaning no sampling. If you want to send one
+   * event out of every 250 times send() is called, you would specify 250 here.
+   *
+   * @type {number}
+   */
   set sampleRate(v) {
     this._builder.sampleRate = v;
   }
+  /**
+   * The rate at which to sample events. Default is 1, meaning no sampling. If you want to send one
+   * event out of every 250 times send() is called, you would specify 250 here.
+   *
+   * @type {number}
+   */
   get sampleRate() {
     return this._builder.sampleRate;
   }

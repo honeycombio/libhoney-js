@@ -1,3 +1,4 @@
+/* global describe, it */
 import assert from 'assert';
 import libhoney from '../lib/libhoney';
 
@@ -22,7 +23,8 @@ describe('libhoney events', function() {
     var ev2 = b.newEvent();
     var map = new Map();
     map.set("a", 5);
-    assert.equal(5, ev.data.a);
+    ev2.add(map);
+    assert.equal(5, ev2.data.a);
   });
 
   it("it toString()'s keys from Maps in .add()", function() {
@@ -60,7 +62,7 @@ describe('libhoney events', function() {
     map.set("boolean", true);
 
     // Date does not convert
-    var d = new Date(1,2,3,4,5,6,7)
+    var d = new Date(1,2,3,4,5,6,7);
     map.set("Date", d);
 
     // Null/undefined both end up being null in the output

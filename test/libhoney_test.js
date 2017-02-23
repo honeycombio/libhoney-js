@@ -1,3 +1,4 @@
+/* global describe, it */
 import assert from 'assert';
 import libhoney from '../lib/libhoney';
 
@@ -7,7 +8,8 @@ describe('libhoney', function() {
   describe("constructor options", function() {
     it("should be communicated to transmission constructor", function() {
       var options = { a: 1, b: 2, c: 3, d: 4, transmission: MockTransmission };
-      var honey = new libhoney(options);
+
+      new libhoney(options);
 
       assert.equal(options.a, _transmissionConstructorArg.a);
       assert.equal(options.b, _transmissionConstructorArg.b);

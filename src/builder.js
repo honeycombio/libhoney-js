@@ -22,6 +22,37 @@ export default class Builder {
     this._fields = Object.create(null);
     this._dyn_fields = Object.create(null);
 
+    /**
+     * The hostname for the Honeycomb API server to which to send events created through this
+     * builder.  default: https://api.honeycomb.io/
+     *
+     * @type {string}
+     */
+    this.apiHost = "";
+    /**
+     * The Honeycomb authentication token. If it is set on a libhoney instance it will be used as the
+     * default write key for all events. If absent, it must be explicitly set on a Builder or
+     * Event. Find your team write key at https://ui.honeycomb.io/account
+     *
+     * @type {string}
+     */
+    this.writeKey = "";
+    /**
+     * The name of the Honeycomb dataset to which to send these events.  If it is specified during
+     * libhoney initialization, it will be used as the default dataset for all events. If absent,
+     * dataset must be explicitly set on a builder or event.
+     *
+     * @type {string}
+     */
+    this.dataset = "";
+    /**
+     * The rate at which to sample events. Default is 1, meaning no sampling. If you want to send one
+     * event out of every 250 times send() is called, you would specify 250 here.
+     *
+     * @type {number}
+     */
+    this.sampleRate = 1;
+
     foreach(fields, (v,k) => this.addField(k, v));
     foreach(dyn_fields, (v,k) => this.addDynamicField(k, v));
   }
@@ -142,4 +173,4 @@ export default class Builder {
 
     return b;
   }
-};
+}
