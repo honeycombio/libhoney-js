@@ -224,26 +224,6 @@ export default class Libhoney extends EventEmitter {
   }
 
   /**
-   * a shortcut to create an event, add data, and send the event immediately.
-   * @param {Object|Map<string, any>} data field->value mapping.
-   * @example <caption>using an object</caption>
-   *   honey.sendNow ({
-   *     responseTime_ms: 100,
-   *     httpStatusCode: 200
-   *   });
-   * @example <caption>using an ES2015 map</caption>
-   *   let map = new Map();
-   *   map.set("responseTime_ms", 100);
-   *   map.set("httpStatusCode", 200);
-   *   honey.sendNow (map);
-   */
-  sendNow (data) {
-    var ev = this.newEvent();
-    ev.add(data);
-    this.sendEvent(ev);
-  }
-
-  /**
    * adds a group of field->values to the global Builder.
    * @param {Object|Map<string, any>} data field->value mapping.
    * @returns {Libhoney} this libhoney instance.
@@ -291,13 +271,17 @@ export default class Libhoney extends EventEmitter {
 
   /**
    * creates and sends an event, including all global builder fields/dyn_fields, as well as anything in the optional data parameter.
-   * @param {Object|Map<string, any>} [data] field->value mapping to add to the event sent.
-   * @example <caption>empty sendNow</caption>
-   *   honey.sendNow(); // sends just the data that has been added via add/addField/addDynamicField.
-   * @example <caption>adding data at send-time</caption>
-   *   honey.sendNow({
-   *     additionalField: value
+   * @param {Object|Map<string, any>} data field->value mapping.
+   * @example <caption>using an object</caption>
+   *   honey.sendNow ({
+   *     responseTime_ms: 100,
+   *     httpStatusCode: 200
    *   });
+   * @example <caption>using an ES2015 map</caption>
+   *   let map = new Map();
+   *   map.set("responseTime_ms", 100);
+   *   map.set("httpStatusCode", 200);
+   *   honey.sendNow (map);
    */
   sendNow (data) {
     return this._builder.sendNow(data);
