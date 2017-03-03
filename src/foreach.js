@@ -16,4 +16,4 @@ export default function foreach(col, f) {
   } else {
     Object.getOwnPropertyNames(col).forEach((k) => f(col[k], k));
   }
-};
+}
