@@ -189,8 +189,41 @@ describe('transmission', function() {
       batchSizeTrigger: 5,
       maxConcurrentBatches: 1,
       pendingWorkCapacity: responseExpected,
-      responseCallback ({ err }) {
-        assert.equal(404, err.status);
+      responseCallback ({ error, status_code }) {
+        assert.equal(404, error.status);
+        assert.equal(404, status_code);
+        responseCount ++;
+        if (responseCount == responseExpected) {
+          done();
+        }
+      }
+    });
+
+    for (let i = 0; i < responseExpected; i ++) {
+      transmission.sendEvent({
+        apiHost: "http://localhost:9999",
+        writeKey: "123456789",
+        dataset: "test-transmission",
+        sampleRate: 1,
+        timestamp: new Date(),
+        postData: JSON.stringify({ a: 1, b: 2 })
+      });
+    }
+  });
+
+  it('should send the right number of events even it requires more batches than maxConcurrentBatch', function(done) {
+    var responseCount = 0;
+    var responseExpected = 50;
+    var batchSize = 2;
+    mock.post('http://localhost:9999/1/events/test-transmission', function(req) {
+      return {};
+    });
+
+    var transmission = new Transmission({
+      batchTimeTrigger: 50,
+      batchSizeTrigger: batchSize,
+      pendingWorkCapacity: responseExpected,
+      responseCallback () {
         responseCount ++;
         if (responseCount == responseExpected) {
           done();

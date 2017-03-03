@@ -8,6 +8,8 @@
 import Transmission from './transmission';
 import Builder from './builder';
 
+import { EventEmitter } from 'events';
+
 const defaults = Object.freeze({
   // host to send data to
   apiHost: "https://api.honeycomb.io/",
@@ -15,9 +17,6 @@ const defaults = Object.freeze({
   // sample rate of data.  causes us to send 1/sample-rate of events
   // i.e. `sampleRate: 10` means we only send 1/10th the events.
   sampleRate: 1,
-
-  // response queue.  just an plain js array that transmission will append to
-  responseQueue: [],
 
   // transmission constructor, or a string "worker"/"base" to pick one of our builtin versions.
   // we fall back to the base impl if worker or a custom implementation throws on init.
@@ -32,14 +31,17 @@ const defaults = Object.freeze({
   maxConcurrentBatches: 10,
 
   // the maximum number of pending events we allow in our queue before they get batched
-  pendingWorkCapacity: 10000
+  pendingWorkCapacity: 10000,
+
+  // the maximum number of responses we enqueue before we drop.
+  maxResponseQueueSize: 1000
 });
 
 /**
  * Represents a honeycomb context.  Each honeycomb context has 
  * @class
  */
-export default class Libhoney {
+export default class Libhoney extends EventEmitter {
   /**
    * constructs a libhoney context.
    *
@@ -52,7 +54,8 @@ export default class Libhoney {
    * });
    */
   constructor (opts) {
-    this._options = Object.assign({}, defaults, opts);
+    super();
+    this._options = Object.assign({ responseCallback: this._responseCallback.bind(this) }, defaults, opts);
     this._transmission = getAndInitTransmission(this._options.transmission, this._options);
     this._usable = this._transmission != null;
     this._builder = new Builder(this);
@@ -61,6 +64,16 @@ export default class Libhoney {
     this._builder.writeKey = this._options.writeKey;
     this._builder.dataset = this._options.dataset;
     this._builder.sampleRate = this._options.sampleRate;
+
+    this._responseQueue = [];
+  }
+
+  _responseCallback (response) {
+    let queue = this._responseQueue;
+    if (queue.length < this._options.maxResponseQueueSize) {
+      queue.push(response);
+    }
+    this.emit("response", queue);
   }
 
   /**
@@ -205,7 +218,8 @@ export default class Libhoney {
       postData: postData,
       writeKey: writeKey,
       dataset: dataset,
-      sampleRate: sampleRate
+      sampleRate: sampleRate,
+      metadata: event.metadata
     });
   }
 

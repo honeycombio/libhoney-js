@@ -4,6 +4,14 @@ module.exports = function(options) {
   var honey = new libhoney(options);
 
   return function(req, res, next) {
+    const responseCallback = (queue) => {
+      var responses = queue.splice(0, queue.length);
+      for (var i = 0; i < responses.length; i ++) {
+        console.log("response status =", responses[i].status_code);
+      }
+    };
+    honey.once("response", responseCallback);
+
     honey.sendNow({
       app: req.app,
       baseUrl: req.baseUrl,

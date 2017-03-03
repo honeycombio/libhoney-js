@@ -98,11 +98,25 @@ export default class Transmission {
 
     var batch = this._eventQueue.splice(0, this._batchSizeTrigger);
 
+    let finishBatch = () => {
+      this._batchCount--;
+
+      let queueLength = this._eventQueue.length;
+      if (queueLength > 0) {
+        if (queueLength > this._batchSizeTrigger) {
+          this._sendBatch();
+        } else {
+          this._ensureSendTimeout();
+        }
+      }
+    };
+
     eachPromise(batch, (ev) => {
       var url = urljoin(ev.apiHost, "/1/events", ev.dataset);
       var req = superagent.post(url);
 
       return new Promise( (resolve) => {
+        var start = Date.now();
         req
           .set('X-Hny-Team', ev.writeKey)
           .set('X-Hny-Samplerate', ev.sampleRate)
@@ -112,24 +126,20 @@ export default class Transmission {
           .send(ev.postData)
           .end((err, res) => {
             // call a callback here (in our init options) so it can be used both in the node, browser, and worker contexts.
-            this._responseCallback({ err, res });
+            this._responseCallback({
+              status_code: res ? res.status : err.status,
+              duration: Date.now() - start,
+              metadata: ev.metadata,
+              error: err
+            });
 
             // we resolve unconditionally to continue the iteration in eachSeries.  errors will cause
             // the event to be re-enqueued/dropped.
             resolve();
           });
       });
-    }).then( () => {
-      this._batch--;
-      if (this._eventQueue.length > this._batchSizeTrigger) {
-        this._sendBatch();
-      }
-    }).catch( () => {
-      this._batch--;
-      if (this._eventQueue.length > this._batchSizeTrigger) {
-        this._sendBatch();
-      }
-    });
+    }).then(finishBatch)
+      .catch(finishBatch);
   }
 
   _shouldSendEvent (ev) {
