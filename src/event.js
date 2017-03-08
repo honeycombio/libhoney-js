@@ -65,19 +65,21 @@ export default class Event {
    *     .add ({
    *       responseTime_ms: 100,
    *       httpStatusCode: 200
-   *     });
+   *     })
+   *     .send();
    * @example <caption>using an ES2015 map</caption>
    *   let map = new Map();
    *   map.set("responseTime_ms", 100);
    *   map.set("httpStatusCode", 200);
    *   let event = honey.newEvent();
    *   event.add (map);
+   *   event.send();
    */
   add (data) {
     foreach(data, (v, k) => this.addField(k, v));
     return this;
   }
-  
+
   /**
    * adds a single field->value mapping to this event.
    * @param {string} name

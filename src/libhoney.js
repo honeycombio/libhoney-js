@@ -33,12 +33,12 @@ const defaults = Object.freeze({
   // the maximum number of pending events we allow in our queue before they get batched
   pendingWorkCapacity: 10000,
 
-  // the maximum number of responses we enqueue before we drop.
+  // the maximum number of s we enqueue before we drop.
   maxResponseQueueSize: 1000
 });
 
 /**
- * Represents a honeycomb context.  Each honeycomb context has 
+ * Represents a honeycomb context.  Each honeycomb context has
  * @class
  */
 export default class Libhoney extends EventEmitter {
@@ -229,27 +229,27 @@ export default class Libhoney extends EventEmitter {
    * @returns {Libhoney} this libhoney instance.
    * @example <caption>using an object</caption>
    *   honey.add ({
-   *     responseTime_ms: 100,
-   *     httpStatusCode: 200
+   *     buildID: "a6cc38a1",
+   *     env: "staging"
    *   });
    * @example <caption>using an ES2015 map</caption>
    *   let map = new Map();
-   *   map.set("responseTime_ms", 100);
-   *   map.set("httpStatusCode", 200);
+   *   map.set("build_id", "a6cc38a1");
+   *   map.set("env", "staging");
    *   honey.add (map);
    */
   add (data) {
     this._builder.add(data);
     return this;
   }
-  
+
   /**
    * adds a single field->value mapping to the global Builder.
    * @param {string} name name of field to add.
    * @param {any} val value of field to add.
    * @returns {Libhoney} this libhoney instance.
    * @example
-   *   honey.addField("responseTime_ms", 100);
+   *   honey.addField("build_id", "a6cc38a1");
    */
   addField (name, val) {
     this._builder.addField(name, val);
@@ -286,7 +286,7 @@ export default class Libhoney extends EventEmitter {
   sendNow (data) {
     return this._builder.sendNow(data);
   }
-  
+
   /**
    * creates and returns a new Event containing all fields/dyn_fields from the global Builder, that can be further fleshed out and sent on its own.
    * @returns {Event} an Event instance

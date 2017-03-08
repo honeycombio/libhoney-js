@@ -65,13 +65,13 @@ export default class Builder {
    *   var honey = new libhoney();
    *   var builder = honey.newBuilder();
    *   builder.add ({
-   *     responseTime_ms: 100,
-   *     httpStatusCode: 200
+   *     component: "web",
+   *     depth: 200
    *   });
    * @example <caption>using an ES2015 map</caption>
    *   let map = new Map();
-   *   map.set("responseTime_ms", 100);
-   *   map.set("httpStatusCode", 200);
+   *   map.set("component", "web");
+   *   map.set("depth", 200);
    *   builder.add (map);
    */
   add (data) {
@@ -85,7 +85,7 @@ export default class Builder {
    * @param {any} val
    * @returns {Builder} this Builder instance.
    * @example
-   *   builder.addField("responseTime_ms", 100);
+   *   builder.addField("component", "web");
    */
   addField (name, val) {
     if (typeof val === "object") {
@@ -101,7 +101,7 @@ export default class Builder {
     this._fields[name] = val;
     return this;
   }
-  
+
   /**
    * adds a single field->dynamic value function, which is invoked to supply values when events are created from this builder.
    * @param {string} name the name of the field to add to events.

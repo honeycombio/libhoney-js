@@ -38,6 +38,6 @@ module.exports = function(options) {
 
     next();
 
-    builder.sendNow();
+    event.send();
   };
 };
