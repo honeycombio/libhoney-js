@@ -57,7 +57,7 @@ export default class Transmission {
       this._responseCallback = options.responseCallback;
     }
     if (typeof options.batchSizeTrigger == "number") {
-      this._batchSizeTrigger = options.batchSizeTrigger;
+      this._batchSizeTrigger = Math.max(options.batchSizeTrigger, 1);
     }
     if (typeof options.batchTimeTrigger == "number") {
       this._batchTimeTrigger = options.batchTimeTrigger;
@@ -78,7 +78,7 @@ export default class Transmission {
     }
 
     this._eventQueue.push(ev);
-    if (this._eventQueue.length > this._batchSizeTrigger) {
+    if (this._eventQueue.length >= this._batchSizeTrigger) {
       this._sendBatch();
     } else {
       this._ensureSendTimeout();
@@ -103,7 +103,7 @@ export default class Transmission {
 
       let queueLength = this._eventQueue.length;
       if (queueLength > 0) {
-        if (queueLength > this._batchSizeTrigger) {
+        if (queueLength >= this._batchSizeTrigger) {
           this._sendBatch();
         } else {
           this._ensureSendTimeout();

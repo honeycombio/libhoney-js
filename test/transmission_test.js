@@ -7,6 +7,64 @@ let mock = require('superagent-mocker')(superagent);
 
 describe('transmission', function() {
 
+  it('should handle batchSizeTrigger of 0', function(done) {
+    mock.post('http://localhost:9999/1/events/test-transmission', function(req) {
+      return {
+        status: 404
+      };
+    });
+
+    var transmission = new Transmission({
+      batchTimeTrigger: 10000, // larger than the mocha timeout
+      batchSizeTrigger: 0,
+      responseCallback () {
+        done();
+      }
+    });
+
+    transmission.sendEvent({
+      apiHost: "http://localhost:9999",
+      writeKey: "123456789",
+      dataset: "test-transmission",
+      sampleRate: 1,
+      timestamp: new Date(),
+      postData: JSON.stringify({ a: 1, b: 2 })
+    });
+  });
+
+  it('should send a batch when batchSizeTrigger is met, not exceeded', function(done) {
+    var responseCount = 0;
+    var responseExpected = 5;
+
+    mock.post('http://localhost:9999/1/events/test-transmission', function(req) {
+      return {
+        status: 404
+      };
+    });
+
+    var transmission = new Transmission({
+      batchTimeTrigger: 10000, // larger than the mocha timeout
+      batchSizeTrigger: 5,
+      responseCallback () {
+        responseCount ++;
+        if (responseCount == responseExpected) {
+          done();
+        }
+      }
+    });
+
+    for (let i = 0; i < responseExpected; i ++) {
+      transmission.sendEvent({
+        apiHost: "http://localhost:9999",
+        writeKey: "123456789",
+        dataset: "test-transmission",
+        sampleRate: 1,
+        timestamp: new Date(),
+        postData: JSON.stringify({ a: 1, b: 2 })
+      });
+    }
+  });
+
   it('should handle apiHosts with trailing slashes', function(done) {
     let endpointHit = false;
     mock.post('http://localhost:9999/1/events/test-transmission', function(req) {
