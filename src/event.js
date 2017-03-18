@@ -119,4 +119,8 @@ export default class Event {
   send () {
     this._libhoney.sendEvent(this);
   }
+
+  sendPresampled () {
+    this._libhoney.sendPresampledEvent(this);
+  }
 }

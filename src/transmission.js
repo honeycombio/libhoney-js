@@ -48,11 +48,7 @@ export default class Transmission {
     this._sendTimeoutId = -1;
     this._eventQueue = [];
     this._batchCount = 0;
-    // Included for testing; to stub out randomness and verify that an event
-    // was dropped.
-    this._randomFn = Math.random;
-    this._droppedCallback = emptyResponseCallback;
-
+    
     if (typeof options.responseCallback == "function") {
       this._responseCallback = options.responseCallback;
     }
@@ -68,15 +64,34 @@ export default class Transmission {
     if (typeof options.pendingWorkCapacity == "number") {
       this._pendingWorkCapacity = options.pendingWorkCapacity;
     }
+
+    // Included for testing; to stub out randomness and verify that an event
+    // was dropped.
+    this._randomFn = Math.random;
   }
 
+  _droppedCallback(ev, reason) {
+    this._responseCallback({
+      metadata: ev.metadata,
+      error: new Error(reason)
+    });
+  }
+  
   sendEvent (ev) {
     // bail early if we aren't sampling this event
     if (!this._shouldSendEvent(ev)) {
-      this._droppedCallback();
+      this._droppedCallback(ev, "event dropped due to sampling");
       return;
     }
 
+    this.sendPresampledEvent(ev);
+  }
+
+  sendPresampledEvent (ev) {
+    if (this._eventQueue.length >= this._pendingWorkCapacity) {
+			this._droppedCallback(ev, "queue overflow");
+      return;
+    }
     this._eventQueue.push(ev);
     if (this._eventQueue.length >= this._batchSizeTrigger) {
       this._sendBatch();
@@ -143,9 +158,6 @@ export default class Transmission {
   }
 
   _shouldSendEvent (ev) {
-    if (this._eventQueue.length >= this._pendingWorkCapacity) {
-      return false;
-    }
     var { sampleRate } = ev;
     if (sampleRate <= 1) {
       return true;
