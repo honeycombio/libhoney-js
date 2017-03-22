@@ -300,4 +300,35 @@ describe('transmission', function() {
       });
     }
   });
+
+  it('should send 100% of presampled events', function(done) {
+    var responseCount = 0;
+    var responseExpected = 10;
+    mock.post('http://localhost:9999/1/events/test-transmission', function(req) {
+      return {};
+    });
+
+    var transmission = new Transmission({
+      responseCallback (resp) {
+        if (resp.error) {
+          return;
+        }
+        responseCount ++;
+        if (responseCount == responseExpected) {
+          done();
+        }
+      }
+    });
+
+    for (let i = 0; i < responseExpected; i ++) {
+      transmission.sendPresampledEvent({
+        apiHost: "http://localhost:9999",
+        writeKey: "123456789",
+        dataset: "test-transmission",
+        sampleRate: 10,
+        timestamp: new Date(),
+        postData: JSON.stringify({ a: 1, b: 2 })
+      });
+    }
+  });
 });

@@ -166,6 +166,9 @@ export default class Libhoney extends EventEmitter {
    *   dataset [optional]: the data set name.  overrides the libhoney instance's value.
    *   sampleRate [optional]: cause us to send 1 out of sampleRate events.  overrides the libhoney instance's value.
    * }
+   *
+   * Sampling is done based on the supplied sampleRate, so events passed to this method might not
+   * actually be sent to Honeycomb.
    * @private
    */
   sendEvent (event) {
@@ -212,14 +215,88 @@ export default class Libhoney extends EventEmitter {
       return;
     }
 
+    var metadata = event.metadata;
+    
     this._transmission.sendEvent({
-      timestamp: timestamp,
-      apiHost: apiHost,
-      postData: postData,
-      writeKey: writeKey,
-      dataset: dataset,
-      sampleRate: sampleRate,
-      metadata: event.metadata
+      timestamp,
+      apiHost,
+      postData,
+      writeKey,
+      dataset,
+      sampleRate,
+      metadata
+    });
+  }
+
+  /**
+   *  sendPresampledEvent takes events of the following form:
+   *
+   * {
+   *   data: a JSON-serializable object, keys become colums in Honeycomb
+   *   timestamp [optional]: time for this event, defaults to now()
+   *   writeKey [optional]: your team's write key.  overrides the libhoney instance's value.
+   *   dataset [optional]: the data set name.  overrides the libhoney instance's value.
+   *   sampleRate: the rate this event has already been sampled.
+   * }
+   *
+   * Sampling is presumed to have already been done (at the supplied sampledRate), so all events passed to this method
+   * are sent to Honeycomb.
+   * @private
+   */
+  sendPresampledEvent (event) {
+    if (!this._usable) return;
+
+    var timestamp = event.timestamp || Date.now();
+    if (typeof timestamp === 'string' || typeof timestamp === 'number')
+      timestamp = new Date(timestamp);
+
+    if (typeof event.data !== 'object' || event.data === null) {
+      console.error(".data must be an object");
+      return;
+    }
+    var postData;
+    try {
+      postData = JSON.stringify(event.data);
+    }
+    catch (e) {
+      console.error("error converting event data to JSON: " + e);
+      return;
+    }
+
+    var apiHost = event.apiHost;
+    if (typeof apiHost !== 'string' || apiHost === "") {
+      console.error(".apiHost must be a non-empty string");
+      return;
+    }
+
+    var writeKey = event.writeKey;
+    if (typeof writeKey !== 'string' || writeKey === "") {
+      console.error(".writeKey must be a non-empty string");
+      return;
+    }
+
+    var dataset = event.dataset;
+    if (typeof dataset !== 'string' || dataset === "") {
+      console.error(".dataset must be a non-empty string");
+      return;
+    }
+
+    var sampleRate = event.sampleRate;
+    if (typeof sampleRate !== 'number') {
+      console.error(".sampleRate must be a number");
+      return;
+    }
+
+    var metadata = event.metadata;
+    
+    this._transmission.sendPresampledEvent({
+      timestamp,
+      apiHost,
+      postData,
+      writeKey,
+      dataset,
+      sampleRate,
+      metadata
     });
   }
 
