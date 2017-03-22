@@ -166,6 +166,9 @@ export default class Libhoney extends EventEmitter {
    *   dataset [optional]: the data set name.  overrides the libhoney instance's value.
    *   sampleRate [optional]: cause us to send 1 out of sampleRate events.  overrides the libhoney instance's value.
    * }
+   *
+   * Sampling is done based on the supplied sampleRate, so events passed to this method might not
+   * actually be sent to Honeycomb.
    * @private
    */
   sendEvent (event) {
@@ -225,6 +228,21 @@ export default class Libhoney extends EventEmitter {
     });
   }
 
+  /**
+   *  sendPresampledEvent takes events of the following form:
+   *
+   * {
+   *   data: a JSON-serializable object, keys become colums in Honeycomb
+   *   timestamp [optional]: time for this event, defaults to now()
+   *   writeKey [optional]: your team's write key.  overrides the libhoney instance's value.
+   *   dataset [optional]: the data set name.  overrides the libhoney instance's value.
+   *   sampleRate: the rate this event has already been sampled.
+   * }
+   *
+   * Sampling is presumed to have already been done (at the supplied sampledRate), so all events passed to this method
+   * are sent to Honeycomb.
+   * @private
+   */
   sendPresampledEvent (event) {
     if (!this._usable) return;
 

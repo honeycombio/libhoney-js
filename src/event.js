@@ -114,12 +114,16 @@ export default class Event {
   }
 
   /**
-   * sends this event to honeycomb
+   * Sends this event to honeycomb, sampling if necessary.
    */
   send () {
     this._libhoney.sendEvent(this);
   }
 
+  /**
+   * Dispatch an event to be sent to Honeycomb.  Assumes sampling has already happened,
+   * and will send every event handed to it.
+   */
   sendPresampled () {
     this._libhoney.sendPresampledEvent(this);
   }
