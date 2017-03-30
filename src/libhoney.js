@@ -34,7 +34,10 @@ const defaults = Object.freeze({
   pendingWorkCapacity: 10000,
 
   // the maximum number of s we enqueue before we drop.
-  maxResponseQueueSize: 1000
+  maxResponseQueueSize: 1000,
+
+  // if this is false, all sending is disabled.  useful for disabling libhoney when testing
+  disabled: false
 });
 
 /**
@@ -395,6 +398,10 @@ export default class Libhoney extends EventEmitter {
 }
 
 function getAndInitTransmission(transmission, options) {
+  if (options.disabled) {
+    return null;
+  }
+
   if (typeof transmission === "string") {
     if (transmission === "base") {
       transmission = Transmission;
