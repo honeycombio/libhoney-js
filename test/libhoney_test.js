@@ -1,14 +1,15 @@
-/* global describe, it, require */
+/* global describe, it, require, beforeEach */
 import assert from 'assert';
 import libhoney from '../lib/libhoney';
 
-import { _transmissionConstructorArg, _transmissionSendEventArg, MockTransmission } from './mock_transmission';
+import { _transmissionConstructorArg, _transmissionSendEventArg, MockTransmission, resetArgs } from './mock_transmission';
 
 let superagent = require('superagent');
 let mock = require('superagent-mocker')(superagent);
 
 describe('libhoney', function() {
   describe("constructor options", function() {
+    beforeEach(resetArgs);
     it("should be communicated to transmission constructor", function() {
       var options = { a: 1, b: 2, c: 3, d: 4, transmission: MockTransmission };
 
@@ -22,6 +23,7 @@ describe('libhoney', function() {
   });
 
   describe("event properties", function() {
+    beforeEach(resetArgs);
     it("should ultimately fallback to hardcoded defaults", function() {
       var honey = new libhoney({
         // these two properties are required
@@ -59,6 +61,7 @@ describe('libhoney', function() {
   });
 
   describe("response queue", function() {
+    beforeEach(resetArgs);
     it("should enqueue a maximum of maxResponseQueueSize, dropping new responses (not old)", function(done) {
       mock.post('http://localhost:9999/1/events/testResponseQueue', function(req) {
         return {};
@@ -94,6 +97,30 @@ describe('libhoney', function() {
         ev.addMetadata(i);
         ev.send();
       }
+    });
+  });
+
+  describe("disabled = true", function() {
+    beforeEach(resetArgs);
+    it("should not hit transmission", function() {
+      var honey = new libhoney({
+        // these two properties are required
+        writeKey: "12345",
+        dataset: "testing",
+        transmission: MockTransmission,
+        disabled: true
+      });
+
+      var postData = { a : 1, b : 2};
+      honey.sendNow(postData);
+      assert.equal(_transmissionSendEventArg, null);
+
+      var ev = honey.newEvent();
+      honey.sendEvent(ev);
+      assert.equal(_transmissionSendEventArg, null);
+
+      honey.sendPresampledEvent(ev);
+      assert.equal(_transmissionSendEventArg, null);
     });
   });
 });
