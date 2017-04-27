@@ -1,3 +1,5 @@
 language: node_js
 node_js:
   - "6"
+after_script:
+  - curl 'https://doc.esdoc.org/api/create' -X POST --data-urlencode "gitUrl=git@github.com:honeycombio/libhoney-js.git"

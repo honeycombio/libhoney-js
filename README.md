@@ -12,7 +12,7 @@ npm install libhoney --save-dev
 
 ## Documentation
 
-An API reference is available at https://honeycombio.github.io/libhoney-js/
+An API reference is available at https://doc.esdoc.org/github.com/honeycombio/libhoney-js/
 
 ## Example
 
