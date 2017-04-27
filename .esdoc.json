@@ -1,0 +1,6 @@
+{
+  "title": "libhoney: a node module for interacting with Honeycomb.io",
+
+  "source": "src",
+  "destination": "docs"
+}
