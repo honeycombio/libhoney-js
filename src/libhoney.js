@@ -33,10 +33,10 @@ const defaults = Object.freeze({
   // the maximum number of pending events we allow in our queue before they get batched
   pendingWorkCapacity: 10000,
 
-  // the maximum number of s we enqueue before we drop.
+  // the maximum number of events we enqueue before we begin dropping them.
   maxResponseQueueSize: 1000,
 
-  // if this is false, all sending is disabled.  useful for disabling libhoney when testing
+  // if this is set to true, all sending is disabled.  useful for disabling libhoney when testing
   disabled: false
 });
 
