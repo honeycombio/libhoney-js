@@ -19,9 +19,9 @@ An API reference is available at https://doc.esdoc.org/github.com/honeycombio/li
 Honeycomb can calculate all sorts of statistics, so send the values you care about and let us crunch the averages, percentiles, lower/upper bounds, cardinality -- whatever you want -- for you.
 
 ```js
-var libhoney = require('libhoney').default;
+import Libhoney from 'libhoney';
 
-var hny = new libhoney({
+let hny = new Libhoney({
   writeKey: "YOUR_WRITE_KEY",
   dataset: "honeycomb-js-example"
 });
