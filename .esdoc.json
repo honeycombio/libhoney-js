@@ -2,5 +2,9 @@
   "title": "libhoney: a node module for interacting with Honeycomb.io",
 
   "source": "src",
-  "destination": "docs"
+  "destination": "docs",
+  "experimentalProposal": {
+    "classProperties": true,
+    "objectRestSpread": true
+  }
 }
