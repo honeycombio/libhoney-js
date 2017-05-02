@@ -35,7 +35,8 @@
     "gulp-replace": "^0.5.4",
     "jsdoc": "^3.4.0",
     "mocha": "^3.0.2",
-    "superagent-mocker": "^0.5.2"
+    "superagent-mocker": "^0.5.2",
+    "esdoc": "^0.5.2"
   },
   "dependencies": {
     "superagent": "^2.3.0",
