@@ -49,6 +49,14 @@ export default class Event {
      */
     this.sampleRate = 1;
 
+    /**
+     * If set, specifies the timestamp associated with this event. If unset,
+     * defaults to Date.now();
+     *
+     * @type {Date}
+     */
+    this.timestamp = null;
+
     foreach(fields, (v, k) => this.addField(k, v));
     foreach(dyn_fields, (v, k) => this.addField(k, v()));
 
