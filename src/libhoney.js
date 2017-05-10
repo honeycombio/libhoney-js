@@ -190,60 +190,12 @@ export default class Libhoney extends EventEmitter {
    * @private
    */
   sendEvent (event) {
-    if (!this._usable) return;
-
-    var timestamp = event.timestamp || Date.now();
-    if (typeof timestamp === 'string' || typeof timestamp === 'number')
-      timestamp = new Date(timestamp);
-
-    if (typeof event.data !== 'object' || event.data === null) {
-      console.error(".data must be an object");
+    let transmitEvent = this.validateEvent(event);
+    if (!transmitEvent) {
       return;
     }
-    var postData;
-    try {
-      postData = JSON.stringify(event.data);
-    }
-    catch (e) {
-      console.error("error converting event data to JSON: " + e);
-      return;
-    }
-
-    var apiHost = event.apiHost;
-    if (typeof apiHost !== 'string' || apiHost === "") {
-      console.error(".apiHost must be a non-empty string");
-      return;
-    }
-
-    var writeKey = event.writeKey;
-    if (typeof writeKey !== 'string' || writeKey === "") {
-      console.error(".writeKey must be a non-empty string");
-      return;
-    }
-
-    var dataset = event.dataset;
-    if (typeof dataset !== 'string' || dataset === "") {
-      console.error(".dataset must be a non-empty string");
-      return;
-    }
-
-    var sampleRate = event.sampleRate;
-    if (typeof sampleRate !== 'number') {
-      console.error(".sampleRate must be a number");
-      return;
-    }
-
-    var metadata = event.metadata;
     
-    this._transmission.sendEvent({
-      timestamp,
-      apiHost,
-      postData,
-      writeKey,
-      dataset,
-      sampleRate,
-      metadata
-    });
+    this._transmission.sendEvent(transmitEvent);
   }
 
   /**
@@ -262,6 +214,22 @@ export default class Libhoney extends EventEmitter {
    * @private
    */
   sendPresampledEvent (event) {
+    let transmitEvent = this.validateEvent(event);
+    if (!transmitEvent) {
+      return;
+    }
+
+    this._transmission.sendPresampledEvent(transmitEvent);
+  }
+
+  /**
+   * validateEvent takes an event and validates its structure and contents.
+   *
+   * @returns {Object} the validated libhoney Event. May return undefined if
+   *                   the event was invalid in some way or unable to be sent.
+   * @private
+   */
+  validateEvent (event) {
     if (!this._usable) return;
 
     var timestamp = event.timestamp || Date.now();
@@ -306,8 +274,7 @@ export default class Libhoney extends EventEmitter {
     }
 
     var metadata = event.metadata;
-    
-    this._transmission.sendPresampledEvent({
+    return {
       timestamp,
       apiHost,
       postData,
@@ -315,7 +282,7 @@ export default class Libhoney extends EventEmitter {
       dataset,
       sampleRate,
       metadata
-    });
+    };
   }
 
   /**
