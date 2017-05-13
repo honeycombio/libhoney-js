@@ -46,7 +46,7 @@ describe('libhoney events', function() {
     ev = b.newEvent();
     map = new Map();
     
-    // Object, we JSON.stringify it
+    // Object, we pass it on through (and let Honeycomb serialize it if necessary)
     map.set("obj", { a: 1, b : 2 });
 
     // String converts to a string
@@ -71,6 +71,6 @@ describe('libhoney events', function() {
     
     ev.add(map);
 
-    assert.equal(JSON.stringify(ev.data), `{"obj":\"{\\"a\\":1,\\"b\\":2}\","String":"a:1","string":"a:1","Number":5,"number":5,"Boolean":true,"boolean":true,"Date":${ JSON.stringify(d) },"null":null,"undefined":null}`);
+    assert.equal(JSON.stringify(ev.data), `{"obj":{"a":1,"b":2},"String":"a:1","string":"a:1","Number":5,"number":5,"Boolean":true,"boolean":true,"Date":${ JSON.stringify(d) },"null":null,"undefined":null}`);
   });
 });

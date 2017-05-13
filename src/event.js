@@ -99,14 +99,7 @@ export default class Event {
    *     .send();
    */
   addField (name, val) {
-    if (typeof val === "object") {
-      // JS reports typeof == object for a lot of things that we don't need additional processing to handle
-      if (val === null || val instanceof Boolean || val instanceof Number || val instanceof Date || val instanceof String) {
-        // these are fine
-      } else {
-        val = JSON.stringify(val);
-      }
-    } else if (val == undefined) {
+    if (val == undefined) {
       val = null;
     }
     this.data[name] = val;
