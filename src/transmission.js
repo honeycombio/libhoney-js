@@ -64,38 +64,13 @@ class BatchEndpointAggregator {
                              (batch, ev) => batch.events.push(ev));
   }
 
-  encodeEvent (ev) {
-    let encoded = "{";
-    let needComma = false;
-    if (ev.postData) {
-      encoded += `"data":${ev.postData}`;
-      needComma = true;
-    }
-    if (ev.sampleRate) {
-      if (needComma) {
-        encoded += ",";
-      }
-      encoded += `"samplerate":${JSON.stringify(ev.sampleRate)}`;
-      needComma = true;
-    }
-    if (ev.timestamp) {
-      if (needComma) {
-        encoded += ",";
-      }
-      encoded += `"time":${JSON.stringify(ev.timestamp)}`;
-      needComma = true;
-    }
-    encoded += "}";
-    return encoded;
-  }
-
   encodeBatchEvents (events) {
     let numEncoded = 0;
     let encoded = "[" +
           events.map((ev, i) => {
             let evEncoded;
             try {
-              evEncoded = this.encodeEvent(ev);
+              evEncoded = JSON.stringify(ev);
               numEncoded ++;
             } catch (e) {
               ev.encodeError = e;
