@@ -27,7 +27,7 @@
   "devDependencies": {
     "babel-preset-es2015": "^6.9.0",
     "babel-register": "^6.11.6",
-    "esdoc": "^0.4.8",
+    "esdoc": "^0.5.2",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
     "gulp-esdoc": "^0.3.0",
@@ -35,8 +35,7 @@
     "gulp-replace": "^0.5.4",
     "jsdoc": "^3.4.0",
     "mocha": "^3.0.2",
-    "superagent-mocker": "^0.5.2",
-    "esdoc": "^0.5.2"
+    "superagent-mocker": "^0.5.2"
   },
   "dependencies": {
     "superagent": "^2.3.0",
