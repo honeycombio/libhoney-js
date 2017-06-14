@@ -2,12 +2,13 @@
 // Use of this source code is governed by the Apache License 2.0
 // license that can be found in the LICENSE file.
 
+// jshint esversion: 6
 /* global require, window, global */
 
 /**
  * @module
  */
-let superagent = require('superagent');
+import superagent from 'superagent';
 import urljoin from 'urljoin';
 
 const userAgent = "libhoney-js/LIBHONEY_JS_VERSION";
@@ -33,6 +34,79 @@ const eachPromise = (arr, iteratorFn) =>
             return iteratorFn(item);
         });
     }, Promise.resolve());
+
+const partition = (arr, keyfn, createfn, addfn) => {
+  let result = Object.create(null);
+  arr.forEach((v) => {
+    let key = keyfn(v);
+    if (!result[key]) {
+      result[key] = createfn(v);
+    } else {
+      addfn(result[key], v);
+    }
+  });
+  return result;
+};
+
+class BatchEndpointAggregator {
+  constructor(events) {
+    this.batches = partition(events,
+                             /* keyfn */
+                             (ev) => `${ev.apiHost}_${ev.writeKey}_${ev.dataset}`,
+                             /* createfn */
+                             (ev) => ({
+                               apiHost: ev.apiHost,
+                               writeKey: ev.writeKey,
+                               dataset: ev.dataset,
+                               events: [ev]
+                             }),
+                             /* addfn */
+                             (batch, ev) => batch.events.push(ev));
+  }
+
+  encodeEvent (ev) {
+    let encoded = "{";
+    let needComma = false;
+    if (ev.postData) {
+      encoded += `"data":${ev.postData}`;
+      needComma = true;
+    }
+    if (ev.sampleRate) {
+      if (needComma) {
+        encoded += ",";
+      }
+      encoded += `"samplerate":${JSON.stringify(ev.sampleRate)}`;
+      needComma = true;
+    }
+    if (ev.timestamp) {
+      if (needComma) {
+        encoded += ",";
+      }
+      encoded += `"time":${JSON.stringify(ev.timestamp)}`;
+      needComma = true;
+    }
+    encoded += "}";
+    return encoded;
+  }
+
+  encodeBatchEvents (events) {
+    let numEncoded = 0;
+    let encoded = "[" +
+          events.map((ev, i) => {
+            let evEncoded;
+            try {
+              evEncoded = this.encodeEvent(ev);
+              numEncoded ++;
+            } catch (e) {
+              ev.encodeError = e;
+              evEncoded = "null";
+            }
+            return evEncoded;
+          }).join(",") +
+          "]";
+    return { encoded, numEncoded };
+  }
+}
 
 /**
  * @private
@@ -71,10 +145,10 @@ export default class Transmission {
   }
 
   _droppedCallback(ev, reason) {
-    this._responseCallback({
+    this._responseCallback([{
       metadata: ev.metadata,
       error: new Error(reason)
-    });
+    }]);
   }
   
   sendEvent (ev) {
@@ -113,6 +187,8 @@ export default class Transmission {
 
     var batch = this._eventQueue.splice(0, this._batchSizeTrigger);
 
+    let batchAgg = new BatchEndpointAggregator(batch);
+
     let finishBatch = () => {
       this._batchCount--;
 
@@ -126,27 +202,38 @@ export default class Transmission {
       }
     };
 
-    eachPromise(batch, (ev) => {
-      var url = urljoin(ev.apiHost, "/1/events", ev.dataset);
+    let batches = Object.keys(batchAgg.batches).map((k) => batchAgg.batches[k]);
+    eachPromise(batches, (batch) => {
+      var url = urljoin(batch.apiHost, "/1/batch", batch.dataset);
       var req = superagent.post(url);
 
+      let { encoded, numEncoded } = batchAgg.encodeBatchEvents(batch.events);
       return new Promise( (resolve) => {
         var start = Date.now();
         req
-          .set('X-Hny-Team', ev.writeKey)
-          .set('X-Hny-Samplerate', ev.sampleRate)
-          .set('X-Hny-Event-Time', ev.timestamp.toISOString())
+          .set('X-Hny-Team', batch.writeKey)
           .set('User-Agent', userAgent)
           .type("json")
-          .send(ev.postData)
+          .send(encoded)
           .end((err, res) => {
-            // call a callback here (in our init options) so it can be used both in the node, browser, and worker contexts.
-            this._responseCallback({
-              status_code: res ? res.status : err.status,
-              duration: Date.now() - start,
-              metadata: ev.metadata,
-              error: err
-            });
+            let end = Date.now();
+
+            if (err) {
+              this._responseCallback(batch.events.map((ev) => ({
+                status_code: ev.encodeError ? undefined : err.status,
+                duration: end - start,
+                metadata: ev.metadata,
+                error: ev.encodeError || err
+              })));
+            } else {
+              let response = JSON.parse(res.text);
+              this._responseCallback(response.map((res, i) => ({
+                status_code: batch.events[i].encodeError ? undefined : res.status,
+                duration: end - start,
+                metadata: batch.events[i].metadata,
+                error: batch.events[i].encodeError || res.err
+              })));
+            }
 
             // we resolve unconditionally to continue the iteration in eachSeries.  errors will cause
             // the event to be re-enqueued/dropped.
