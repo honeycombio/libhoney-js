@@ -65,20 +65,22 @@ class BatchEndpointAggregator {
   }
 
   encodeBatchEvents (events) {
+    let first = true;
     let numEncoded = 0;
-    let encoded = "[" +
-          events.map((ev, i) => {
-            let evEncoded;
-            try {
-              evEncoded = JSON.stringify(ev);
-              numEncoded ++;
-            } catch (e) {
-              ev.encodeError = e;
-              evEncoded = "null";
-            }
-            return evEncoded;
-          }).join(",") +
-          "]";
+    let encodedEvents = events.reduce((acc, ev) => {
+      try {
+        let encodedEvent = ev.toJSON(); // directly call toJSON, not JSON.stringify, because the latter wraps it in an additional set of quotes
+        numEncoded++;
+        let newAcc = acc + (!first ? "," : "") + encodedEvent;
+        first = false;
+        return newAcc;
+      } catch (e) {
+        ev.encodeError = e;
+        return acc;
+      }
+    }, "");
+
+    let encoded = "[" + encodedEvents + "]";
     return { encoded, numEncoded };
   }
 }
@@ -184,6 +186,17 @@ export default class Transmission {
 
       let { encoded, numEncoded } = batchAgg.encodeBatchEvents(batch.events);
       return new Promise( (resolve) => {
+
+        // if we failed to encode any of the events, no point in sending anything to honeycomb
+        if (numEncoded === 0) {
+          this._responseCallback(batch.events.map((ev) => ({
+            metadata: ev.metadata,
+            error: ev.encodeError
+          })));
+          resolve();
+          return;
+        }
+
         var start = Date.now();
         req
           .set('X-Hny-Team', batch.writeKey)
@@ -202,14 +215,25 @@ export default class Transmission {
               })));
             } else {
               let response = JSON.parse(res.text);
-              this._responseCallback(response.map((res, i) => ({
-                status_code: batch.events[i].encodeError ? undefined : res.status,
-                duration: end - start,
-                metadata: batch.events[i].metadata,
-                error: batch.events[i].encodeError || res.err
-              })));
+              let respIdx = 0;
+              this._responseCallback(batch.events.map((ev) => {
+                if (ev.encodeError) {
+                  return {
+                    duration: end - start,
+                    metadata: ev.metadata,
+                    error: ev.encodeError
+                  };
+                } else {
+                  let res = response[respIdx++];
+                  return {
+                    status_code: res.status,
+                    duration: end - start,
+                    metadata: ev.metadata,
+                    error: res.err
+                  };
+                }
+              }));
             }
-
             // we resolve unconditionally to continue the iteration in eachSeries.  errors will cause
             // the event to be re-enqueued/dropped.
             resolve();
