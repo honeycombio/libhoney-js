@@ -6,7 +6,7 @@
 /**
  * @module
  */
-import Transmission from './transmission';
+import { Transmission, ValidatedEvent } from './transmission';
 import Builder from './builder';
 
 import { EventEmitter } from 'events';
@@ -39,38 +39,6 @@ const defaults = Object.freeze({
   // if this is set to true, all sending is disabled.  useful for disabling libhoney when testing
   disabled: false
 });
-
-class ValidatedEvent {
-  constructor(timestamp,
-              apiHost,
-              postData,
-              writeKey,
-              dataset,
-              sampleRate,
-              metadata) {
-    this.timestamp  = timestamp;
-    this.apiHost    = apiHost;
-    this.postData   = postData;
-    this.writeKey   = writeKey;
-    this.dataset    = dataset;
-    this.sampleRate = sampleRate;
-    this.metadata   = metadata;
-  }
-
-  toJSON() {
-    let fields = [];
-    if (this.timestamp) {
-      fields.push(`"time":${JSON.stringify(this.timestamp)}`);
-    }
-    if (this.sampleRate) {
-      fields.push(`"samplerate":${JSON.stringify(this.sampleRate)}`);
-    }
-    if (this.postData) {
-      fields.push(`"data":${this.postData}`);
-    }
-    return `{${fields.join(",")}}`;
-  }
-}
 
 /**
  * libhoney aims to make it as easy as possible to create events and send them on into Honeycomb.
@@ -307,13 +275,13 @@ export default class Libhoney extends EventEmitter {
     }
 
     var metadata = event.metadata;
-    return new ValidatedEvent(timestamp,
-                              apiHost,
-                              postData,
-                              writeKey,
-                              dataset,
-                              sampleRate,
-                              metadata);
+    return new ValidatedEvent({timestamp,
+                               apiHost,
+                               postData,
+                               writeKey,
+                               dataset,
+                               sampleRate,
+                               metadata});
   }
 
   /**

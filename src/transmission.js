@@ -88,7 +88,42 @@ class BatchEndpointAggregator {
 /**
  * @private
  */
-export default class Transmission {
+export class ValidatedEvent {
+  constructor({ timestamp,
+                apiHost,
+                postData,
+                writeKey,
+                dataset,
+                sampleRate,
+                metadata }) {
+    this.timestamp  = timestamp;
+    this.apiHost    = apiHost;
+    this.postData   = postData;
+    this.writeKey   = writeKey;
+    this.dataset    = dataset;
+    this.sampleRate = sampleRate;
+    this.metadata   = metadata;
+  }
+
+  toJSON() {
+    let fields = [];
+    if (this.timestamp) {
+      fields.push(`"time":${JSON.stringify(this.timestamp)}`);
+    }
+    if (this.sampleRate) {
+      fields.push(`"samplerate":${JSON.stringify(this.sampleRate)}`);
+    }
+    if (this.postData) {
+      fields.push(`"data":${this.postData}`);
+    }
+    return `{${fields.join(",")}}`;
+  }
+}
+
+/**
+ * @private
+ */
+export class Transmission {
 
   constructor (options) {
     this._responseCallback = emptyResponseCallback;
