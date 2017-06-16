@@ -2,10 +2,11 @@
 // Use of this source code is governed by the Apache License 2.0
 // license that can be found in the LICENSE file.
 
+// jshint esversion: 6
 /**
  * @module
  */
-import Transmission from './transmission';
+import { Transmission, ValidatedEvent } from './transmission';
 import Builder from './builder';
 
 import { EventEmitter } from 'events';
@@ -75,7 +76,7 @@ export default class Libhoney extends EventEmitter {
     super();
     this._options = Object.assign({ responseCallback: this._responseCallback.bind(this) }, defaults, opts);
     this._transmission = getAndInitTransmission(this._options.transmission, this._options);
-    this._usable = this._transmission != null;
+    this._usable = this._transmission !== null;
     this._builder = new Builder(this);
 
     this._builder.apiHost = this._options.apiHost;
@@ -86,12 +87,12 @@ export default class Libhoney extends EventEmitter {
     this._responseQueue = [];
   }
 
-  _responseCallback (response) {
+  _responseCallback (responses) {
     let queue = this._responseQueue;
     if (queue.length < this._options.maxResponseQueueSize) {
-      queue.push(response);
+      this._responseQueue = this._responseQueue.concat(responses);
     }
-    this.emit("response", queue);
+    this.emit("response", this._responseQueue);
   }
 
   /**
@@ -230,7 +231,7 @@ export default class Libhoney extends EventEmitter {
    * @private
    */
   validateEvent (event) {
-    if (!this._usable) return;
+    if (!this._usable) return null;
 
     var timestamp = event.timestamp || Date.now();
     if (typeof timestamp === 'string' || typeof timestamp === 'number')
@@ -238,7 +239,7 @@ export default class Libhoney extends EventEmitter {
 
     if (typeof event.data !== 'object' || event.data === null) {
       console.error(".data must be an object");
-      return;
+      return null;
     }
     var postData;
     try {
@@ -246,43 +247,41 @@ export default class Libhoney extends EventEmitter {
     }
     catch (e) {
       console.error("error converting event data to JSON: " + e);
-      return;
+      return null;
     }
 
     var apiHost = event.apiHost;
     if (typeof apiHost !== 'string' || apiHost === "") {
       console.error(".apiHost must be a non-empty string");
-      return;
+      return null;
     }
 
     var writeKey = event.writeKey;
     if (typeof writeKey !== 'string' || writeKey === "") {
       console.error(".writeKey must be a non-empty string");
-      return;
+      return null;
     }
 
     var dataset = event.dataset;
     if (typeof dataset !== 'string' || dataset === "") {
       console.error(".dataset must be a non-empty string");
-      return;
+      return null;
     }
 
     var sampleRate = event.sampleRate;
     if (typeof sampleRate !== 'number') {
       console.error(".sampleRate must be a number");
-      return;
+      return null;
     }
 
     var metadata = event.metadata;
-    return {
-      timestamp,
-      apiHost,
-      postData,
-      writeKey,
-      dataset,
-      sampleRate,
-      metadata
-    };
+    return new ValidatedEvent({timestamp,
+                               apiHost,
+                               postData,
+                               writeKey,
+                               dataset,
+                               sampleRate,
+                               metadata});
   }
 
   /**

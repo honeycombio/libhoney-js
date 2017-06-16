@@ -2,12 +2,13 @@
 // Use of this source code is governed by the Apache License 2.0
 // license that can be found in the LICENSE file.
 
+// jshint esversion: 6
 /* global require, window, global */
 
 /**
  * @module
  */
-let superagent = require('superagent');
+import superagent from 'superagent';
 import urljoin from 'urljoin';
 
 const userAgent = "libhoney-js/LIBHONEY_JS_VERSION";
@@ -34,10 +35,95 @@ const eachPromise = (arr, iteratorFn) =>
         });
     }, Promise.resolve());
 
+const partition = (arr, keyfn, createfn, addfn) => {
+  let result = Object.create(null);
+  arr.forEach((v) => {
+    let key = keyfn(v);
+    if (!result[key]) {
+      result[key] = createfn(v);
+    } else {
+      addfn(result[key], v);
+    }
+  });
+  return result;
+};
+
+class BatchEndpointAggregator {
+  constructor(events) {
+    this.batches = partition(events,
+                             /* keyfn */
+                             (ev) => `${ev.apiHost}_${ev.writeKey}_${ev.dataset}`,
+                             /* createfn */
+                             (ev) => ({
+                               apiHost: ev.apiHost,
+                               writeKey: ev.writeKey,
+                               dataset: ev.dataset,
+                               events: [ev]
+                             }),
+                             /* addfn */
+                             (batch, ev) => batch.events.push(ev));
+  }
+
+  encodeBatchEvents (events) {
+    let first = true;
+    let numEncoded = 0;
+    let encodedEvents = events.reduce((acc, ev) => {
+      try {
+        let encodedEvent = ev.toJSON(); // directly call toJSON, not JSON.stringify, because the latter wraps it in an additional set of quotes
+        numEncoded++;
+        let newAcc = acc + (!first ? "," : "") + encodedEvent;
+        first = false;
+        return newAcc;
+      } catch (e) {
+        ev.encodeError = e;
+        return acc;
+      }
+    }, "");
+
+    let encoded = "[" + encodedEvents + "]";
+    return { encoded, numEncoded };
+  }
+}
+
 /**
  * @private
  */
-export default class Transmission {
+export class ValidatedEvent {
+  constructor({ timestamp,
+                apiHost,
+                postData,
+                writeKey,
+                dataset,
+                sampleRate,
+                metadata }) {
+    this.timestamp  = timestamp;
+    this.apiHost    = apiHost;
+    this.postData   = postData;
+    this.writeKey   = writeKey;
+    this.dataset    = dataset;
+    this.sampleRate = sampleRate;
+    this.metadata   = metadata;
+  }
+
+  toJSON() {
+    let fields = [];
+    if (this.timestamp) {
+      fields.push(`"time":${JSON.stringify(this.timestamp)}`);
+    }
+    if (this.sampleRate) {
+      fields.push(`"samplerate":${JSON.stringify(this.sampleRate)}`);
+    }
+    if (this.postData) {
+      fields.push(`"data":${this.postData}`);
+    }
+    return `{${fields.join(",")}}`;
+  }
+}
+
+/**
+ * @private
+ */
+export class Transmission {
 
   constructor (options) {
     this._responseCallback = emptyResponseCallback;
@@ -71,10 +157,10 @@ export default class Transmission {
   }
 
   _droppedCallback(ev, reason) {
-    this._responseCallback({
+    this._responseCallback([{
       metadata: ev.metadata,
       error: new Error(reason)
-    });
+    }]);
   }
   
   sendEvent (ev) {
@@ -113,6 +199,8 @@ export default class Transmission {
 
     var batch = this._eventQueue.splice(0, this._batchSizeTrigger);
 
+    let batchAgg = new BatchEndpointAggregator(batch);
+
     let finishBatch = () => {
       this._batchCount--;
 
@@ -126,28 +214,61 @@ export default class Transmission {
       }
     };
 
-    eachPromise(batch, (ev) => {
-      var url = urljoin(ev.apiHost, "/1/events", ev.dataset);
+    let batches = Object.keys(batchAgg.batches).map((k) => batchAgg.batches[k]);
+    eachPromise(batches, (batch) => {
+      var url = urljoin(batch.apiHost, "/1/batch", batch.dataset);
       var req = superagent.post(url);
 
+      let { encoded, numEncoded } = batchAgg.encodeBatchEvents(batch.events);
       return new Promise( (resolve) => {
+
+        // if we failed to encode any of the events, no point in sending anything to honeycomb
+        if (numEncoded === 0) {
+          this._responseCallback(batch.events.map((ev) => ({
+            metadata: ev.metadata,
+            error: ev.encodeError
+          })));
+          resolve();
+          return;
+        }
+
         var start = Date.now();
         req
-          .set('X-Hny-Team', ev.writeKey)
-          .set('X-Hny-Samplerate', ev.sampleRate)
-          .set('X-Hny-Event-Time', ev.timestamp.toISOString())
+          .set('X-Hny-Team', batch.writeKey)
           .set('User-Agent', userAgent)
           .type("json")
-          .send(ev.postData)
+          .send(encoded)
           .end((err, res) => {
-            // call a callback here (in our init options) so it can be used both in the node, browser, and worker contexts.
-            this._responseCallback({
-              status_code: res ? res.status : err.status,
-              duration: Date.now() - start,
-              metadata: ev.metadata,
-              error: err
-            });
+            let end = Date.now();
 
+            if (err) {
+              this._responseCallback(batch.events.map((ev) => ({
+                status_code: ev.encodeError ? undefined : err.status,
+                duration: end - start,
+                metadata: ev.metadata,
+                error: ev.encodeError || err
+              })));
+            } else {
+              let response = JSON.parse(res.text);
+              let respIdx = 0;
+              this._responseCallback(batch.events.map((ev) => {
+                if (ev.encodeError) {
+                  return {
+                    duration: end - start,
+                    metadata: ev.metadata,
+                    error: ev.encodeError
+                  };
+                } else {
+                  let res = response[respIdx++];
+                  return {
+                    status_code: res.status,
+                    duration: end - start,
+                    metadata: ev.metadata,
+                    error: res.err
+                  };
+                }
+              }));
+            }
             // we resolve unconditionally to continue the iteration in eachSeries.  errors will cause
             // the event to be re-enqueued/dropped.
             resolve();

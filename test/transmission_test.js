@@ -1,6 +1,7 @@
+// jshint esversion: 6
 /* global require, describe, it */
 import assert from 'assert';
-import Transmission from '../lib/transmission';
+import { Transmission, ValidatedEvent } from '../lib/transmission';
 
 let superagent = require('superagent');
 let mock = require('superagent-mocker')(superagent);
@@ -9,8 +10,10 @@ describe('transmission', function() {
 
   it('should handle batchSizeTrigger of 0', function(done) {
     mock.post('http://localhost:9999/1/events/test-transmission', function(req) {
+      let reqEvents = JSON.parse(req.body);
+      let resp = reqEvents.map(() => ({ status: 202 }));
       return {
-        status: 404
+        text: JSON.stringify(resp)
       };
     });
 
@@ -22,31 +25,34 @@ describe('transmission', function() {
       }
     });
 
-    transmission.sendEvent({
+    transmission.sendEvent(new ValidatedEvent({
       apiHost: "http://localhost:9999",
       writeKey: "123456789",
       dataset: "test-transmission",
       sampleRate: 1,
       timestamp: new Date(),
       postData: JSON.stringify({ a: 1, b: 2 })
-    });
+    }));
   });
 
   it('should send a batch when batchSizeTrigger is met, not exceeded', function(done) {
     var responseCount = 0;
     var responseExpected = 5;
 
-    mock.post('http://localhost:9999/1/events/test-transmission', function(req) {
+    mock.post('http://localhost:9999/1/batch/test-transmission', function(req) {
+      let reqEvents = JSON.parse(req.body);
+      let resp = reqEvents.map(() => ({ status: 202 }));
       return {
-        status: 404
+        text: JSON.stringify(resp)
       };
     });
 
     var transmission = new Transmission({
       batchTimeTrigger: 10000, // larger than the mocha timeout
       batchSizeTrigger: 5,
-      responseCallback () {
-        responseCount ++;
+      responseCallback (queue) {
+        responseCount += queue.length;
+        queue.splice(0, queue.length);
         if (responseCount == responseExpected) {
           done();
         }
@@ -54,22 +60,26 @@ describe('transmission', function() {
     });
 
     for (let i = 0; i < responseExpected; i ++) {
-      transmission.sendEvent({
+      transmission.sendEvent(new ValidatedEvent({
         apiHost: "http://localhost:9999",
         writeKey: "123456789",
         dataset: "test-transmission",
         sampleRate: 1,
         timestamp: new Date(),
         postData: JSON.stringify({ a: 1, b: 2 })
-      });
+      }));
     }
   });
 
   it('should handle apiHosts with trailing slashes', function(done) {
     let endpointHit = false;
-    mock.post('http://localhost:9999/1/events/test-transmission', function(req) {
+    mock.post('http://localhost:9999/1/batch/test-transmission', function(req) {
       endpointHit = true;
-      return {};
+      let reqEvents = JSON.parse(req.body);
+      let resp = reqEvents.map(() => ({ status: 202 }));
+      return {
+        text: JSON.stringify(resp)
+      };
     });
 
     var transmission = new Transmission({
@@ -80,14 +90,14 @@ describe('transmission', function() {
       }
     });
 
-    transmission.sendEvent({
+    transmission.sendEvent(new ValidatedEvent({
       apiHost: "http://localhost:9999/",
       writeKey: "123456789",
       dataset: "test-transmission",
       sampleRate: 1,
       timestamp: new Date(),
       postData: JSON.stringify({ a: 1, b: 2 })
-    });
+    }));
   });
      
   it('should eventually send a single event (after the timeout)', function(done) {
@@ -98,14 +108,14 @@ describe('transmission', function() {
       }
     });
 
-    transmission.sendEvent({
+    transmission.sendEvent(new ValidatedEvent({
       apiHost: "http://localhost:9999",
       writeKey: "123456789",
       dataset: "test-transmission",
       sampleRate: 1,
       timestamp: new Date(),
       postData: JSON.stringify({ a: 1, b: 2 })
-    });
+    }));
   });
 
   it('should respect sample rate and accept the event', function(done) {
@@ -117,14 +127,14 @@ describe('transmission', function() {
     });
 
     transmission._randomFn = function() { return 0.09; };
-    transmission.sendEvent({
+    transmission.sendEvent(new ValidatedEvent({
       apiHost: "http://localhost:9999",
       writeKey: "123456789",
       dataset: "test-transmission",
       sampleRate: 10,
       timestamp: new Date(),
       postData: JSON.stringify({ a: 1, b: 2 })
-    });
+    }));
   });
 
   it('should respect sample rate and drop the event', function(done) {
@@ -137,14 +147,14 @@ describe('transmission', function() {
       done();
     };
 
-    transmission.sendEvent({
+    transmission.sendEvent(new ValidatedEvent({
       apiHost: "http://localhost:9999",
       writeKey: "123456789",
       dataset: "test-transmission",
       sampleRate: 10,
       timestamp: new Date(),
       postData: JSON.stringify({ a: 1, b: 2 })
-    });
+    }));
   });
 
   it('should drop events beyond the pendingWorkCapacity', function(done) {
@@ -153,15 +163,20 @@ describe('transmission', function() {
     var responseCount = 0;
     var responseExpected = 5;
 
-    mock.post('http://localhost:9999/1/events/test-transmission', function(req) {
-      return {};
+    mock.post('http://localhost:9999/1/batch/test-transmission', function(req) {
+      let reqEvents = JSON.parse(req.body);
+      let resp = reqEvents.map(() => ({ status: 202 }));
+      return {
+        text: JSON.stringify(resp)
+      };
     });
 
     var transmission = new Transmission({
       batchTimeTrigger: 50,
       pendingWorkCapacity: responseExpected,
-      responseCallback () {
-        responseCount ++;
+      responseCallback (queue) {
+        responseCount += queue.length;
+        queue.splice(0, queue.length);
         if (responseCount == responseExpected) {
           done();
         }
@@ -174,28 +189,28 @@ describe('transmission', function() {
 
     // send the events we expect responses for
     for (let i = 0; i < responseExpected; i ++) {
-      transmission.sendEvent({
+      transmission.sendEvent(new ValidatedEvent({
         apiHost: "http://localhost:9999",
         writeKey: "123456789",
         dataset: "test-transmission",
         sampleRate: 1,
         timestamp: new Date(),
         postData: JSON.stringify({ a: 1, b: 2 })
-      });
+      }));
     }
 
     // send the events we expect to drop.  Since JS is single threaded we can verify that
     // droppedCount behaves the way we want
     for (let i = 0; i < droppedExpected; i ++) {
       eventDropped = false;
-      transmission.sendEvent({
+      transmission.sendEvent(new ValidatedEvent({
         apiHost: "http://localhost:9999",
         writeKey: "123456789",
         dataset: "test-transmission",
         sampleRate: 1,
         timestamp: new Date(),
         postData: JSON.stringify({ a: 1, b: 2 })
-      });
+      }));
       assert.equal(true, eventDropped);
     }
   });
@@ -204,16 +219,21 @@ describe('transmission', function() {
     var responseCount = 0;
     var responseExpected = 10;
 
-    mock.post('http://localhost:9999/1/events/test-transmission', function(req) {
-      return {};
+    mock.post('http://localhost:9999/1/batch/test-transmission', function(req) {
+      let reqEvents = JSON.parse(req.body);
+      let resp = reqEvents.map(() => ({ status: 202 }));
+      return {
+        text: JSON.stringify(resp)
+      };
     });
 
     var transmission = new Transmission({
       batchTimeTrigger: 50,
       batchSizeTrigger: 5,
       pendingWorkCapacity: responseExpected,
-      responseCallback () {
-        responseCount ++;
+      responseCallback (queue) {
+        responseCount += queue.length;
+        queue.splice(0, queue.length);
         if (responseCount == responseExpected) {
           done();
         }
@@ -221,14 +241,14 @@ describe('transmission', function() {
     });
 
     for (let i = 0; i < responseExpected; i ++) {
-      transmission.sendEvent({
+      transmission.sendEvent(new ValidatedEvent({
         apiHost: "http://localhost:9999",
         writeKey: "123456789",
         dataset: "test-transmission",
         sampleRate: 1,
         timestamp: new Date(),
         postData: JSON.stringify({ a: 1, b: 2 })
-      });
+      }));
     }
   });
 
@@ -236,7 +256,7 @@ describe('transmission', function() {
     var responseCount = 0;
     var responseExpected = 10;
 
-    mock.post('http://localhost:9999/1/events/test-transmission', function(req) {
+    mock.post('http://localhost:9999/1/batch/test-transmission', function(req) {
       return {
         status: 404
       };
@@ -247,25 +267,28 @@ describe('transmission', function() {
       batchSizeTrigger: 5,
       maxConcurrentBatches: 1,
       pendingWorkCapacity: responseExpected,
-      responseCallback ({ error, status_code }) {
-        assert.equal(404, error.status);
-        assert.equal(404, status_code);
-        responseCount ++;
-        if (responseCount == responseExpected) {
-          done();
-        }
+      responseCallback (queue) {
+        let responses = queue.splice(0, queue.length);
+        responses.forEach(({ error, status_code }) =>  {
+          assert.equal(404, error.status);
+          assert.equal(404, status_code);
+          responseCount ++;
+          if (responseCount == responseExpected) {
+            done();
+          }
+        });
       }
     });
 
     for (let i = 0; i < responseExpected; i ++) {
-      transmission.sendEvent({
+      transmission.sendEvent(new ValidatedEvent({
         apiHost: "http://localhost:9999",
         writeKey: "123456789",
         dataset: "test-transmission",
         sampleRate: 1,
         timestamp: new Date(),
         postData: JSON.stringify({ a: 1, b: 2 })
-      });
+      }));
     }
   });
 
@@ -273,16 +296,21 @@ describe('transmission', function() {
     var responseCount = 0;
     var responseExpected = 50;
     var batchSize = 2;
-    mock.post('http://localhost:9999/1/events/test-transmission', function(req) {
-      return {};
+    mock.post('http://localhost:9999/1/batch/test-transmission', function(req) {
+      let reqEvents = JSON.parse(req.body);
+      let resp = reqEvents.map(() => ({ status: 202 }));
+      return {
+        text: JSON.stringify(resp)
+      };
     });
 
     var transmission = new Transmission({
       batchTimeTrigger: 50,
       batchSizeTrigger: batchSize,
       pendingWorkCapacity: responseExpected,
-      responseCallback () {
-        responseCount ++;
+      responseCallback (queue) {
+        responseCount += queue.length;
+        queue.splice(0, queue.length);
         if (responseCount == responseExpected) {
           done();
         }
@@ -290,45 +318,113 @@ describe('transmission', function() {
     });
 
     for (let i = 0; i < responseExpected; i ++) {
-      transmission.sendEvent({
+      transmission.sendEvent(new ValidatedEvent({
         apiHost: "http://localhost:9999",
         writeKey: "123456789",
         dataset: "test-transmission",
         sampleRate: 1,
         timestamp: new Date(),
         postData: JSON.stringify({ a: 1, b: 2 })
-      });
+      }));
     }
   });
 
   it('should send 100% of presampled events', function(done) {
     var responseCount = 0;
     var responseExpected = 10;
-    mock.post('http://localhost:9999/1/events/test-transmission', function(req) {
-      return {};
+    mock.post('http://localhost:9999/1/batch/test-transmission', function(req) {
+      let reqEvents = JSON.parse(req.body);
+      let resp = reqEvents.map(() => ({ status: 202 }));
+      return {
+        text: JSON.stringify(resp)
+      };
     });
 
     var transmission = new Transmission({
-      responseCallback (resp) {
-        if (resp.error) {
-          return;
-        }
-        responseCount ++;
-        if (responseCount == responseExpected) {
-          done();
-        }
+      responseCallback (queue) {
+        let responses = queue.splice(0, queue.length);
+        responses.forEach((resp) => {
+          if (resp.error) {
+            console.log(resp.error);
+            return;
+          }
+          responseCount ++;
+          if (responseCount == responseExpected) {
+            done();
+          }
+        });
       }
     });
 
     for (let i = 0; i < responseExpected; i ++) {
-      transmission.sendPresampledEvent({
+      transmission.sendPresampledEvent(new ValidatedEvent({
         apiHost: "http://localhost:9999",
         writeKey: "123456789",
         dataset: "test-transmission",
         sampleRate: 10,
         timestamp: new Date(),
         postData: JSON.stringify({ a: 1, b: 2 })
-      });
+      }));
+    }
+  });
+
+  it('should deal with encoding errors', function(done) {
+    var responseCount = 0;
+    var responseExpected = 11;
+    mock.post('http://localhost:9999/1/batch/test-transmission', function(req) {
+      let reqEvents = JSON.parse(req.body);
+      let resp = reqEvents.map(() => ({ status: 202 }));
+      return {
+        text: JSON.stringify(resp)
+      };
+    });
+
+    var transmission = new Transmission({
+      responseCallback (queue) {
+        let responses = queue.splice(0, queue.length);
+        responses.forEach((resp) => {
+          responseCount ++;
+          if (responseCount == responseExpected) {
+            done();
+          }
+        });
+      }
+    });
+
+    let a = {};
+    a.a = a;
+    for (let i = 0; i < 5; i ++) {
+      transmission.sendPresampledEvent(new ValidatedEvent({
+        apiHost: "http://localhost:9999",
+        writeKey: "123456789",
+        dataset: "test-transmission",
+        sampleRate: 10,
+        timestamp: new Date(),
+        postData: JSON.stringify({ a: 1, b: 2 })
+      }));
+    }
+    {
+      // send an event that fails to encode
+      let a = {};
+      a.a = a;
+      transmission.sendPresampledEvent(new ValidatedEvent({
+        apiHost: "http://localhost:9999",
+        writeKey: "123456789",
+        dataset: "test-transmission",
+        sampleRate: 10,
+        timestamp: a,
+        postData: JSON.stringify({ a: 1, b: 2 })
+      }));
+    }
+    for (let i = 0; i < 5; i ++) {
+      transmission.sendPresampledEvent(new ValidatedEvent({
+        apiHost: "http://localhost:9999",
+        writeKey: "123456789",
+        dataset: "test-transmission",
+        sampleRate: 10,
+        timestamp: new Date(),
+        postData: JSON.stringify({ a: 1, b: 2 })
+      }));
     }
   });
 });
