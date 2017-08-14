@@ -4,14 +4,14 @@ var process = require('process');
 module.exports = function(options) {
   var honey = new libhoney(options);
 
-  return function(req, res, next) {
-    // Attach dynamic fields to the global event builder in libhoney.
-    // Dynamic fields calculate their values at the time the event is created
-    // (the event.sendNow call below)
-    honey.addDynamicField('rss_after', () => process.memoryUsage().rss);
-    honey.addDynamicField('heapTotal_after', () => process.memoryUsage().heapTotal);
-    honey.addDynamicField('heapUsed_after', () => process.memoryUsage().heapUsed);
+  // Attach dynamic fields to the global event builder in libhoney.
+  // Dynamic fields calculate their values at the time the event is created
+  // (the event.sendNow call below)
+  honey.addDynamicField('rss_after', () => process.memoryUsage().rss);
+  honey.addDynamicField('heapTotal_after', () => process.memoryUsage().heapTotal);
+  honey.addDynamicField('heapUsed_after', () => process.memoryUsage().heapUsed);
 
+  return function(req, res, next) {
     var event = honey.newEvent();
     event.add({
       app: req.app,
