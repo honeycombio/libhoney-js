@@ -216,11 +216,6 @@ export class Transmission {
       }
     };
 
-    const finishBatchWithError = (e) => {
-      console.error(e);
-      finishBatch();
-    };
-
     let batches = Object.keys(batchAgg.batches).map((k) => batchAgg.batches[k]);
     eachPromise(batches, (batch) => {
       var url = urljoin(batch.apiHost, "/1/batch", batch.dataset);
@@ -288,7 +283,7 @@ export class Transmission {
           });
       });
     }).then(finishBatch)
-      .catch(finishBatchWithError);
+      .catch(finishBatch);
   }
 
   _shouldSendEvent (ev) {
