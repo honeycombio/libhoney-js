@@ -427,4 +427,39 @@ describe('transmission', function() {
       }));
     }
   });
+
+  it('should allow user-agent additions', function(done) {
+    var responseCount = 0;
+    var userAgentReceived = "";
+
+    var UAs = [
+      { addition: "", probe: (ua) => indexOf("libhoney") === 0 && indexOf("addition") === -1 },
+      { addition: "user-agent addition", probe: (ua) => indexOf("libhoney") === 0 && indexOf("addition") !== -1 },
+    ];
+
+    mock.post('http://localhost:9999/1/batch/test-transmission', function(req) {
+      userAgentReceieved = req.headers["User-Agent"];
+      return {};
+    });
+
+    var transmission = new Transmission({
+      responseCallback (queue) {
+        if (queue.length > 0) {
+          if (userAgentReceived.indexOf("addition" !== -1)) {
+            done();
+          }
+        }
+      },
+      userAgentAddition: "user-agent addition here"
+    });
+
+    transmission.sendPresampledEvent(new ValidatedEvent({
+      apiHost: "http://localhost:9999",
+      writeKey: "123456789",
+      dataset: "test-transmission",
+      sampleRate: 10,
+      timestamp: new Date(),
+      postData: JSON.stringify({ a: 1, b: 2 })
+    }));
+  });
 });
