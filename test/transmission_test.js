@@ -430,36 +430,45 @@ describe('transmission', function() {
 
   it('should allow user-agent additions', function(done) {
     var responseCount = 0;
-    var userAgentReceived = "";
+    var responseExpected = 2;
 
     var UAs = [
-      { addition: "", probe: (ua) => indexOf("libhoney") === 0 && indexOf("addition") === -1 },
-      { addition: "user-agent addition", probe: (ua) => indexOf("libhoney") === 0 && indexOf("addition") !== -1 },
+      { dataset: "test-transmission1", addition: "", probe: (ua) => ua.indexOf("libhoney") === 0 && ua.indexOf("addition") === -1 },
+      { dataset: "test-transmission2", addition: "user-agent addition", probe: (ua) => ua.indexOf("libhoney") === 0 && ua.indexOf("addition") !== -1 },
     ];
 
-    mock.post('http://localhost:9999/1/batch/test-transmission', function(req) {
-      userAgentReceieved = req.headers["User-Agent"];
-      return {};
-    });
+    // set up our endpoints
+    UAs.forEach(ua =>
+      mock.post(`http://localhost:9999/1/batch/${ua.dataset}`, function(req) {
+        if (!ua.probe(req.headers["user-agent"])) {
+          done(new Error("unexpected user-agent addition"));
+        }
+        return {};
+      })
+    );
 
-    var transmission = new Transmission({
-      responseCallback (queue) {
-        if (queue.length > 0) {
-          if (userAgentReceived.indexOf("addition" !== -1)) {
+    // now send our events through separate transmissions with different UA additions
+    UAs.forEach(ua => {
+      var transmission = new Transmission({
+        batchSizeTrigger: 1, // so we'll send individual events
+        responseCallback (queue) {
+          let responses = queue.splice(0, queue.length);
+          responseCount += responses.length;
+          if (responseCount === responseExpected) {
             done();
           }
-        }
-      },
-      userAgentAddition: "user-agent addition here"
-    });
+        },
+        userAgentAddition: ua.addition
+      });
 
-    transmission.sendPresampledEvent(new ValidatedEvent({
-      apiHost: "http://localhost:9999",
-      writeKey: "123456789",
-      dataset: "test-transmission",
-      sampleRate: 10,
-      timestamp: new Date(),
-      postData: JSON.stringify({ a: 1, b: 2 })
-    }));
+      transmission.sendPresampledEvent(new ValidatedEvent({
+        apiHost: "http://localhost:9999",
+        writeKey: "123456789",
+        dataset: ua.dataset,
+        sampleRate: 1,
+        timestamp: new Date(),
+        postData: JSON.stringify({ a: 1, b: 2 })
+      }));
+    });
   });
 });
