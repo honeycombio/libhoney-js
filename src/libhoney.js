@@ -37,7 +37,10 @@ const defaults = Object.freeze({
   maxResponseQueueSize: 1000,
 
   // if this is set to true, all sending is disabled.  useful for disabling libhoney when testing
-  disabled: false
+  disabled: false,
+
+  // If this is non-empty, append it to the end of the User-Agent header.
+  userAgentAddition: ""
 });
 
 /**

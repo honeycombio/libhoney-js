@@ -11,7 +11,7 @@
 import superagent from 'superagent';
 import urljoin from 'urljoin';
 
-const userAgent = "libhoney-js/LIBHONEY_JS_VERSION";
+const USER_AGENT = "libhoney-js/LIBHONEY_JS_VERSION";
 
 const _global = (typeof window !== "undefined" ? window :
                  typeof global !== "undefined" ? global : undefined);
@@ -151,6 +151,8 @@ export class Transmission {
       this._pendingWorkCapacity = options.pendingWorkCapacity;
     }
 
+    this._userAgentAddition = options.userAgentAddition || "";
+
     // Included for testing; to stub out randomness and verify that an event
     // was dropped.
     this._randomFn = Math.random;
@@ -201,7 +203,7 @@ export class Transmission {
 
     let batchAgg = new BatchEndpointAggregator(batch);
 
-    let finishBatch = () => {
+    const finishBatch = () => {
       this._batchCount--;
 
       let queueLength = this._eventQueue.length;
@@ -230,6 +232,12 @@ export class Transmission {
           })));
           resolve();
           return;
+        }
+
+        let userAgent = USER_AGENT;
+        let trimmedAddition = this._userAgentAddition.trim();
+        if (trimmedAddition) {
+          userAgent = `${USER_AGENT} ${trimmedAddition}`;
         }
 
         var start = Date.now();
