@@ -41,11 +41,11 @@ describe('libhoney builder', function() {
       transmission: MockTransmission
     });
 
-    var postData = { c: { a: 1 } };
+    var postData = { a: { b: 1 }, c: { d: 2 } };
 
-    var builder = honey.newBuilder();
+    var builder = honey.newBuilder({a: { b : 1 }});
 
-    builder.sendNow({ c: { a: 1 } });
+    builder.sendNow({ c: { d: 2 } });
 
     assert.equal(_transmissionSendEventArg.postData, JSON.stringify(postData));
   });
