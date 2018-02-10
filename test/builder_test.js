@@ -33,6 +33,23 @@ describe('libhoney builder', function() {
     assert.equal(5, ev.data.a);
   });
 
+  it("doesn't stringify object values", function() {
+    var honey = new libhoney({
+      apiHost: "http://foo/bar",
+      writeKey: "12345",
+      dataset: "testing",
+      transmission: MockTransmission
+    });
+
+    var postData = { c: { a: 1 } };
+
+    var builder = honey.newBuilder();
+
+    builder.sendNow({ c: { a: 1 } });
+
+    assert.equal(_transmissionSendEventArg.postData, JSON.stringify(postData));
+  });
+
   it("includes snapshot of global fields/dyn_fields", function() {
     var honey = new libhoney({
       apiHost: "http://foo/bar",

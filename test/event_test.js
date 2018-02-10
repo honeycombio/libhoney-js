@@ -38,6 +38,16 @@ describe('libhoney events', function() {
     assert.equal(5, ev.data.hello);
   });
 
+  it("doesn't stringify object values", function() {
+    var postData = { c: { a: 1 } };
+
+    var ev = hny.newEvent();
+
+    ev.add({ c: { a: 1 } });
+
+    assert.equal(JSON.stringify(ev.data), JSON.stringify({ c: { a: 1 } }));
+  });
+
   it("converts all values to primitive types in .add/.addField", function() {
     var b = hny.newBuilder();
     var ev;
