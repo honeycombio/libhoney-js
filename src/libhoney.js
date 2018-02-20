@@ -6,7 +6,7 @@
 /**
  * @module
  */
-import { Transmission, ValidatedEvent } from './transmission';
+import { Transmission, MockTransmission, WriterTransmission, NullTransmission, ValidatedEvent } from './transmission';
 import Builder from './builder';
 
 import { EventEmitter } from 'events';
@@ -18,8 +18,14 @@ const defaults = Object.freeze({
   // i.e. `sampleRate: 10` means we only send 1/10th the events.
   sampleRate: 1,
 
-  // transmission constructor, or a string "worker"/"base" to pick one of our builtin versions.
+  // transmission constructor, or a string to pick one of our builtin versions.
   // we fall back to the base impl if worker or a custom implementation throws on init.
+  // string options available are:
+  //  - "base": the default transmission implementation
+  //  - "worker": a web-worker based transmission (not currently available, see https://github.com/honeycombio/libhoney-js/issues/22)
+  //  - "mock": an implementation that accumulates all events sent
+  //  - "writer": an implementation that logs to the console all events sent
+  //  - "null": an implementation that does nothing
   transmission: "base",
 
   // batch triggers
@@ -96,6 +102,14 @@ export default class Libhoney extends EventEmitter {
       this._responseQueue = this._responseQueue.concat(responses);
     }
     this.emit("response", this._responseQueue);
+  }
+
+  /**
+   * The transmission implementation in use for this libhoney instance.  Useful when mocking libhoney (specify
+   * "mock" for options.transmission, and use this field to get at the list of events sent through libhoney.)
+   */
+  get transmission() {
+    return this._transmission;
   }
 
   /**
@@ -387,13 +401,25 @@ function getAndInitTransmission(transmission, options) {
   }
 
   if (typeof transmission === "string") {
-    if (transmission === "base") {
-      transmission = Transmission;
-    } else if (transmission === "worker") {
-      console.warn("worker implementation not ready yet.  using base implementation");
-      transmission = Transmission;
-    } else {
-      throw new Error(`unknown transmission implementation "${transmission}".`);
+    switch(transmission) {
+      case "base":
+        transmission = Transmission;
+        break;
+      case "worker":
+        console.warn("worker implementation not ready yet.  using base implementation");
+        transmission = Transmission;
+        break;
+      case "mock":
+        transmission = MockTransmission;
+        break;
+      case "writer":
+        transmission = WriterTransmission;
+        break;
+      case "null":
+        transmission = NullTransmission;
+        break;
+      default:
+        throw new Error(`unknown transmission implementation "${transmission}".`);
     }
   } else if (typeof transmission !== "function") {
     throw new Error(".transmission must be one of 'base'/'worker' or a constructor.");
