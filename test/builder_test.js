@@ -2,8 +2,6 @@
 import assert from 'assert';
 import libhoney from '../lib/libhoney';
 
-import { _transmissionSendEventArg, MockTransmission } from './mock_transmission';
-
 describe('libhoney builder', function() {
   var hny = new libhoney();
 
@@ -38,8 +36,9 @@ describe('libhoney builder', function() {
       apiHost: "http://foo/bar",
       writeKey: "12345",
       dataset: "testing",
-      transmission: MockTransmission
+      transmission: "mock"
     });
+    var transmission = honey.transmission;
 
     var postData = { a: { b: 1 }, c: { d: 2 } };
 
@@ -47,7 +46,8 @@ describe('libhoney builder', function() {
 
     builder.sendNow({ c: { d: 2 } });
 
-    assert.equal(_transmissionSendEventArg.postData, JSON.stringify(postData));
+    assert.equal(transmission.events.length, 1);
+    assert.equal(transmission.events[0].postData, JSON.stringify(postData));
   });
 
   it("includes snapshot of global fields/dyn_fields", function() {
@@ -55,8 +55,9 @@ describe('libhoney builder', function() {
       apiHost: "http://foo/bar",
       writeKey: "12345",
       dataset: "testing",
-      transmission: MockTransmission
+      transmission: "mock"
     });
+    var transmission = honey.transmission;
 
     var postData = { b : 2, c : 3 };
 
@@ -67,7 +68,8 @@ describe('libhoney builder', function() {
 
     builder.sendNow({ c : 3 });
 
-    assert.equal(_transmissionSendEventArg.postData, JSON.stringify(postData));
+    assert.equal(transmission.events.length, 1);
+    assert.equal(transmission.events[0].postData, JSON.stringify(postData));
 
     // but if we create another builder, it should show up in the post data.
     postData = { a : 1, b : 2, c : 3 };
@@ -76,6 +78,7 @@ describe('libhoney builder', function() {
 
     builder.sendNow({ c : 3 });
 
-    assert.equal(_transmissionSendEventArg.postData, JSON.stringify(postData));
+    assert.equal(transmission.events.length, 2);
+    assert.equal(transmission.events[1].postData, JSON.stringify(postData));
   });
 });

@@ -6,8 +6,7 @@ import { Transmission, ValidatedEvent } from '../lib/transmission';
 let superagent = require('superagent');
 let mock = require('superagent-mocker')(superagent);
 
-describe('transmission', function() {
-
+describe('base transmission', function() {
   it('should handle batchSizeTrigger of 0', function(done) {
     mock.post('http://localhost:9999/1/events/test-transmission', function(req) {
       let reqEvents = JSON.parse(req.body);

@@ -121,7 +121,8 @@ export class ValidatedEvent {
 }
 
 export class MockTransmission {
-  constructor() {
+  constructor(options) {
+    this.constructorArg = options;
     this.events = [];
   }
 
@@ -134,6 +135,7 @@ export class MockTransmission {
   }
 
   reset() {
+    this.constructorArg = null;
     this.events = [];
   }
 };
