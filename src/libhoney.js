@@ -422,7 +422,7 @@ function getAndInitTransmission(transmission, options) {
         throw new Error(`unknown transmission implementation "${transmission}".`);
     }
   } else if (typeof transmission !== "function") {
-    throw new Error(".transmission must be one of 'base'/'worker' or a constructor.");
+    throw new Error(".transmission must be one of 'base'/'worker'/'mock'/'writer'/'null' or a constructor.");
   }
 
   try {
