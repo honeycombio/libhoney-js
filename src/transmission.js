@@ -120,6 +120,44 @@ export class ValidatedEvent {
   }
 }
 
+export class MockTransmission {
+  constructor(options) {
+    this.constructorArg = options;
+    this.events = [];
+  }
+
+  sendEvent (ev) {
+    this.events.push(ev);
+  }
+
+  sendPresampledEvent (ev) {
+    this.events.push(ev);
+  }
+
+  reset() {
+    this.constructorArg = null;
+    this.events = [];
+  }
+};
+
+export class WriterTransmission {
+  sendEvent (ev) {
+    console.log(JSON.stringify(ev));
+  }
+
+  sendPresampledEvent (ev) {
+    console.log(JSON.stringify(ev));
+  }
+}
+
+export class NullTransmission {
+  sendEvent (ev) {
+  }
+
+  sendPresampledEvent (ev) {
+  }
+}
+
 /**
  * @private
  */
