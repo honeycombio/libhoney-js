@@ -7,7 +7,7 @@ A node module for interacting with [Honeycomb](https://honeycomb.io). (For more 
 ## Installation
 
 ```
-npm install libhoney --save-dev
+npm install libhoney --save
 ```
 
 ## Documentation
