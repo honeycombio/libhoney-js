@@ -14,6 +14,8 @@ import {
   ValidatedEvent
 } from "./transmission";
 import Builder from "./builder";
+import BoardsClient from "./api/boards/client";
+import TriggersClient from "./api/triggers/client";
 
 import { EventEmitter } from "events";
 
@@ -94,6 +96,8 @@ export default class Libhoney extends EventEmitter {
       defaults,
       opts
     );
+    this._boards = new BoardsClient(this._options);
+    this._triggers = new TriggersClient(this._options);
     this._transmission = getAndInitTransmission(
       this._options.transmission,
       this._options
@@ -115,6 +119,14 @@ export default class Libhoney extends EventEmitter {
       this._responseQueue = this._responseQueue.concat(responses);
     }
     this.emit("response", this._responseQueue);
+  }
+
+  get boards() {
+    return this._boards;
+  }
+
+  get triggers() {
+    return this._triggers;
   }
 
   /**

@@ -1,6 +1,6 @@
-/* eslint-env node, jest */
+/* global describe, it, require */
 import assert from "assert";
-import libhoney from "../libhoney";
+import libhoney from "./libhoney";
 
 let superagent = require("superagent");
 let mock = require("superagent-mocker")(superagent);
@@ -65,7 +65,7 @@ describe("libhoney", function() {
   describe("response queue", function() {
     it("should enqueue a maximum of maxResponseQueueSize, dropping new responses (not old)", function(done) {
       mock.post("http://localhost:9999/1/events/testResponseQueue", function(
-        _req
+        req
       ) {
         return {};
       });
@@ -79,8 +79,7 @@ describe("libhoney", function() {
         maxResponseQueueSize: queueSize
       });
 
-      // we send queueSize+1 events, so we should see two response events
-      // with queueSize as the length
+      // we send queueSize+1 events, so we should see two response events with queueSize as the length
       honey.on("response", queue => {
         if (queue.length !== queueSize) {
           return;

@@ -1,6 +1,6 @@
-/* eslint-env node, jest */
+/* global describe, it */
 import assert from "assert";
-import libhoney from "../libhoney";
+import libhoney from "./libhoney";
 
 describe("libhoney builder", function() {
   var hny = new libhoney();

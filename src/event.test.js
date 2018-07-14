@@ -1,6 +1,6 @@
-/* eslint-env node, jest */
+/* global describe, it */
 import assert from "assert";
-import libhoney from "../libhoney";
+import libhoney from "./libhoney";
 
 describe("libhoney events", function() {
   var hny = new libhoney();
@@ -57,9 +57,9 @@ describe("libhoney events", function() {
 
     var ev = hny.newEvent();
 
-    ev.add(postData);
+    ev.add({ c: { a: 1 } });
 
-    assert.equal(JSON.stringify(ev.data), JSON.stringify(postData));
+    assert.equal(JSON.stringify(ev.data), JSON.stringify({ c: { a: 1 } }));
   });
 
   it("converts all values to primitive types in .add/.addField", function() {
@@ -70,8 +70,7 @@ describe("libhoney events", function() {
     ev = b.newEvent();
     map = new Map();
 
-    // Object, we pass it on through (and let Honeycomb serialize it if
-    // necessary)
+    // Object, we pass it on through (and let Honeycomb serialize it if necessary)
     map.set("obj", { a: 1, b: 2 });
 
     // String converts to a string
