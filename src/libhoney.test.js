@@ -1,5 +1,4 @@
-/* global describe, it, require */
-import assert from "assert";
+/* global expect, describe, it, require */
 import libhoney from "./libhoney";
 
 let superagent = require("superagent");
@@ -8,16 +7,15 @@ let mock = require("superagent-mocker")(superagent);
 describe("libhoney", function() {
   describe("constructor options", function() {
     it("should be communicated to transmission constructor", function() {
-      let options = { a: 1, b: 2, c: 3, d: 4, transmission: "mock" };
+      let options = { a: 1, b: 2, c: 3, d: 4 };
 
-      let honey = new libhoney(options);
+      let honey = new libhoney(
+        Object.assign({}, options, { transmission: "mock" })
+      );
 
       let transmission = honey.transmission;
 
-      assert.equal(options.a, transmission.constructorArg.a);
-      assert.equal(options.b, transmission.constructorArg.b);
-      assert.equal(options.c, transmission.constructorArg.c);
-      assert.equal(options.d, transmission.constructorArg.d);
+      expect(transmission.constructorArg).toMatchObject(options);
     });
   });
 
@@ -33,14 +31,16 @@ describe("libhoney", function() {
       let postData = { a: 1, b: 2 };
       honey.sendNow(postData);
 
-      assert.equal(transmission.events.length, 1);
-      assert.equal(transmission.events[0].apiHost, "https://api.honeycomb.io/");
-      assert.equal(transmission.events[0].apiKey, "12345");
-
-      assert.equal(transmission.events[0].dataset, "testing");
-      assert.equal(transmission.events[0].sampleRate, 1);
-      assert(transmission.events[0].timestamp instanceof Date);
-      assert.equal(transmission.events[0].postData, JSON.stringify(postData));
+      expect(transmission.events).toMatchObject([
+        {
+          apiHost: "https://api.honeycomb.io/",
+          apiKey: "12345",
+          dataset: "testing",
+          sampleRate: 1,
+          postData: JSON.stringify(postData),
+          timestamp: expect.any(Date)
+        }
+      ]);
     });
 
     it("should come from libhoney options if not specified in event", function() {
@@ -54,11 +54,14 @@ describe("libhoney", function() {
       let postData = { a: 1, b: 2 };
       honey.sendNow(postData);
 
-      assert.equal(transmission.events.length, 1);
-      assert.equal(transmission.events[0].apiHost, "http://foo/bar");
-      assert.equal(transmission.events[0].apiKey, "12345");
-      assert.equal(transmission.events[0].dataset, "testing");
-      assert.equal(transmission.events[0].postData, JSON.stringify(postData));
+      expect(transmission.events).toMatchObject([
+        {
+          apiHost: "http://foo/bar",
+          apiKey: "12345",
+          dataset: "testing",
+          postData: JSON.stringify(postData)
+        }
+      ]);
     });
   });
 
@@ -88,8 +91,8 @@ describe("libhoney", function() {
         queueFullCount++;
         if (queueFullCount === 2) {
           queue.sort((a, b) => a.metadata - b.metadata);
-          assert.equal(queue[0].metadata, 0);
-          assert.equal(queue[queueSize - 1].metadata, queueSize - 1);
+          expect(queue[0].metadata).toBe(0);
+          expect(queue[queueSize - 1].metadata).toBe(queueSize - 1);
           done();
         }
       });
@@ -114,7 +117,7 @@ describe("libhoney", function() {
       });
       let transmission = honey.transmission;
 
-      assert.equal(transmission, null);
+      expect(transmission).toBeNull();
     });
   });
 });

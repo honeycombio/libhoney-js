@@ -1,5 +1,4 @@
-/* global describe, it */
-import assert from "assert";
+/* global expect, describe, it */
 import libhoney from "./libhoney";
 
 describe("libhoney events", function() {
@@ -16,8 +15,10 @@ describe("libhoney events", function() {
     );
 
     let ev = b.newEvent();
-    assert.equal(5, ev.data.a);
-    assert.equal(3, ev.data.b);
+    expect(ev.data).toMatchObject({
+      a: 5,
+      b: 3
+    });
   });
 
   it("accepts dict-like arguments to .add()", function() {
@@ -25,13 +26,17 @@ describe("libhoney events", function() {
     let ev = b.newEvent();
 
     ev.add({ a: 5 });
-    assert.equal(5, ev.data.a);
+    expect(ev.data).toMatchObject({
+      a: 5
+    });
 
     let ev2 = b.newEvent();
     let map = new Map();
     map.set("a", 5);
     ev2.add(map);
-    assert.equal(5, ev2.data.a);
+    expect(ev2.data).toMatchObject({
+      a: 5
+    });
   });
 
   it("it toString()'s keys from Maps in .add()", function() {
@@ -49,17 +54,18 @@ describe("libhoney events", function() {
     );
     ev.add(map);
 
-    assert.equal(5, ev.data.hello);
+    expect(ev.data).toMatchObject({
+      hello: 5
+    });
   });
 
   it("doesn't stringify object values", function() {
-    let postData = { c: { a: 1 } };
-
     let ev = hny.newEvent();
+    let data = { c: { a: 1 } };
 
-    ev.add({ c: { a: 1 } });
+    ev.add(data);
 
-    assert.equal(JSON.stringify(ev.data), JSON.stringify({ c: { a: 1 } }));
+    expect(ev.data).toEqual(data);
   });
 
   it("converts all values to primitive types in .add/.addField", function() {
@@ -95,8 +101,7 @@ describe("libhoney events", function() {
 
     ev.add(map);
 
-    assert.equal(
-      JSON.stringify(ev.data),
+    expect(JSON.stringify(ev.data)).toBe(
       `{"obj":{"a":1,"b":2},"String":"a:1","string":"a:1","Number":5,"number":5,"Boolean":true,"boolean":true,"Date":${JSON.stringify(
         d
       )},"null":null,"undefined":null}`
