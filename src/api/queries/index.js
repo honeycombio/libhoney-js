@@ -166,6 +166,7 @@ export function query({
   );
 }
 
+/*
 // examples:
 
 let q1 = query({
@@ -179,3 +180,4 @@ let q1 = query({
 });
 
 console.dir(q1);
+*/

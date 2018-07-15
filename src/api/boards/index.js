@@ -1,4 +1,4 @@
-import { query, calculation, order } from "../queries";
+import { Query } from "../queries";
 
 export class BoardQuery {
   constructor(name, description, dataset, query) {

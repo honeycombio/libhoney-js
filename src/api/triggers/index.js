@@ -27,7 +27,7 @@ export class Trigger {
       Query.fromJSON(t.query),
       Threshold.fromJSON(t.threshold),
       (t.recipients || []).map(r => Recipient.fromJSON(r)),
-      b.id
+      t.id
     );
   }
 }
@@ -84,6 +84,7 @@ recipient.slack = target => new Recipient("slack", target);
 recipient.email = target => new Recipient("email", target);
 recipient.pagerduty = () => new Recipient("pagerduty");
 
+/*
 // example
 
 let t1 = trigger({
@@ -96,3 +97,4 @@ let t1 = trigger({
   threshold: threshold.gt(500),
   recipients: [recipient.email("toshok@honeycomb.io")]
 });
+*/

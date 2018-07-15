@@ -1,7 +1,7 @@
 import superagent from "superagent";
 import urljoin from "urljoin";
 
-const USER_AGENT = "libhoney-js/LIBHONEY_JS_VERSION";
+const USER_AGENT = "libhoney-js/<@LIBHONEY_JS_VERSION@>";
 
 export default class ResourceClient {
   constructor(
@@ -42,7 +42,7 @@ export default class ResourceClient {
             reject(err);
             return;
           }
-          resolve(this.resourceType.fromJson(res));
+          resolve(this.resourceType.fromJSON(res));
         });
     });
   }
@@ -56,7 +56,7 @@ export default class ResourceClient {
             reject(err);
             return;
           }
-          resolve(this.resourceType.fromJson(res));
+          resolve(this.resourceType.fromJSON(res));
         });
     });
   }
@@ -85,13 +85,22 @@ export default class ResourceClient {
             reject(err);
             return;
           }
-          resolve(this.resourceType.fromJson(res));
+          resolve(this.resourceType.fromJSON(res));
         });
     });
   }
   list() {
     return new Promise((resolve, reject) => {
-      this.newRequest("get"); /*...*/
+      this.newRequest("get")
+        .type("json")
+        .send()
+        .end((err, res) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve((res.body || []).map(r => this.resourceType.fromJSON(r)));
+        });
     });
   }
 }

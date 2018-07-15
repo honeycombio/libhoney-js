@@ -96,6 +96,7 @@ export default class Libhoney extends EventEmitter {
       defaults,
       opts
     );
+
     this._boards = new BoardsClient(this._options);
     this._triggers = new TriggersClient(this._options);
     this._transmission = getAndInitTransmission(
