@@ -1,11 +1,11 @@
 /* eslint-env node */
-const express = require("express");
-const libhoney = require("libhoney");
-const responseTime = require("response-time");
-let app = express();
+var express = require("express");
+var libhoney = require("libhoney").default;
+var responseTime = require("response-time");
+var app = express();
 
-let honey = new libhoney({
-  writeKey: process.env["HONEY_WRITE_KEY"],
+var honey = new libhoney({
+  apiKey: process.env["HONEY_API_KEY"],
   dataset: "express-example-response-time"
 });
 

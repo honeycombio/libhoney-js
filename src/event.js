@@ -28,12 +28,12 @@ export default class Event {
      */
     this.apiHost = "";
     /**
-     * The Honeycomb authentication token for this event.  Find your team write key at
+     * The Honeycomb authentication token for this event.  Find you team api key at
      * https://ui.honeycomb.io/account
      *
      * @type {string}
      */
-    this.writeKey = "";
+    this.apiKey = "";
     /**
      * The name of the Honeycomb dataset to which to send this event.
      *

@@ -24,10 +24,10 @@ An API reference is available at https://honeycomb.io/docs/connect/javascript/
 Honeycomb can calculate all sorts of statistics, so send the values you care about and let us crunch the averages, percentiles, lower/upper bounds, cardinality -- whatever you want -- for you.
 
 ```js
-import Libhoney from 'libhoney';
+import Libhoney from "libhoney";
 
 let hny = new Libhoney({
-  writeKey: "YOUR_WRITE_KEY",
+  apiKey: "YOUR_API_KEY",
   dataset: "honeycomb-js-example"
 });
 

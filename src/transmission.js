@@ -56,11 +56,11 @@ class BatchEndpointAggregator {
     this.batches = partition(
       events,
       /* keyfn */
-      ev => `${ev.apiHost}_${ev.writeKey}_${ev.dataset}`,
+      ev => `${ev.apiHost}_${ev.apiKey}_${ev.dataset}`,
       /* createfn */
       ev => ({
         apiHost: ev.apiHost,
-        writeKey: ev.writeKey,
+        apiKey: ev.apiKey,
         dataset: ev.dataset,
         events: [ev]
       }),
@@ -98,7 +98,7 @@ export class ValidatedEvent {
     timestamp,
     apiHost,
     postData,
-    writeKey,
+    apiKey,
     dataset,
     sampleRate,
     metadata
@@ -106,7 +106,7 @@ export class ValidatedEvent {
     this.timestamp = timestamp;
     this.apiHost = apiHost;
     this.postData = postData;
-    this.writeKey = writeKey;
+    this.apiKey = apiKey;
     this.dataset = dataset;
     this.sampleRate = sampleRate;
     this.metadata = metadata;
@@ -243,7 +243,7 @@ export class Transmission {
 
     this._batchCount++;
 
-    var batch = this._eventQueue.splice(0, this._batchSizeTrigger);
+    let batch = this._eventQueue.splice(0, this._batchSizeTrigger);
 
     let batchAgg = new BatchEndpointAggregator(batch);
 
@@ -262,8 +262,8 @@ export class Transmission {
 
     let batches = Object.keys(batchAgg.batches).map(k => batchAgg.batches[k]);
     eachPromise(batches, batch => {
-      var url = urljoin(batch.apiHost, "/1/batch", batch.dataset);
-      var req = superagent.post(url);
+      let url = urljoin(batch.apiHost, "/1/batch", batch.dataset);
+      let req = superagent.post(url);
 
       let { encoded, numEncoded } = batchAgg.encodeBatchEvents(batch.events);
       return new Promise(resolve => {
@@ -285,9 +285,9 @@ export class Transmission {
           userAgent = `${USER_AGENT} ${trimmedAddition}`;
         }
 
-        var start = Date.now();
+        let start = Date.now();
         req
-          .set("X-Hny-Team", batch.writeKey)
+          .set("X-Hny-Team", batch.apiKey)
           .set("User-Agent", userAgent)
           .type("json")
           .send(encoded)
@@ -337,7 +337,7 @@ export class Transmission {
   }
 
   _shouldSendEvent(ev) {
-    var { sampleRate } = ev;
+    let { sampleRate } = ev;
     if (sampleRate <= 1) {
       return true;
     }

@@ -3,10 +3,10 @@ import assert from "assert";
 import libhoney from "./libhoney";
 
 describe("libhoney events", function() {
-  var hny = new libhoney();
+  let hny = new libhoney();
 
   it("inherit fields and dyn_fields from builder", function() {
-    var b = hny.newBuilder(
+    let b = hny.newBuilder(
       { a: 5 },
       {
         b: function() {
@@ -15,30 +15,30 @@ describe("libhoney events", function() {
       }
     );
 
-    var ev = b.newEvent();
+    let ev = b.newEvent();
     assert.equal(5, ev.data.a);
     assert.equal(3, ev.data.b);
   });
 
   it("accepts dict-like arguments to .add()", function() {
-    var b = hny.newBuilder();
-    var ev = b.newEvent();
+    let b = hny.newBuilder();
+    let ev = b.newEvent();
 
     ev.add({ a: 5 });
     assert.equal(5, ev.data.a);
 
-    var ev2 = b.newEvent();
-    var map = new Map();
+    let ev2 = b.newEvent();
+    let map = new Map();
     map.set("a", 5);
     ev2.add(map);
     assert.equal(5, ev2.data.a);
   });
 
   it("it toString()'s keys from Maps in .add()", function() {
-    var b = hny.newBuilder();
-    var ev = b.newEvent();
+    let b = hny.newBuilder();
+    let ev = b.newEvent();
 
-    var map = new Map();
+    let map = new Map();
     map.set(
       {
         toString: function() {
@@ -53,9 +53,9 @@ describe("libhoney events", function() {
   });
 
   it("doesn't stringify object values", function() {
-    var postData = { c: { a: 1 } };
+    let postData = { c: { a: 1 } };
 
-    var ev = hny.newEvent();
+    let ev = hny.newEvent();
 
     ev.add({ c: { a: 1 } });
 
@@ -63,9 +63,9 @@ describe("libhoney events", function() {
   });
 
   it("converts all values to primitive types in .add/.addField", function() {
-    var b = hny.newBuilder();
-    var ev;
-    var map;
+    let b = hny.newBuilder();
+    let ev;
+    let map;
 
     ev = b.newEvent();
     map = new Map();
@@ -86,7 +86,7 @@ describe("libhoney events", function() {
     map.set("boolean", true);
 
     // Date does not convert
-    var d = new Date(1, 2, 3, 4, 5, 6, 7);
+    let d = new Date(1, 2, 3, 4, 5, 6, 7);
     map.set("Date", d);
 
     // Null/undefined both end up being null in the output

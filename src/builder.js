@@ -31,12 +31,12 @@ export default class Builder {
     this.apiHost = "";
     /**
      * The Honeycomb authentication token. If it is set on a libhoney instance it will be used as the
-     * default write key for all events. If absent, it must be explicitly set on a Builder or
-     * Event. Find your team write key at https://ui.honeycomb.io/account
+     * default api key for all events. If absent, it must be explicitly set on a Builder or
+     * Event. Find your team api key at https://ui.honeycomb.io/account
      *
      * @type {string}
      */
-    this.writeKey = "";
+    this.apiKey = "";
     /**
      * The name of the Honeycomb dataset to which to send these events.  If it is specified during
      * libhoney initialization, it will be used as the default dataset for all events. If absent,
@@ -134,7 +134,7 @@ export default class Builder {
   newEvent() {
     let ev = new Event(this._libhoney, this._fields, this._dyn_fields);
     ev.apiHost = this.apiHost;
-    ev.writeKey = this.writeKey;
+    ev.apiKey = this.apiKey;
     ev.dataset = this.dataset;
     ev.sampleRate = this.sampleRate;
     return ev;
@@ -159,7 +159,7 @@ export default class Builder {
     foreach(dyn_fields, (v, k) => b.addDynamicField(k, v));
 
     b.apiHost = this.apiHost;
-    b.writeKey = this.writeKey;
+    b.apiKey = this.apiKey;
     b.dataset = this.dataset;
     b.sampleRate = this.sampleRate;
 

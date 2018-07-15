@@ -8,7 +8,7 @@ let mock = require("superagent-mocker")(superagent);
 describe("libhoney", function() {
   describe("constructor options", function() {
     it("should be communicated to transmission constructor", function() {
-      var options = { a: 1, b: 2, c: 3, d: 4, transmission: "mock" };
+      let options = { a: 1, b: 2, c: 3, d: 4, transmission: "mock" };
 
       let honey = new libhoney(options);
 
@@ -23,19 +23,19 @@ describe("libhoney", function() {
 
   describe("event properties", function() {
     it("should ultimately fallback to hardcoded defaults", function() {
-      var honey = new libhoney({
+      let honey = new libhoney({
         // these two properties are required
-        writeKey: "12345",
+        apiKey: "12345",
         dataset: "testing",
         transmission: "mock"
       });
       let transmission = honey.transmission;
-      var postData = { a: 1, b: 2 };
+      let postData = { a: 1, b: 2 };
       honey.sendNow(postData);
 
       assert.equal(transmission.events.length, 1);
       assert.equal(transmission.events[0].apiHost, "https://api.honeycomb.io/");
-      assert.equal(transmission.events[0].writeKey, "12345");
+      assert.equal(transmission.events[0].apiKey, "12345");
 
       assert.equal(transmission.events[0].dataset, "testing");
       assert.equal(transmission.events[0].sampleRate, 1);
@@ -44,19 +44,19 @@ describe("libhoney", function() {
     });
 
     it("should come from libhoney options if not specified in event", function() {
-      var honey = new libhoney({
+      let honey = new libhoney({
         apiHost: "http://foo/bar",
-        writeKey: "12345",
+        apiKey: "12345",
         dataset: "testing",
         transmission: "mock"
       });
       let transmission = honey.transmission;
-      var postData = { a: 1, b: 2 };
+      let postData = { a: 1, b: 2 };
       honey.sendNow(postData);
 
       assert.equal(transmission.events.length, 1);
       assert.equal(transmission.events[0].apiHost, "http://foo/bar");
-      assert.equal(transmission.events[0].writeKey, "12345");
+      assert.equal(transmission.events[0].apiKey, "12345");
       assert.equal(transmission.events[0].dataset, "testing");
       assert.equal(transmission.events[0].postData, JSON.stringify(postData));
     });
@@ -70,11 +70,11 @@ describe("libhoney", function() {
         return {};
       });
 
-      var queueSize = 50;
-      var queueFullCount = 0;
-      var honey = new libhoney({
+      let queueSize = 50;
+      let queueFullCount = 0;
+      let honey = new libhoney({
         apiHost: "http://localhost:9999",
-        writeKey: "12345",
+        apiKey: "12345",
         dataset: "testResponseQueue",
         maxResponseQueueSize: queueSize
       });
@@ -94,8 +94,8 @@ describe("libhoney", function() {
         }
       });
 
-      for (var i = 0; i < queueSize + 1; i++) {
-        var ev = honey.newEvent();
+      for (let i = 0; i < queueSize + 1; i++) {
+        let ev = honey.newEvent();
         ev.add({ a: 1, b: 2 });
         ev.addMetadata(i);
         ev.send();
@@ -105,14 +105,14 @@ describe("libhoney", function() {
 
   describe("disabled = true", function() {
     it("should not hit transmission", function() {
-      var honey = new libhoney({
+      let honey = new libhoney({
         // these two properties are required
-        writeKey: "12345",
+        apiKey: "12345",
         dataset: "testing",
         transmission: "mock",
         disabled: true
       });
-      var transmission = honey.transmission;
+      let transmission = honey.transmission;
 
       assert.equal(transmission, null);
     });

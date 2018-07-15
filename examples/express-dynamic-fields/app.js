@@ -1,11 +1,11 @@
 /* eslint-env node */
-const express = require("express");
-const honey = require("./express-honey");
-const app = express();
+var express = require("express");
+var honey = require("./express-honey");
+var app = express();
 
 app.use(
   honey({
-    writeKey: process.env["HONEY_WRITE_KEY"],
+    apiKey: process.env["HONEY_API_KEY"],
     dataset: "express-example-dynamic-fields",
     sampleRate: 5 // log 1 out of every 5 events
   })

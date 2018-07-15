@@ -1,11 +1,11 @@
 /* eslint-env node */
-const express = require("express");
-const honey = require("./express-honey");
-let app = express();
+var express = require("express");
+var honey = require("./express-honey");
+var app = express();
 
 app.use(
   honey({
-    writeKey: process.env["HONEY_WRITE_KEY"],
+    apiKey: process.env["HONEY_API_KEY"],
     dataset: "express-example"
   })
 );

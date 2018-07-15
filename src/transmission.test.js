@@ -18,7 +18,7 @@ describe("base transmission", function() {
       };
     });
 
-    var transmission = new Transmission({
+    let transmission = new Transmission({
       batchTimeTrigger: 10000, // larger than the mocha timeout
       batchSizeTrigger: 0,
       responseCallback() {
@@ -29,7 +29,7 @@ describe("base transmission", function() {
     transmission.sendEvent(
       new ValidatedEvent({
         apiHost: "http://localhost:9999",
-        writeKey: "123456789",
+        apiKey: "123456789",
         dataset: "test-transmission",
         sampleRate: 1,
         timestamp: new Date(),
@@ -39,8 +39,8 @@ describe("base transmission", function() {
   });
 
   it("should send a batch when batchSizeTrigger is met, not exceeded", function(done) {
-    var responseCount = 0;
-    var responseExpected = 5;
+    let responseCount = 0;
+    let responseExpected = 5;
 
     mock.post("http://localhost:9999/1/batch/test-transmission", function(req) {
       let reqEvents = JSON.parse(req.body);
@@ -50,7 +50,7 @@ describe("base transmission", function() {
       };
     });
 
-    var transmission = new Transmission({
+    let transmission = new Transmission({
       batchTimeTrigger: 10000, // larger than the mocha timeout
       batchSizeTrigger: 5,
       responseCallback(queue) {
@@ -66,7 +66,7 @@ describe("base transmission", function() {
       transmission.sendEvent(
         new ValidatedEvent({
           apiHost: "http://localhost:9999",
-          writeKey: "123456789",
+          apiKey: "123456789",
           dataset: "test-transmission",
           sampleRate: 1,
           timestamp: new Date(),
@@ -87,7 +87,7 @@ describe("base transmission", function() {
       };
     });
 
-    var transmission = new Transmission({
+    let transmission = new Transmission({
       batchTimeTrigger: 0,
       responseCallback: function(resp) {
         assert.equal(true, endpointHit);
@@ -98,7 +98,7 @@ describe("base transmission", function() {
     transmission.sendEvent(
       new ValidatedEvent({
         apiHost: "http://localhost:9999/",
-        writeKey: "123456789",
+        apiKey: "123456789",
         dataset: "test-transmission",
         sampleRate: 1,
         timestamp: new Date(),
@@ -108,7 +108,7 @@ describe("base transmission", function() {
   });
 
   it("should eventually send a single event (after the timeout)", function(done) {
-    var transmission = new Transmission({
+    let transmission = new Transmission({
       batchTimeTrigger: 10,
       responseCallback: function(resp) {
         done();
@@ -118,7 +118,7 @@ describe("base transmission", function() {
     transmission.sendEvent(
       new ValidatedEvent({
         apiHost: "http://localhost:9999",
-        writeKey: "123456789",
+        apiKey: "123456789",
         dataset: "test-transmission",
         sampleRate: 1,
         timestamp: new Date(),
@@ -128,7 +128,7 @@ describe("base transmission", function() {
   });
 
   it("should respect sample rate and accept the event", function(done) {
-    var transmission = new Transmission({
+    let transmission = new Transmission({
       batchTimeTrigger: 10,
       responseCallback: function(resp) {
         done();
@@ -141,7 +141,7 @@ describe("base transmission", function() {
     transmission.sendEvent(
       new ValidatedEvent({
         apiHost: "http://localhost:9999",
-        writeKey: "123456789",
+        apiKey: "123456789",
         dataset: "test-transmission",
         sampleRate: 10,
         timestamp: new Date(),
@@ -151,7 +151,7 @@ describe("base transmission", function() {
   });
 
   it("should respect sample rate and drop the event", function(done) {
-    var transmission = new Transmission({
+    let transmission = new Transmission({
       batchTimeTrigger: 10
     });
 
@@ -165,7 +165,7 @@ describe("base transmission", function() {
     transmission.sendEvent(
       new ValidatedEvent({
         apiHost: "http://localhost:9999",
-        writeKey: "123456789",
+        apiKey: "123456789",
         dataset: "test-transmission",
         sampleRate: 10,
         timestamp: new Date(),
@@ -175,10 +175,10 @@ describe("base transmission", function() {
   });
 
   it("should drop events beyond the pendingWorkCapacity", function(done) {
-    var eventDropped;
-    var droppedExpected = 5;
-    var responseCount = 0;
-    var responseExpected = 5;
+    let eventDropped;
+    let droppedExpected = 5;
+    let responseCount = 0;
+    let responseExpected = 5;
 
     mock.post("http://localhost:9999/1/batch/test-transmission", function(req) {
       let reqEvents = JSON.parse(req.body);
@@ -188,7 +188,7 @@ describe("base transmission", function() {
       };
     });
 
-    var transmission = new Transmission({
+    let transmission = new Transmission({
       batchTimeTrigger: 50,
       pendingWorkCapacity: responseExpected,
       responseCallback(queue) {
@@ -209,7 +209,7 @@ describe("base transmission", function() {
       transmission.sendEvent(
         new ValidatedEvent({
           apiHost: "http://localhost:9999",
-          writeKey: "123456789",
+          apiKey: "123456789",
           dataset: "test-transmission",
           sampleRate: 1,
           timestamp: new Date(),
@@ -225,7 +225,7 @@ describe("base transmission", function() {
       transmission.sendEvent(
         new ValidatedEvent({
           apiHost: "http://localhost:9999",
-          writeKey: "123456789",
+          apiKey: "123456789",
           dataset: "test-transmission",
           sampleRate: 1,
           timestamp: new Date(),
@@ -237,8 +237,8 @@ describe("base transmission", function() {
   });
 
   it("should send the right number events even if it requires multiple concurrent batches", function(done) {
-    var responseCount = 0;
-    var responseExpected = 10;
+    let responseCount = 0;
+    let responseExpected = 10;
 
     mock.post("http://localhost:9999/1/batch/test-transmission", function(req) {
       let reqEvents = JSON.parse(req.body);
@@ -248,7 +248,7 @@ describe("base transmission", function() {
       };
     });
 
-    var transmission = new Transmission({
+    let transmission = new Transmission({
       batchTimeTrigger: 50,
       batchSizeTrigger: 5,
       pendingWorkCapacity: responseExpected,
@@ -265,7 +265,7 @@ describe("base transmission", function() {
       transmission.sendEvent(
         new ValidatedEvent({
           apiHost: "http://localhost:9999",
-          writeKey: "123456789",
+          apiKey: "123456789",
           dataset: "test-transmission",
           sampleRate: 1,
           timestamp: new Date(),
@@ -276,8 +276,8 @@ describe("base transmission", function() {
   });
 
   it("should send the right number of events even if they all fail", function(done) {
-    var responseCount = 0;
-    var responseExpected = 10;
+    let responseCount = 0;
+    let responseExpected = 10;
 
     mock.post("http://localhost:9999/1/batch/test-transmission", function(req) {
       return {
@@ -285,7 +285,7 @@ describe("base transmission", function() {
       };
     });
 
-    var transmission = new Transmission({
+    let transmission = new Transmission({
       batchTimeTrigger: 50,
       batchSizeTrigger: 5,
       maxConcurrentBatches: 1,
@@ -307,7 +307,7 @@ describe("base transmission", function() {
       transmission.sendEvent(
         new ValidatedEvent({
           apiHost: "http://localhost:9999",
-          writeKey: "123456789",
+          apiKey: "123456789",
           dataset: "test-transmission",
           sampleRate: 1,
           timestamp: new Date(),
@@ -318,9 +318,9 @@ describe("base transmission", function() {
   });
 
   it("should send the right number of events even it requires more batches than maxConcurrentBatch", function(done) {
-    var responseCount = 0;
-    var responseExpected = 50;
-    var batchSize = 2;
+    let responseCount = 0;
+    let responseExpected = 50;
+    let batchSize = 2;
     mock.post("http://localhost:9999/1/batch/test-transmission", function(req) {
       let reqEvents = JSON.parse(req.body);
       let resp = reqEvents.map(() => ({ status: 202 }));
@@ -329,7 +329,7 @@ describe("base transmission", function() {
       };
     });
 
-    var transmission = new Transmission({
+    let transmission = new Transmission({
       batchTimeTrigger: 50,
       batchSizeTrigger: batchSize,
       pendingWorkCapacity: responseExpected,
@@ -346,7 +346,7 @@ describe("base transmission", function() {
       transmission.sendEvent(
         new ValidatedEvent({
           apiHost: "http://localhost:9999",
-          writeKey: "123456789",
+          apiKey: "123456789",
           dataset: "test-transmission",
           sampleRate: 1,
           timestamp: new Date(),
@@ -357,8 +357,8 @@ describe("base transmission", function() {
   });
 
   it("should send 100% of presampled events", function(done) {
-    var responseCount = 0;
-    var responseExpected = 10;
+    let responseCount = 0;
+    let responseExpected = 10;
     mock.post("http://localhost:9999/1/batch/test-transmission", function(req) {
       let reqEvents = JSON.parse(req.body);
       let resp = reqEvents.map(() => ({ status: 202 }));
@@ -367,7 +367,7 @@ describe("base transmission", function() {
       };
     });
 
-    var transmission = new Transmission({
+    let transmission = new Transmission({
       responseCallback(queue) {
         let responses = queue.splice(0, queue.length);
         responses.forEach(resp => {
@@ -387,7 +387,7 @@ describe("base transmission", function() {
       transmission.sendPresampledEvent(
         new ValidatedEvent({
           apiHost: "http://localhost:9999",
-          writeKey: "123456789",
+          apiKey: "123456789",
           dataset: "test-transmission",
           sampleRate: 10,
           timestamp: new Date(),
@@ -398,8 +398,8 @@ describe("base transmission", function() {
   });
 
   it("should deal with encoding errors", function(done) {
-    var responseCount = 0;
-    var responseExpected = 11;
+    let responseCount = 0;
+    let responseExpected = 11;
     mock.post("http://localhost:9999/1/batch/test-transmission", function(req) {
       let reqEvents = JSON.parse(req.body);
       let resp = reqEvents.map(() => ({ status: 202 }));
@@ -408,7 +408,7 @@ describe("base transmission", function() {
       };
     });
 
-    var transmission = new Transmission({
+    let transmission = new Transmission({
       responseCallback(queue) {
         let responses = queue.splice(0, queue.length);
         responses.forEach(resp => {
@@ -426,7 +426,7 @@ describe("base transmission", function() {
       transmission.sendPresampledEvent(
         new ValidatedEvent({
           apiHost: "http://localhost:9999",
-          writeKey: "123456789",
+          apiKey: "123456789",
           dataset: "test-transmission",
           sampleRate: 10,
           timestamp: new Date(),
@@ -441,7 +441,7 @@ describe("base transmission", function() {
       transmission.sendPresampledEvent(
         new ValidatedEvent({
           apiHost: "http://localhost:9999",
-          writeKey: "123456789",
+          apiKey: "123456789",
           dataset: "test-transmission",
           sampleRate: 10,
           timestamp: a,
@@ -453,7 +453,7 @@ describe("base transmission", function() {
       transmission.sendPresampledEvent(
         new ValidatedEvent({
           apiHost: "http://localhost:9999",
-          writeKey: "123456789",
+          apiKey: "123456789",
           dataset: "test-transmission",
           sampleRate: 10,
           timestamp: new Date(),
@@ -464,10 +464,10 @@ describe("base transmission", function() {
   });
 
   it("should allow user-agent additions", function(done) {
-    var responseCount = 0;
-    var responseExpected = 2;
+    let responseCount = 0;
+    let responseExpected = 2;
 
-    var UAs = [
+    let UAs = [
       {
         dataset: "test-transmission1",
         addition: "",
@@ -494,7 +494,7 @@ describe("base transmission", function() {
 
     // now send our events through separate transmissions with different UA additions
     UAs.forEach(ua => {
-      var transmission = new Transmission({
+      let transmission = new Transmission({
         batchSizeTrigger: 1, // so we'll send individual events
         responseCallback(queue) {
           let responses = queue.splice(0, queue.length);
@@ -509,7 +509,7 @@ describe("base transmission", function() {
       transmission.sendPresampledEvent(
         new ValidatedEvent({
           apiHost: "http://localhost:9999",
-          writeKey: "123456789",
+          apiKey: "123456789",
           dataset: ua.dataset,
           sampleRate: 1,
           timestamp: new Date(),

@@ -66,12 +66,12 @@ const defaults = Object.freeze({
 export default class Libhoney extends EventEmitter {
   /**
    * Constructs a libhoney context in order to configure default behavior,
-   * though each of its members (`apiHost`, `writeKey`, `dataset`, and
+   * though each of its members (`apiHost`, `apiKey`, `dataset`, and
    * `sampleRate`) may in fact be overridden on a specific Builder or Event.
    *
    * @param {Object} [opts] overrides for the defaults
    * @param {string} [opts.apiHost=https://api.honeycomb.io] - Server host to receive Honeycomb events.
-   * @param {string} opts.writeKey - Write key for your Honeycomb team. (Required)
+   * @param {string} opts.apiKey - API key for your Honeycomb team. (Required)
    * @param {string} opts.dataset - Name of the dataset that should contain this event. The dataset will be created for your team if it doesn't already exist.
    * @param {number} [opts.sampleRate=1] - Sample rate of data. If set, causes us to send 1/sampleRate of events and drop the rest.
    * @param {number} [opts.batchSizeTrigger=50] - We send a batch to the API when this many outstanding events exist in our event queue.
@@ -84,7 +84,7 @@ export default class Libhoney extends EventEmitter {
    * @example
    * import Libhoney from 'libhoney';
    * let honey = new Libhoney({
-   *   writeKey: "YOUR_WRITE_KEY",
+   *   apiKey: "YOUR_API_KEY",
    *   dataset: "honeycomb-js-example",
    *   // disabled: true // uncomment when testing or in development
    * });
@@ -107,7 +107,7 @@ export default class Libhoney extends EventEmitter {
     this._builder = new Builder(this);
 
     this._builder.apiHost = this._options.apiHost;
-    this._builder.writeKey = this._options.writeKey;
+    this._builder.apiKey = this._options.apiKey;
     this._builder.dataset = this._options.dataset;
     this._builder.sampleRate = this._options.sampleRate;
 
@@ -159,23 +159,23 @@ export default class Libhoney extends EventEmitter {
 
   /**
    * The Honeycomb authentication token. If it is set on a libhoney instance it will be used as the
-   * default write key for all events. If absent, it must be explicitly set on a Builder or
-   * Event. Find your team write key at https://ui.honeycomb.io/account
+   * default api key for all events. If absent, it must be explicitly set on a Builder or
+   * Event. Find your team api key at https://ui.honeycomb.io/account
    *
    * @type {string}
    */
-  set writeKey(v) {
-    this._builder.writeKey = v;
+  set apiKey(v) {
+    this._builder.apiKey = v;
   }
   /**
    * The Honeycomb authentication token. If it is set on a libhoney instance it will be used as the
-   * default write key for all events. If absent, it must be explicitly set on a Builder or
-   * Event. Find your team write key at https://ui.honeycomb.io/account
+   * default api key for all events. If absent, it must be explicitly set on a Builder or
+   * Event. Find your team api key at https://ui.honeycomb.io/account
    *
    * @type {string}
    */
-  get writeKey() {
-    return this._builder.writeKey;
+  get apiKey() {
+    return this._builder.apiKey;
   }
 
   /**
@@ -224,7 +224,7 @@ export default class Libhoney extends EventEmitter {
    * {
    *   data: a JSON-serializable object, keys become colums in Honeycomb
    *   timestamp [optional]: time for this event, defaults to now()
-   *   writeKey [optional]: your team's write key.  overrides the libhoney instance's value.
+   *   apiKey [optional]: your team's api key.  overrides the libhoney instance's value.
    *   dataset [optional]: the data set name.  overrides the libhoney instance's value.
    *   sampleRate [optional]: cause us to send 1 out of sampleRate events.  overrides the libhoney instance's value.
    * }
@@ -248,7 +248,7 @@ export default class Libhoney extends EventEmitter {
    * {
    *   data: a JSON-serializable object, keys become colums in Honeycomb
    *   timestamp [optional]: time for this event, defaults to now()
-   *   writeKey [optional]: your team's write key.  overrides the libhoney instance's value.
+   *   apiKey [optional]: your team's api key.  overrides the libhoney instance's value.
    *   dataset [optional]: the data set name.  overrides the libhoney instance's value.
    *   sampleRate: the rate this event has already been sampled.
    * }
@@ -276,7 +276,7 @@ export default class Libhoney extends EventEmitter {
   validateEvent(event) {
     if (!this._usable) return null;
 
-    var timestamp = event.timestamp || Date.now();
+    let timestamp = event.timestamp || Date.now();
     if (typeof timestamp === "string" || typeof timestamp === "number")
       timestamp = new Date(timestamp);
 
@@ -284,7 +284,7 @@ export default class Libhoney extends EventEmitter {
       console.error(".data must be an object");
       return null;
     }
-    var postData;
+    let postData;
     try {
       postData = JSON.stringify(event.data);
     } catch (e) {
@@ -292,36 +292,36 @@ export default class Libhoney extends EventEmitter {
       return null;
     }
 
-    var apiHost = event.apiHost;
+    let apiHost = event.apiHost;
     if (typeof apiHost !== "string" || apiHost === "") {
       console.error(".apiHost must be a non-empty string");
       return null;
     }
 
-    var writeKey = event.writeKey;
-    if (typeof writeKey !== "string" || writeKey === "") {
-      console.error(".writeKey must be a non-empty string");
+    let apiKey = event.apiKey;
+    if (typeof apiKey !== "string" || apiKey === "") {
+      console.error(".apiKey must be a non-empty string");
       return null;
     }
 
-    var dataset = event.dataset;
+    let dataset = event.dataset;
     if (typeof dataset !== "string" || dataset === "") {
       console.error(".dataset must be a non-empty string");
       return null;
     }
 
-    var sampleRate = event.sampleRate;
+    let sampleRate = event.sampleRate;
     if (typeof sampleRate !== "number") {
       console.error(".sampleRate must be a number");
       return null;
     }
 
-    var metadata = event.metadata;
+    let metadata = event.metadata;
     return new ValidatedEvent({
       timestamp,
       apiHost,
       postData,
-      writeKey,
+      apiKey,
       dataset,
       sampleRate,
       metadata
