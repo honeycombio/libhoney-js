@@ -1,7 +1,7 @@
 /* eslint-env node */
-var express = require("express");
-var honey = require("./express-honey");
-var app = express();
+const express = require("express");
+const honey = require("./express-honey");
+const app = express();
 
 app.use(
   honey({
