@@ -1,5 +1,4 @@
 /* global describe, it, expect */
-import cases from "jest-in-case";
 import superagent from "superagent";
 import mocker from "superagent-mocker";
 let mockAgent = mocker(superagent);
@@ -10,7 +9,7 @@ import { query, calculation } from "../queries";
 
 describe("boards client", () => {
   it("does a get to the right url for list()", done => {
-    mockAgent.get("http://localhost:9999/1/boards/", req => ({
+    mockAgent.get("http://localhost:9999/1/boards/", () => ({
       body: []
     }));
 
@@ -26,7 +25,7 @@ describe("boards client", () => {
   });
 
   it("does a get to the right url for get(id)", done => {
-    mockAgent.get("http://localhost:9999/1/boards/abc123", req => ({
+    mockAgent.get("http://localhost:9999/1/boards/abc123", () => ({
       body: {
         id: "abc123",
         name: "board name"

@@ -1,7 +1,7 @@
 /* global describe, expect */
 import cases from "jest-in-case";
 
-import { Trigger, trigger, threshold, recipient } from ".";
+import { trigger, threshold, recipient } from ".";
 import { calculation, order } from "../queries";
 
 describe("triggers", () => {

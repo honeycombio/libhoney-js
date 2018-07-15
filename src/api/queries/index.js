@@ -200,6 +200,11 @@ export function query({
     calculations,
     filters,
     filterCombination,
-    orders
+    orders,
+    limit,
+    startTime,
+    endTime,
+    timeRange,
+    granularity
   );
 }

@@ -103,8 +103,8 @@ export default class ResourceClient {
     return new Promise((resolve, reject) => {
       this.newRequest("delete", id, datasetName)
         .send()
-        .end((err, res) => {
-          // more here
+        .end(err => {
+          // more here?
           if (err) {
             reject(err);
             return;
