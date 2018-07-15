@@ -1,62 +1,71 @@
 import { Query } from "../queries";
+import { ifThrow } from "../util";
 
 export class BoardQuery {
   constructor(name, description, dataset, query) {
-    // validate here
     this.name = name;
     this.description = description;
     this.dataset = dataset;
     this.query = query;
+
+    this.validate();
+  }
+
+  validate() {
+    ifThrow(!this.dataset, "dataset must have at least one character");
+
+    if (this.query) {
+      this.query.validate();
+    }
+  }
+
+  static fromJSON(bq) {
+    if (typeof bq === "undefined") {
+      return bq;
+    }
+    return new BoardQuery(
+      bq.name,
+      bq.description,
+      bq.dataset,
+      Query.fromJSON(bq.query)
+    );
   }
 }
 export function boardQuery({ name, description, dataset, query }) {
-  return new BoardQuery(name, description, dataset, query);
+  return new BoardQuery(name, description, dataset, Query.fromJSON(query));
 }
 
 export class Board {
   constructor(name, description, queries, id) {
-    // validate here
     this.name = name;
     this.description = description;
     this.queries = queries;
     this.id = id;
+
+    this.validate();
+  }
+
+  validate() {
+    ifThrow(!this.name, "name must have at least one character");
+
+    if (this.queries) {
+      this.queries.forEach(bq => bq.validate());
+    }
   }
 
   static fromJSON(b) {
     return new Board(
       b.name,
       b.description,
-      (b.queries || []).map(q => Query.fromJSON(q)),
+      (b.queries || []).map(bq => BoardQuery.fromJSON(bq)),
       b.id
     );
   }
 }
 export function board({ name, description, queries }) {
-  return new Board(name, description, queries);
+  return new Board(
+    name,
+    description,
+    (queries || []).map(bq => BoardQuery.fromJSON(bq))
+  );
 }
-
-// example
-/*
-let b1 = board({
-  name: "Example Board",
-  description: "Just testing out the API",
-  queries: [
-    boardQuery({
-      name: "Example query",
-      description: "Query Description",
-      dataset: "My Service",
-      query: query({
-        breakdowns: ["col1", "col2"],
-        calculations: [
-          calculation.COUNT(),
-          calculation.P99("col1"),
-          calculation.P50("col2")
-        ],
-        orders: [order.P99("col1"), order.P50("col2").descending()]
-      })
-    })
-  ]
-});
-
-console.log(b1);
-*/

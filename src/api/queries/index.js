@@ -1,4 +1,6 @@
-export const validFilterOps = {
+import { ifThrow } from "../util";
+
+const validFilterOps = {
   "=": true,
   "!=": true,
   ">": true,
@@ -18,7 +20,7 @@ export const unaryFilterOps = {
   "does-not-exist": true
 };
 
-export const validAggregateOps = {
+export const validCalculateOps = {
   NONE: true,
   COUNT: true,
   SUM: true,
@@ -42,29 +44,43 @@ export const validAggregateOps = {
 
 export class Calculation {
   constructor(column, op) {
-    //validate here
     this.column = column;
     this.op = op;
     if (this.op === "COUNT") {
       this.column = "*";
     }
+    this.validate();
+  }
+
+  validate() {
+    // XXX(toshok) more here
+    ifThrow(!this.column, "column field is required");
+    ifThrow(!this.op, "op field is required");
+    ifThrow(!validCalculateOps[this.op], `unknown calculation op '${this.op}'`);
+  }
+
+  static fromJSON(c) {
+    return new Calculation(c.column, c.op);
   }
 }
 export function calculation({ column, op }) {
   return new Calculation(column, op);
 }
-Object.keys(validAggregateOps).forEach(op => {
+Object.keys(validCalculateOps).forEach(op => {
   calculation[op] = col => new Calculation(col, op);
 });
 
 export class Filter {
   constructor(column, op, value) {
-    // validate here
     this.column = column;
     this.op = op;
     this.value = value;
+    this.validate();
   }
 
+  validate() {
+    // XXX(toshok) more here
+  }
   static fromJSON(f) {
     return new Filter(f.column, f.op, f.value);
   }
@@ -75,15 +91,32 @@ export function filter({ column, op, value }) {
 
 export class Order {
   constructor(column, op, order = "ascending") {
-    // validate here
     this.column = column;
     this.op = op;
     this.order = order;
+
+    if (this.op === "COUNT") {
+      this.column = "*";
+    }
+
+    this.validate();
   }
+
+  validate() {
+    ifThrow(!this.column, "column field is required");
+    ifThrow(!this.op, "op field is required");
+    ifThrow(!validCalculateOps[this.op], `unknown order op '${this.op}'`);
+    ifThrow(
+      this.order !== "ascending" && this.order !== "descending",
+      `unknown order '${this.order}'`
+    );
+  }
+
   ascending() {
     this.order = "ascending";
     return this;
   }
+
   descending() {
     this.order = "descending";
     return this;
@@ -96,10 +129,7 @@ export class Order {
 export function order({ column, op, order }) {
   return new Order(column, op, order);
 }
-function orderOp(op) {
-  return;
-}
-Object.keys(validAggregateOps).forEach(op => {
+Object.keys(validCalculateOps).forEach(op => {
   order[op] = col => new Order(col, op);
 });
 
@@ -116,7 +146,6 @@ export class Query {
     timeRange,
     granularity
   ) {
-    // validate here
     this.breakdowns = breakdowns;
     this.calculations = calculations;
     this.filters = filters;
@@ -127,9 +156,18 @@ export class Query {
     this.endTime = endTime;
     this.timeRange = timeRange;
     this.granularity = granularity;
+
+    this.validate();
+  }
+
+  validate() {
+    // XXX(toshok) more here
   }
 
   static fromJSON(q) {
+    if (typeof q === "undefined") {
+      return q;
+    }
     return new Query(
       q.breakdowns || [],
       (q.calculations || []).map(c => Calculation.fromJSON(c)),
@@ -165,19 +203,3 @@ export function query({
     orders
   );
 }
-
-/*
-// examples:
-
-let q1 = query({
-  breakdowns: ["col1", "col2"],
-  calculations: [
-    calculation.COUNT(),
-    calculation.P99("col1"),
-    calculation.P50("col2")
-  ],
-  orders: [order.P99("col1"), order.P50("col2").descending()]
-});
-
-console.dir(q1);
-*/

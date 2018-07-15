@@ -10,6 +10,7 @@ export default class ResourceClient {
     resourceType,
     apiKey,
     disabled,
+    datasetScoped,
     userAgentAddition = ""
   ) {
     this.apiHost = apiHost;
@@ -17,6 +18,7 @@ export default class ResourceClient {
     this.resourceType = resourceType;
     this.apiKey = apiKey;
     this.disabled = disabled;
+    this.datasetScoped = datasetScoped;
 
     let userAgent = USER_AGENT;
     let trimmedAddition = userAgentAddition.trim();
@@ -26,15 +28,32 @@ export default class ResourceClient {
     this.userAgent = userAgent;
   }
 
-  newRequest(method, id = "") {
-    return superagent[method](urljoin(this.apiHost, this.resourceEndpoint, id))
+  newRequest(method, id = "", datasetName) {
+    let url;
+    if (this.datasetScoped) {
+      url = urljoin(this.apiHost, this.resourceEndpoint, datasetName, id);
+    } else {
+      url = urljoin(this.apiHost, this.resourceEndpoint, id);
+    }
+
+    return superagent[method](url)
       .set("X-Hny-Team", this.apiKey)
-      .set("User-Agent", this.userAgent);
+      .set("User-Agent", this.userAgent)
+      .type("json");
   }
-  create(resource) {
+  create(resource, datasetName) {
+    if (this.datasetScoped && !datasetName) {
+      throw new Error(
+        `a datasetName is required to create a ${this.resourceType.name}`
+      );
+    } else if (!this.datasetScoped && datasetName) {
+      throw new Error(
+        `a datasetName cannot be used to create a ${this.resourceType.name}`
+      );
+    }
+
     return new Promise((resolve, reject) => {
-      this.newRequest("post")
-        .type("json")
+      this.newRequest("post", undefined, datasetName)
         .send(resource)
         .end((err, res) => {
           // more here
@@ -42,13 +61,23 @@ export default class ResourceClient {
             reject(err);
             return;
           }
-          resolve(this.resourceType.fromJSON(res));
+          resolve(this.resourceType.fromJSON(res.body));
         });
     });
   }
-  get(id) {
+  get(id, datasetName) {
+    if (this.datasetScoped && !datasetName) {
+      throw new Error(
+        `a datasetName is required to fetch a ${this.resourceType.name}`
+      );
+    } else if (!this.datasetScoped && datasetName) {
+      throw new Error(
+        `a datasetName cannot be used to fetch a ${this.resourceType.name}`
+      );
+    }
+
     return new Promise((resolve, reject) => {
-      this.newRequest("get", id)
+      this.newRequest("get", id, datasetName)
         .send()
         .end((err, res) => {
           // more here
@@ -56,13 +85,23 @@ export default class ResourceClient {
             reject(err);
             return;
           }
-          resolve(this.resourceType.fromJSON(res));
+          resolve(this.resourceType.fromJSON(res.body));
         });
     });
   }
-  delete(id) {
+  delete(id, datasetName) {
+    if (this.datasetScoped && !datasetName) {
+      throw new Error(
+        `a datasetName is required to delete a ${this.resourceType.name}`
+      );
+    } else if (!this.datasetScoped && datasetName) {
+      throw new Error(
+        `a datasetName cannot be used to delete a ${this.resourceType.name}`
+      );
+    }
+
     return new Promise((resolve, reject) => {
-      this.newRequest("delete", id)
+      this.newRequest("delete", id, datasetName)
         .send()
         .end((err, res) => {
           // more here
@@ -74,10 +113,18 @@ export default class ResourceClient {
         });
     });
   }
-  update(resource) {
+  update(resource, datasetName) {
+    if (this.datasetScoped && !datasetName) {
+      throw new Error(
+        `a datasetName is required to update a ${this.resourceType.name}`
+      );
+    } else if (!this.datasetScoped && datasetName) {
+      throw new Error(
+        `a datasetName cannot be used to update a ${this.resourceType.name}`
+      );
+    }
     return new Promise((resolve, reject) => {
-      this.newRequest("put", resource.id)
-        .type("json")
+      this.newRequest("put", resource.id, datasetName)
         .send(resource)
         .end((err, res) => {
           // more here
@@ -85,14 +132,23 @@ export default class ResourceClient {
             reject(err);
             return;
           }
-          resolve(this.resourceType.fromJSON(res));
+          resolve(this.resourceType.fromJSON(res.body));
         });
     });
   }
-  list() {
+  list(datasetName) {
+    if (this.datasetScoped && !datasetName) {
+      throw new Error(
+        `a datasetName is required to list ${this.resourceType.name}s`
+      );
+    } else if (!this.datasetScoped && datasetName) {
+      throw new Error(
+        `a datasetName cannot be used to list ${this.resourceType.name}s`
+      );
+    }
+
     return new Promise((resolve, reject) => {
-      this.newRequest("get")
-        .type("json")
+      this.newRequest("get", undefined, datasetName)
         .send()
         .end((err, res) => {
           if (err) {
