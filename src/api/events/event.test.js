@@ -1,11 +1,11 @@
 /* global expect, describe, it */
-import libhoney from "./libhoney";
+import libhoney from "../../libhoney";
 
 describe("libhoney events", function() {
-  let hny = new libhoney();
+  let hnyevents = new libhoney().events;
 
   it("inherit fields and dyn_fields from builder", function() {
-    let b = hny.newBuilder(
+    let b = hnyevents.newBuilder(
       { a: 5 },
       {
         b: function() {
@@ -22,7 +22,7 @@ describe("libhoney events", function() {
   });
 
   it("accepts dict-like arguments to .add()", function() {
-    let b = hny.newBuilder();
+    let b = hnyevents.newBuilder();
     let ev = b.newEvent();
 
     ev.add({ a: 5 });
@@ -40,7 +40,7 @@ describe("libhoney events", function() {
   });
 
   it("it toString()'s keys from Maps in .add()", function() {
-    let b = hny.newBuilder();
+    let b = hnyevents.newBuilder();
     let ev = b.newEvent();
 
     let map = new Map();
@@ -60,7 +60,7 @@ describe("libhoney events", function() {
   });
 
   it("doesn't stringify object values", function() {
-    let ev = hny.newEvent();
+    let ev = hnyevents.newEvent();
     let data = { c: { a: 1 } };
 
     ev.add(data);
@@ -69,7 +69,7 @@ describe("libhoney events", function() {
   });
 
   it("converts all values to primitive types in .add/.addField", function() {
-    let b = hny.newBuilder();
+    let b = hnyevents.newBuilder();
     let ev;
     let map;
 

@@ -1,11 +1,11 @@
 /* global expect, describe, it */
-import libhoney from "./libhoney";
+import libhoney from "../../libhoney";
 
 describe("libhoney builder", function() {
-  let hny = new libhoney();
+  let hnyevents = new libhoney().events;
 
   it("takes fields and dynamic fields in ctor", function() {
-    let b = hny.newBuilder(
+    let b = hnyevents.newBuilder(
       { a: 5 },
       {
         b: function() {
@@ -20,7 +20,7 @@ describe("libhoney builder", function() {
       b: expect.any(Function)
     });
 
-    b = hny.newBuilder();
+    b = hnyevents.newBuilder();
     expect(Object.getOwnPropertyNames(b._fields)).toEqual([]);
     expect(Object.getOwnPropertyNames(b._dyn_fields)).toEqual([]);
   });
@@ -29,7 +29,7 @@ describe("libhoney builder", function() {
     let b;
     let ev;
 
-    b = hny.newBuilder();
+    b = hnyevents.newBuilder();
     b.add({ a: 5 });
     ev = b.newEvent();
     expect(ev.data).toMatchObject({
@@ -38,7 +38,7 @@ describe("libhoney builder", function() {
 
     let map = new Map();
     map.set("a", 5);
-    b = hny.newBuilder();
+    b = hnyevents.newBuilder();
     b.add(map);
     ev = b.newEvent();
     expect(ev.data).toMatchObject({
@@ -47,17 +47,17 @@ describe("libhoney builder", function() {
   });
 
   it("doesn't stringify object values", function() {
-    let honey = new libhoney({
+    let hnyevents = new libhoney({
       apiHost: "http://foo/bar",
       apiKey: "12345",
       dataset: "testing",
       transmission: "mock"
-    });
-    let transmission = honey.transmission;
+    }).events;
+    let transmission = hnyevents.transmission;
 
     let postData = { a: { b: 1 }, c: { d: 2 } };
 
-    let builder = honey.newBuilder({ a: { b: 1 } });
+    let builder = hnyevents.newBuilder({ a: { b: 1 } });
 
     builder.sendNow({ c: { d: 2 } });
 
@@ -69,20 +69,20 @@ describe("libhoney builder", function() {
   });
 
   it("includes snapshot of global fields/dyn_fields", function() {
-    let honey = new libhoney({
+    let hnyevents = new libhoney({
       apiHost: "http://foo/bar",
       apiKey: "12345",
       dataset: "testing",
       transmission: "mock"
-    });
-    let transmission = honey.transmission;
+    }).events;
+    let transmission = hnyevents.transmission;
 
     let postData = { b: 2, c: 3 };
 
-    let builder = honey.newBuilder({ b: 2 });
+    let builder = hnyevents.newBuilder({ b: 2 });
 
     // add a global field *after* creating the builder.  it shouldn't show up in the post data
-    honey.addField("a", 1);
+    hnyevents.addField("a", 1);
 
     builder.sendNow({ c: 3 });
 
@@ -95,7 +95,7 @@ describe("libhoney builder", function() {
     // but if we create another builder, it should show up in the post data.
     let postData2 = { a: 1, b: 2, c: 3 };
 
-    builder = honey.newBuilder({ b: 2 });
+    builder = hnyevents.newBuilder({ b: 2 });
 
     builder.sendNow({ c: 3 });
 

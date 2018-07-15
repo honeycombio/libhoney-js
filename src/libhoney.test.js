@@ -6,14 +6,14 @@ let mock = require("superagent-mocker")(superagent);
 
 describe("libhoney", function() {
   describe("constructor options", function() {
-    it("should be communicated to transmission constructor", function() {
+    it("should be communicated to event transmission constructor", function() {
       let options = { a: 1, b: 2, c: 3, d: 4 };
 
       let honey = new libhoney(
         Object.assign({}, options, { transmission: "mock" })
       );
 
-      let transmission = honey.transmission;
+      let transmission = honey.events.transmission;
 
       expect(transmission.constructorArg).toMatchObject(options);
     });
@@ -27,9 +27,9 @@ describe("libhoney", function() {
         dataset: "testing",
         transmission: "mock"
       });
-      let transmission = honey.transmission;
+      let transmission = honey.events.transmission;
       let postData = { a: 1, b: 2 };
-      honey.sendNow(postData);
+      honey.events.sendNow(postData);
 
       expect(transmission.events).toMatchObject([
         {
@@ -50,9 +50,9 @@ describe("libhoney", function() {
         dataset: "testing",
         transmission: "mock"
       });
-      let transmission = honey.transmission;
+      let transmission = honey.events.transmission;
       let postData = { a: 1, b: 2 };
-      honey.sendNow(postData);
+      honey.events.sendNow(postData);
 
       expect(transmission.events).toMatchObject([
         {
@@ -83,7 +83,7 @@ describe("libhoney", function() {
       });
 
       // we send queueSize+1 events, so we should see two response events with queueSize as the length
-      honey.on("response", queue => {
+      honey.events.on("response", queue => {
         if (queue.length !== queueSize) {
           return;
         }
@@ -98,7 +98,7 @@ describe("libhoney", function() {
       });
 
       for (let i = 0; i < queueSize + 1; i++) {
-        let ev = honey.newEvent();
+        let ev = honey.events.newEvent();
         ev.add({ a: 1, b: 2 });
         ev.addMetadata(i);
         ev.send();
@@ -115,7 +115,7 @@ describe("libhoney", function() {
         transmission: "mock",
         disabled: true
       });
-      let transmission = honey.transmission;
+      let transmission = honey.events.transmission;
 
       expect(transmission).toBeNull();
     });
