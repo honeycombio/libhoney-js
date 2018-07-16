@@ -4,7 +4,7 @@ const process = require("process");
 
 const honey = new Libhoney({
   apiHost: process.env.HONEYCOMB_API_HOST,
-  apiKey: process.env.HONEYCOMB_WRITEKEY
+  apiKey: process.env.HONEYCOMB_API_KEY
 });
 
 honey.boards
