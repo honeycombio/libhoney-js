@@ -38,7 +38,7 @@
     "superagent-mocker": "^0.5.2"
   },
   "dependencies": {
-    "superagent": "^2.3.0",
+    "superagent": "^3.7.0",
     "urljoin": "^0.1.5"
   }
 }
