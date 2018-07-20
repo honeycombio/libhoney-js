@@ -8,6 +8,7 @@
  */
 import BoardsClient from "./api/boards/client";
 import EventsClient from "./api/events/client";
+import MarkersClient from "./api/markers/client";
 import TriggersClient from "./api/triggers/client";
 
 const defaults = Object.freeze({
@@ -82,13 +83,6 @@ export default class Libhoney {
    */
   constructor(opts) {
     this._options = Object.assign({}, defaults, opts);
-
-    this._apiHost = this._options.apiHost;
-    this._apiKey = this._options.apiKey;
-
-    this.events = new EventsClient(this._options);
-    this.boards = new BoardsClient(this._options);
-    this.triggers = new TriggersClient(this._options);
   }
 
   /**
@@ -98,11 +92,21 @@ export default class Libhoney {
    * @type {string}
    */
   set apiHost(v) {
-    this._apiHost = v;
+    this._options.apiHost = v;
+
     // update all the clients
-    this.event.apiHost = v;
-    this.boards.apiHost = v;
-    this.triggers.apiHost = v;
+    if (this._boards) {
+      this._boards.apiHost = v;
+    }
+    if (this._events) {
+      this._events.apiHost = v;
+    }
+    if (this._markers) {
+      this._markers.apiHost = v;
+    }
+    if (this._triggers) {
+      this._triggers.apiHost = v;
+    }
   }
   /**
    * The hostname for the Honeycomb API server to which to send events created through this libhoney
@@ -111,7 +115,7 @@ export default class Libhoney {
    * @type {string}
    */
   get apiHost() {
-    return this._apiHost;
+    return this._options.apiHost;
   }
 
   /**
@@ -122,11 +126,21 @@ export default class Libhoney {
    * @type {string}
    */
   set apiKey(v) {
-    this.apiKey = v;
+    this._options.apiKey = v;
+
     // update all the clients
-    this.event.apiKey = v;
-    this.boards.apiKey = v;
-    this.triggers.apiKey = v;
+    if (this._boards) {
+      this._boards.apiKey = v;
+    }
+    if (this._events) {
+      this._events.apiKey = v;
+    }
+    if (this._markers) {
+      this._markers.apiKey = v;
+    }
+    if (this._triggers) {
+      this._triggers.apiKey = v;
+    }
   }
 
   /**
@@ -137,7 +151,35 @@ export default class Libhoney {
    * @type {string}
    */
   get apiKey() {
-    return this._apiKey;
+    return this.options._apiKey;
+  }
+
+  get boards() {
+    if (!this._boards) {
+      this._boards = new BoardsClient(this._options);
+    }
+    return this._boards;
+  }
+
+  get events() {
+    if (!this._events) {
+      this._events = new EventsClient(this._options);
+    }
+    return this._events;
+  }
+
+  get markers() {
+    if (!this._markers) {
+      this._markers = new MarkersClient(this._options);
+    }
+    return this._markers;
+  }
+
+  get triggers() {
+    if (!this._triggers) {
+      this._triggers = new TriggersClient(this._options);
+    }
+    return this._triggers;
   }
 }
 
