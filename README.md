@@ -6,8 +6,13 @@ A node (>=4) module for interacting with [Honeycomb](https://honeycomb.io). (For
 
 ## Installation
 
+### npm
 ```
 npm install libhoney --save
+```
+### yarn
+```
+yarn add libhoney
 ```
 
 ## Documentation
