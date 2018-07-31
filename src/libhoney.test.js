@@ -68,7 +68,7 @@ describe("libhoney", function() {
   describe("response queue", function() {
     it("should enqueue a maximum of maxResponseQueueSize, dropping new responses (not old)", function(done) {
       mock.post("http://localhost:9999/1/events/testResponseQueue", function(
-        req
+        _req
       ) {
         return {};
       });

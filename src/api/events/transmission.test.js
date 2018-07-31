@@ -88,7 +88,7 @@ describe("base transmission", function() {
 
     let transmission = new Transmission({
       batchTimeTrigger: 0,
-      responseCallback: function(resp) {
+      responseCallback: function(_resp) {
         expect(endpointHit).toBeTruthy();
         done();
       }
@@ -109,7 +109,7 @@ describe("base transmission", function() {
   it("should eventually send a single event (after the timeout)", function(done) {
     let transmission = new Transmission({
       batchTimeTrigger: 10,
-      responseCallback: function(resp) {
+      responseCallback: function(_resp) {
         done();
       }
     });
@@ -129,7 +129,7 @@ describe("base transmission", function() {
   it("should respect sample rate and accept the event", function(done) {
     let transmission = new Transmission({
       batchTimeTrigger: 10,
-      responseCallback: function(resp) {
+      responseCallback: function(_resp) {
         done();
       }
     });
@@ -278,7 +278,9 @@ describe("base transmission", function() {
     let responseCount = 0;
     let responseExpected = 10;
 
-    mock.post("http://localhost:9999/1/batch/test-transmission", function(req) {
+    mock.post("http://localhost:9999/1/batch/test-transmission", function(
+      _req
+    ) {
       return {
         status: 404
       };
@@ -410,7 +412,7 @@ describe("base transmission", function() {
     let transmission = new Transmission({
       responseCallback(queue) {
         let responses = queue.splice(0, queue.length);
-        responses.forEach(resp => {
+        responses.forEach(_resp => {
           responseCount++;
           if (responseCount == responseExpected) {
             done();

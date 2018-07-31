@@ -1,5 +1,6 @@
 import { ifThrow } from "../util";
 
+/* notyet
 const validFilterOps = {
   "=": true,
   "!=": true,
@@ -14,6 +15,7 @@ const validFilterOps = {
   contains: true,
   "does-not-contain": true
 };
+*/
 
 export const unaryFilterOps = {
   exists: true,
