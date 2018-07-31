@@ -49,5 +49,8 @@
   "dependencies": {
     "superagent": "^3.8.3",
     "urljoin": "^0.1.5"
+  },
+  "jest": {
+    "testEnvironment": "node"
   }
 }
