@@ -1,4 +1,4 @@
-/* global describe, it */
+/* eslint-env node, jest */
 import assert from "assert";
 import libhoney from "../libhoney";
 

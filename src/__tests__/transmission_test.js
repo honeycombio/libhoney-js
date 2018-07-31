@@ -1,5 +1,4 @@
-// jshint esversion: 6
-/* global require, describe, it */
+/* eslint-env node, jest */
 import assert from "assert";
 import { Transmission, ValidatedEvent } from "../transmission";
 
