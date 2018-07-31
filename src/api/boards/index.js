@@ -46,7 +46,7 @@ export class Board {
   }
 
   validate() {
-    ifThrow(!this.name, "name must have at least one character");
+    //    ifThrow(!this.name, "name must have at least one character");
 
     if (this.queries) {
       this.queries.forEach(bq => bq.validate());

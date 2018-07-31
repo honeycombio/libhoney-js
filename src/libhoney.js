@@ -2,7 +2,6 @@
 // Use of this source code is governed by the Apache License 2.0
 // license that can be found in the LICENSE file.
 
-// jshint esversion: 6
 /**
  * @module
  */
@@ -64,14 +63,15 @@ export default class Libhoney {
    * @param {Object} [opts] overrides for the defaults
    * @param {string} [opts.apiHost=https://api.honeycomb.io] - Server host to receive Honeycomb events.
    * @param {string} opts.apiKey - API key for your Honeycomb team. (Required)
-   * @param {string} opts.dataset - Name of the dataset that should contain this event. The dataset will be created for your team if it doesn't already exist.
+   * @param {string} opts.writeKey - (deprecated) API key for your Honeycomb team.
+   * @param {string} opts.dataset - For dataset scoped clients (events, markers), the name of the dataset that should contain the resource.  If sending events, the dataset will be created if not present.
    * @param {number} [opts.sampleRate=1] - Sample rate of data. If set, causes us to send 1/sampleRate of events and drop the rest.
    * @param {number} [opts.batchSizeTrigger=50] - We send a batch to the API when this many outstanding events exist in our event queue.
    * @param {number} [opts.batchTimeTrigger=100] - We send a batch to the API after this many milliseconds have passed.
    * @param {number} [opts.maxConcurrentBatches=10] - We process batches concurrently to increase parallelism while sending.
    * @param {number} [opts.pendingWorkCapacity=10000] - The maximum number of pending events we allow to accumulate in our sending queue before dropping them.
    * @param {number} [opts.maxResponseQueueSize=1000] - The maximum number of responses we enqueue before dropping them.
-   * @param {boolean} [opts.disabled=false] - Disable transmission of events to the specified `apiHost`, particularly useful for testing or development.
+   * @param {boolean} [opts.disabled=false] - Disable communication to the specified `apiHost`, particularly useful for testing or development.
    * @constructor
    * @example
    * import Libhoney from 'libhoney';
@@ -83,6 +83,11 @@ export default class Libhoney {
    */
   constructor(opts) {
     this._options = Object.assign({}, defaults, opts);
+
+    if (this._options.writeKey && typeof this._options.apiKey === "undefined") {
+      // fall back to writeKey if apiKey isn't present
+      this._options.apiKey = this._options.writeKey;
+    }
   }
 
   /**
@@ -181,6 +186,182 @@ export default class Libhoney {
     }
     return this._triggers;
   }
+
+  // deprecated writeKey accessors.  will go away with the next major version bump
+  set writeKey(v) {
+    this.apiKey = v;
+  }
+
+  get writeKey() {
+    return this.apiKey;
+  }
+
+  // proxies for the events client.  these _may_ go away in a future major release.
+  /**
+   * The rate at which to sample events. Default is 1, meaning no sampling. If you want to send one
+   * event out of every 250 times send() is called, you would specify 250 here.
+   *
+   * @type {number}
+   */
+  set sampleRate(v) {
+    this.events.sampleRate = v;
+  }
+  /**
+   * The rate at which to sample events. Default is 1, meaning no sampling. If you want to send one
+   * event out of every 250 times send() is called, you would specify 250 here.
+   *
+   * @type {number}
+   */
+  get sampleRate() {
+    return this.events.sampleRate;
+  }
+
+  /**
+   *  sendEvent takes events of the following form:
+   *
+   * {
+   *   data: a JSON-serializable object, keys become colums in Honeycomb
+   *   timestamp [optional]: time for this event, defaults to now()
+   *   writeKey [optional]: your team's write key.  overrides the libhoney instance's value.
+   *   dataset [optional]: the data set name.  overrides the libhoney instance's value.
+   *   sampleRate [optional]: cause us to send 1 out of sampleRate events.  overrides the libhoney instance's value.
+   * }
+   *
+   * Sampling is done based on the supplied sampleRate, so events passed to this method might not
+   * actually be sent to Honeycomb.
+   * @private
+   */
+  sendEvent(event) {
+    return this.events.sendEvent(event);
+  }
+
+  /**
+   *  sendPresampledEvent takes events of the following form:
+   *
+   * {
+   *   data: a JSON-serializable object, keys become colums in Honeycomb
+   *   timestamp [optional]: time for this event, defaults to now()
+   *   writeKey [optional]: your team's write key.  overrides the libhoney instance's value.
+   *   dataset [optional]: the data set name.  overrides the libhoney instance's value.
+   *   sampleRate: the rate this event has already been sampled.
+   * }
+   *
+   * Sampling is presumed to have already been done (at the supplied sampledRate), so all events passed to this method
+   * are sent to Honeycomb.
+   * @private
+   */
+  sendPresampledEvent(event) {
+    return this.events.sendPresampledEvent(event);
+  }
+
+  /**
+   * validateEvent takes an event and validates its structure and contents.
+   *
+   * @returns {Object} the validated libhoney Event. May return undefined if
+   *                   the event was invalid in some way or unable to be sent.
+   * @private
+   */
+  validateEvent(event) {
+    return this.events.validateEvent(event);
+  }
+
+  /**
+   * adds a group of field->values to the global Builder.
+   * @param {Object|Map<string, any>} data field->value mapping.
+   * @returns {Libhoney} this libhoney instance.
+   * @example <caption>using an object</caption>
+   *   honey.add ({
+   *     buildID: "a6cc38a1",
+   *     env: "staging"
+   *   });
+   * @example <caption>using an ES2015 map</caption>
+   *   let map = new Map();
+   *   map.set("build_id", "a6cc38a1");
+   *   map.set("env", "staging");
+   *   honey.add (map);
+   */
+  add(data) {
+    return this.events.add(data);
+  }
+
+  /**
+   * adds a single field->value mapping to the global Builder.
+   * @param {string} name name of field to add.
+   * @param {any} val value of field to add.
+   * @returns {Libhoney} this libhoney instance.
+   * @example
+   *   honey.addField("build_id", "a6cc38a1");
+   */
+  addField(name, val) {
+    return this.events.addField(name, val);
+  }
+
+  /**
+   * adds a single field->dynamic value function to the global Builder.
+   * @param {string} name name of field to add.
+   * @param {function(): any} fn function that will be called to generate the value whenever an event is created.
+   * @returns {Libhoney} this libhoney instance.
+   * @example
+   *   honey.addDynamicField("process_heapUsed", () => process.memoryUsage().heapUsed);
+   */
+  addDynamicField(name, fn) {
+    return this.events.addDynamicField(name, fn);
+  }
+
+  /**
+   * creates and sends an event, including all global builder fields/dyn_fields, as well as anything in the optional data parameter.
+   * @param {Object|Map<string, any>} data field->value mapping.
+   * @example <caption>using an object</caption>
+   *   honey.sendNow ({
+   *     responseTime_ms: 100,
+   *     httpStatusCode: 200
+   *   });
+   * @example <caption>using an ES2015 map</caption>
+   *   let map = new Map();
+   *   map.set("responseTime_ms", 100);
+   *   map.set("httpStatusCode", 200);
+   *   honey.sendNow (map);
+   */
+  sendNow(data) {
+    return this.events.sendNow(data);
+  }
+  /**
+   * creates and returns a new Event containing all fields/dyn_fields from the global Builder, that can be further fleshed out and sent on its own.
+   * @returns {Event} an Event instance
+   * @example <caption>adding data at send-time</caption>
+   *   let ev = honey.newEvent();
+   *   ev.addField("additionalField", value);
+   *   ev.send();
+   */
+  newEvent() {
+    return this.events.newEvent();
+  }
+
+  /**
+   * creates and returns a clone of the global Builder, merged with fields and dyn_fields passed as arguments.
+   * @param {Object|Map<string, any>} fields a field->value mapping to merge into the new builder.
+   * @param {Object|Map<string, any>} dyn_fields a field->dynamic function mapping to merge into the new builder.
+   * @returns {Builder} a Builder instance
+   * @example <caption>no additional fields/dyn_field</caption>
+   *   let builder = honey.newBuilder();
+   * @example <caption>additional fields/dyn_field</caption>
+   *   let builder = honey.newBuilder({ requestId },
+   *                                  {
+   *                                    process_heapUsed: () => process.memoryUsage().heapUsed
+   *                                  });
+   */
+  newBuilder(fields, dyn_fields) {
+    return this.events.newBuilder(fields, dyn_fields);
+  }
+}
+
+// this will absolutely go away with the next major version bump.  right now in normal node (CJS) usage,
+// users have to do:  `let Libhoney = require("libhoney").default;`
+//
+// switching to rollup fixes that (yay!) but we need to keep it working until  we do the major bump.  hence
+// this hack.
+if (typeof module !== "undefined") {
+  Object.defineProperty(Libhoney, "default", { value: Libhoney });
 }
 
 // this will absolutely go away with the next major version bump.  right now in normal node (CJS) usage,

@@ -104,8 +104,11 @@ export class Order {
 
   validate() {
     ifThrow(!this.column, "column field is required");
-    ifThrow(!this.op, "op field is required");
-    ifThrow(!validCalculateOps[this.op], `unknown order op '${this.op}'`);
+    //ifThrow(!this.op, "op field is required");
+    ifThrow(
+      this.op && !validCalculateOps[this.op],
+      `unknown order op '${this.op}'`
+    );
     ifThrow(
       this.order !== "ascending" && this.order !== "descending",
       `unknown order '${this.order}'`
