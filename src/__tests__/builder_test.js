@@ -1,12 +1,19 @@
 /* global describe, it */
-import assert from 'assert';
-import libhoney from '../lib/libhoney';
+import assert from "assert";
+import libhoney from "../libhoney";
 
-describe('libhoney builder', function() {
+describe("libhoney builder", function() {
   var hny = new libhoney();
 
   it("takes fields and dynamic fields in ctor", function() {
-    var b = hny.newBuilder({a : 5}, {b: function() { return 3; }});
+    var b = hny.newBuilder(
+      { a: 5 },
+      {
+        b: function() {
+          return 3;
+        }
+      }
+    );
     assert.equal(5, b._fields.a);
     assert.equal(undefined, b._fields.b);
     b = hny.newBuilder();
@@ -42,7 +49,7 @@ describe('libhoney builder', function() {
 
     var postData = { a: { b: 1 }, c: { d: 2 } };
 
-    var builder = honey.newBuilder({a: { b : 1 }});
+    var builder = honey.newBuilder({ a: { b: 1 } });
 
     builder.sendNow({ c: { d: 2 } });
 
@@ -59,24 +66,24 @@ describe('libhoney builder', function() {
     });
     var transmission = honey.transmission;
 
-    var postData = { b : 2, c : 3 };
+    var postData = { b: 2, c: 3 };
 
-    var builder = honey.newBuilder({ "b": 2 });
+    var builder = honey.newBuilder({ b: 2 });
 
     // add a global field *after* creating the builder.  it shouldn't show up in the post data
     honey.addField("a", 1);
 
-    builder.sendNow({ c : 3 });
+    builder.sendNow({ c: 3 });
 
     assert.equal(transmission.events.length, 1);
     assert.equal(transmission.events[0].postData, JSON.stringify(postData));
 
     // but if we create another builder, it should show up in the post data.
-    postData = { a : 1, b : 2, c : 3 };
+    postData = { a: 1, b: 2, c: 3 };
 
-    builder = honey.newBuilder({ "b": 2 });
+    builder = honey.newBuilder({ b: 2 });
 
-    builder.sendNow({ c : 3 });
+    builder.sendNow({ c: 3 });
 
     assert.equal(transmission.events.length, 2);
     assert.equal(transmission.events[1].postData, JSON.stringify(postData));

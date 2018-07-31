@@ -2,22 +2,25 @@
 // Use of this source code is governed by the Apache License 2.0
 // license that can be found in the LICENSE file.
 
-// jshint esversion: 6
-/* global require, window, global */
+/* global window, global */
 
 /**
  * @module
  */
-import superagent from 'superagent';
-import urljoin from 'urljoin';
+import superagent from "superagent";
+import urljoin from "urljoin";
 
-const USER_AGENT = "libhoney-js/LIBHONEY_JS_VERSION";
+const USER_AGENT = "libhoney-js/<@LIBHONEY_JS_VERSION@>";
 
-const _global = (typeof window !== "undefined" ? window :
-                 typeof global !== "undefined" ? global : undefined);
+const _global =
+  typeof window !== "undefined"
+    ? window
+    : typeof global !== "undefined"
+      ? global
+      : undefined;
 
 // how many events to collect in a batch
-const batchSizeTrigger = 50;  // either when the eventQueue is > this length
+const batchSizeTrigger = 50; // either when the eventQueue is > this length
 const batchTimeTrigger = 100; // or it's been more than this many ms since the first push
 
 // how many batches to maintain in parallel
@@ -26,18 +29,18 @@ const maxConcurrentBatches = 10;
 // how many events to queue up for busy batches before we start dropping
 const pendingWorkCapacity = 10000;
 
-const emptyResponseCallback = function() { };
+const emptyResponseCallback = function() {};
 
 const eachPromise = (arr, iteratorFn) =>
-    arr.reduce(function(p, item) {
-        return p.then(function() {
-            return iteratorFn(item);
-        });
-    }, Promise.resolve());
+  arr.reduce(function(p, item) {
+    return p.then(function() {
+      return iteratorFn(item);
+    });
+  }, Promise.resolve());
 
 const partition = (arr, keyfn, createfn, addfn) => {
   let result = Object.create(null);
-  arr.forEach((v) => {
+  arr.forEach(v => {
     let key = keyfn(v);
     if (!result[key]) {
       result[key] = createfn(v);
@@ -50,21 +53,23 @@ const partition = (arr, keyfn, createfn, addfn) => {
 
 class BatchEndpointAggregator {
   constructor(events) {
-    this.batches = partition(events,
-                             /* keyfn */
-                             (ev) => `${ev.apiHost}_${ev.writeKey}_${ev.dataset}`,
-                             /* createfn */
-                             (ev) => ({
-                               apiHost: ev.apiHost,
-                               writeKey: ev.writeKey,
-                               dataset: ev.dataset,
-                               events: [ev]
-                             }),
-                             /* addfn */
-                             (batch, ev) => batch.events.push(ev));
+    this.batches = partition(
+      events,
+      /* keyfn */
+      ev => `${ev.apiHost}_${ev.writeKey}_${ev.dataset}`,
+      /* createfn */
+      ev => ({
+        apiHost: ev.apiHost,
+        writeKey: ev.writeKey,
+        dataset: ev.dataset,
+        events: [ev]
+      }),
+      /* addfn */
+      (batch, ev) => batch.events.push(ev)
+    );
   }
 
-  encodeBatchEvents (events) {
+  encodeBatchEvents(events) {
     let first = true;
     let numEncoded = 0;
     let encodedEvents = events.reduce((acc, ev) => {
@@ -89,20 +94,22 @@ class BatchEndpointAggregator {
  * @private
  */
 export class ValidatedEvent {
-  constructor({ timestamp,
-                apiHost,
-                postData,
-                writeKey,
-                dataset,
-                sampleRate,
-                metadata }) {
-    this.timestamp  = timestamp;
-    this.apiHost    = apiHost;
-    this.postData   = postData;
-    this.writeKey   = writeKey;
-    this.dataset    = dataset;
+  constructor({
+    timestamp,
+    apiHost,
+    postData,
+    writeKey,
+    dataset,
+    sampleRate,
+    metadata
+  }) {
+    this.timestamp = timestamp;
+    this.apiHost = apiHost;
+    this.postData = postData;
+    this.writeKey = writeKey;
+    this.dataset = dataset;
     this.sampleRate = sampleRate;
-    this.metadata   = metadata;
+    this.metadata = metadata;
   }
 
   toJSON() {
@@ -126,11 +133,11 @@ export class MockTransmission {
     this.events = [];
   }
 
-  sendEvent (ev) {
+  sendEvent(ev) {
     this.events.push(ev);
   }
 
-  sendPresampledEvent (ev) {
+  sendPresampledEvent(ev) {
     this.events.push(ev);
   }
 
@@ -138,32 +145,29 @@ export class MockTransmission {
     this.constructorArg = null;
     this.events = [];
   }
-};
+}
 
 export class WriterTransmission {
-  sendEvent (ev) {
+  sendEvent(ev) {
     console.log(JSON.stringify(ev));
   }
 
-  sendPresampledEvent (ev) {
+  sendPresampledEvent(ev) {
     console.log(JSON.stringify(ev));
   }
 }
 
 export class NullTransmission {
-  sendEvent (ev) {
-  }
+  sendEvent(_ev) {}
 
-  sendPresampledEvent (ev) {
-  }
+  sendPresampledEvent(_ev) {}
 }
 
 /**
  * @private
  */
 export class Transmission {
-
-  constructor (options) {
+  constructor(options) {
     this._responseCallback = emptyResponseCallback;
     this._batchSizeTrigger = batchSizeTrigger;
     this._batchTimeTrigger = batchTimeTrigger;
@@ -172,7 +176,7 @@ export class Transmission {
     this._sendTimeoutId = -1;
     this._eventQueue = [];
     this._batchCount = 0;
-    
+
     if (typeof options.responseCallback == "function") {
       this._responseCallback = options.responseCallback;
     }
@@ -197,13 +201,15 @@ export class Transmission {
   }
 
   _droppedCallback(ev, reason) {
-    this._responseCallback([{
-      metadata: ev.metadata,
-      error: new Error(reason)
-    }]);
+    this._responseCallback([
+      {
+        metadata: ev.metadata,
+        error: new Error(reason)
+      }
+    ]);
   }
-  
-  sendEvent (ev) {
+
+  sendEvent(ev) {
     // bail early if we aren't sampling this event
     if (!this._shouldSendEvent(ev)) {
       this._droppedCallback(ev, "event dropped due to sampling");
@@ -213,9 +219,9 @@ export class Transmission {
     this.sendPresampledEvent(ev);
   }
 
-  sendPresampledEvent (ev) {
+  sendPresampledEvent(ev) {
     if (this._eventQueue.length >= this._pendingWorkCapacity) {
-			this._droppedCallback(ev, "queue overflow");
+      this._droppedCallback(ev, "queue overflow");
       return;
     }
     this._eventQueue.push(ev);
@@ -226,7 +232,7 @@ export class Transmission {
     }
   }
 
-  _sendBatch () {
+  _sendBatch() {
     if (this._batchCount == maxConcurrentBatches) {
       // don't start up another concurrent batch.  the next timeout/sendEvent or batch completion
       // will cause us to send another
@@ -254,20 +260,21 @@ export class Transmission {
       }
     };
 
-    let batches = Object.keys(batchAgg.batches).map((k) => batchAgg.batches[k]);
-    eachPromise(batches, (batch) => {
+    let batches = Object.keys(batchAgg.batches).map(k => batchAgg.batches[k]);
+    eachPromise(batches, batch => {
       var url = urljoin(batch.apiHost, "/1/batch", batch.dataset);
       var req = superagent.post(url);
 
       let { encoded, numEncoded } = batchAgg.encodeBatchEvents(batch.events);
-      return new Promise( (resolve) => {
-
+      return new Promise(resolve => {
         // if we failed to encode any of the events, no point in sending anything to honeycomb
         if (numEncoded === 0) {
-          this._responseCallback(batch.events.map((ev) => ({
-            metadata: ev.metadata,
-            error: ev.encodeError
-          })));
+          this._responseCallback(
+            batch.events.map(ev => ({
+              metadata: ev.metadata,
+              error: ev.encodeError
+            }))
+          );
           resolve();
           return;
         }
@@ -280,65 +287,73 @@ export class Transmission {
 
         var start = Date.now();
         req
-          .set('X-Hny-Team', batch.writeKey)
-          .set('User-Agent', userAgent)
+          .set("X-Hny-Team", batch.writeKey)
+          .set("User-Agent", userAgent)
           .type("json")
           .send(encoded)
           .end((err, res) => {
             let end = Date.now();
 
             if (err) {
-              this._responseCallback(batch.events.map((ev) => ({
-                status_code: ev.encodeError ? undefined : err.status,
-                duration: end - start,
-                metadata: ev.metadata,
-                error: ev.encodeError || err
-              })));
+              this._responseCallback(
+                batch.events.map(ev => ({
+                  status_code: ev.encodeError ? undefined : err.status,
+                  duration: end - start,
+                  metadata: ev.metadata,
+                  error: ev.encodeError || err
+                }))
+              );
             } else {
               let response = JSON.parse(res.text);
               let respIdx = 0;
-              this._responseCallback(batch.events.map((ev) => {
-                if (ev.encodeError) {
-                  return {
-                    duration: end - start,
-                    metadata: ev.metadata,
-                    error: ev.encodeError
-                  };
-                } else {
-                  let res = response[respIdx++];
-                  return {
-                    status_code: res.status,
-                    duration: end - start,
-                    metadata: ev.metadata,
-                    error: res.err
-                  };
-                }
-              }));
+              this._responseCallback(
+                batch.events.map(ev => {
+                  if (ev.encodeError) {
+                    return {
+                      duration: end - start,
+                      metadata: ev.metadata,
+                      error: ev.encodeError
+                    };
+                  } else {
+                    let res = response[respIdx++];
+                    return {
+                      status_code: res.status,
+                      duration: end - start,
+                      metadata: ev.metadata,
+                      error: res.err
+                    };
+                  }
+                })
+              );
             }
             // we resolve unconditionally to continue the iteration in eachSeries.  errors will cause
             // the event to be re-enqueued/dropped.
             resolve();
           });
       });
-    }).then(finishBatch)
+    })
+      .then(finishBatch)
       .catch(finishBatch);
   }
 
-  _shouldSendEvent (ev) {
+  _shouldSendEvent(ev) {
     var { sampleRate } = ev;
     if (sampleRate <= 1) {
       return true;
     }
-    return (this._randomFn() < 1/sampleRate);
+    return this._randomFn() < 1 / sampleRate;
   }
 
-  _ensureSendTimeout () {
+  _ensureSendTimeout() {
     if (this._sendTimeoutId === -1) {
-      this._sendTimeoutId = _global.setTimeout(() => this._sendBatch(), this._batchTimeTrigger);
+      this._sendTimeoutId = _global.setTimeout(
+        () => this._sendBatch(),
+        this._batchTimeTrigger
+      );
     }
   }
 
-  _clearSendTimeout () {
+  _clearSendTimeout() {
     if (this._sendTimeoutId !== -1) {
       _global.clearTimeout(this._sendTimeoutId);
       this._sendTimeoutId = -1;

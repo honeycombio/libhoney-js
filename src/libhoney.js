@@ -6,10 +6,16 @@
 /**
  * @module
  */
-import { Transmission, MockTransmission, WriterTransmission, NullTransmission, ValidatedEvent } from './transmission';
-import Builder from './builder';
+import {
+  Transmission,
+  MockTransmission,
+  WriterTransmission,
+  NullTransmission,
+  ValidatedEvent
+} from "./transmission";
+import Builder from "./builder";
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 
 const defaults = Object.freeze({
   apiHost: "https://api.honeycomb.io/",
@@ -29,7 +35,7 @@ const defaults = Object.freeze({
   transmission: "base",
 
   // batch triggers
-  batchSizeTrigger: 50,  // we send a batch to the api when we have this many outstanding events
+  batchSizeTrigger: 50, // we send a batch to the api when we have this many outstanding events
   batchTimeTrigger: 100, // ... or after this many ms has passed.
 
   // batches are sent serially (one event at a time), so we allow multiple concurrent batches
@@ -81,10 +87,17 @@ export default class Libhoney extends EventEmitter {
    *   // disabled: true // uncomment when testing or in development
    * });
    */
-  constructor (opts) {
+  constructor(opts) {
     super();
-    this._options = Object.assign({ responseCallback: this._responseCallback.bind(this) }, defaults, opts);
-    this._transmission = getAndInitTransmission(this._options.transmission, this._options);
+    this._options = Object.assign(
+      { responseCallback: this._responseCallback.bind(this) },
+      defaults,
+      opts
+    );
+    this._transmission = getAndInitTransmission(
+      this._options.transmission,
+      this._options
+    );
     this._usable = this._transmission !== null;
     this._builder = new Builder(this);
 
@@ -96,7 +109,7 @@ export default class Libhoney extends EventEmitter {
     this._responseQueue = [];
   }
 
-  _responseCallback (responses) {
+  _responseCallback(responses) {
     let queue = this._responseQueue;
     if (queue.length < this._options.maxResponseQueueSize) {
       this._responseQueue = this._responseQueue.concat(responses);
@@ -207,12 +220,12 @@ export default class Libhoney extends EventEmitter {
    * actually be sent to Honeycomb.
    * @private
    */
-  sendEvent (event) {
+  sendEvent(event) {
     let transmitEvent = this.validateEvent(event);
     if (!transmitEvent) {
       return;
     }
-    
+
     this._transmission.sendEvent(transmitEvent);
   }
 
@@ -231,7 +244,7 @@ export default class Libhoney extends EventEmitter {
    * are sent to Honeycomb.
    * @private
    */
-  sendPresampledEvent (event) {
+  sendPresampledEvent(event) {
     let transmitEvent = this.validateEvent(event);
     if (!transmitEvent) {
       return;
@@ -247,58 +260,59 @@ export default class Libhoney extends EventEmitter {
    *                   the event was invalid in some way or unable to be sent.
    * @private
    */
-  validateEvent (event) {
+  validateEvent(event) {
     if (!this._usable) return null;
 
     var timestamp = event.timestamp || Date.now();
-    if (typeof timestamp === 'string' || typeof timestamp === 'number')
+    if (typeof timestamp === "string" || typeof timestamp === "number")
       timestamp = new Date(timestamp);
 
-    if (typeof event.data !== 'object' || event.data === null) {
+    if (typeof event.data !== "object" || event.data === null) {
       console.error(".data must be an object");
       return null;
     }
     var postData;
     try {
       postData = JSON.stringify(event.data);
-    }
-    catch (e) {
+    } catch (e) {
       console.error("error converting event data to JSON: " + e);
       return null;
     }
 
     var apiHost = event.apiHost;
-    if (typeof apiHost !== 'string' || apiHost === "") {
+    if (typeof apiHost !== "string" || apiHost === "") {
       console.error(".apiHost must be a non-empty string");
       return null;
     }
 
     var writeKey = event.writeKey;
-    if (typeof writeKey !== 'string' || writeKey === "") {
+    if (typeof writeKey !== "string" || writeKey === "") {
       console.error(".writeKey must be a non-empty string");
       return null;
     }
 
     var dataset = event.dataset;
-    if (typeof dataset !== 'string' || dataset === "") {
+    if (typeof dataset !== "string" || dataset === "") {
       console.error(".dataset must be a non-empty string");
       return null;
     }
 
     var sampleRate = event.sampleRate;
-    if (typeof sampleRate !== 'number') {
+    if (typeof sampleRate !== "number") {
       console.error(".sampleRate must be a number");
       return null;
     }
 
     var metadata = event.metadata;
-    return new ValidatedEvent({timestamp,
-                               apiHost,
-                               postData,
-                               writeKey,
-                               dataset,
-                               sampleRate,
-                               metadata});
+    return new ValidatedEvent({
+      timestamp,
+      apiHost,
+      postData,
+      writeKey,
+      dataset,
+      sampleRate,
+      metadata
+    });
   }
 
   /**
@@ -316,7 +330,7 @@ export default class Libhoney extends EventEmitter {
    *   map.set("env", "staging");
    *   honey.add (map);
    */
-  add (data) {
+  add(data) {
     this._builder.add(data);
     return this;
   }
@@ -329,7 +343,7 @@ export default class Libhoney extends EventEmitter {
    * @example
    *   honey.addField("build_id", "a6cc38a1");
    */
-  addField (name, val) {
+  addField(name, val) {
     this._builder.addField(name, val);
     return this;
   }
@@ -342,7 +356,7 @@ export default class Libhoney extends EventEmitter {
    * @example
    *   honey.addDynamicField("process_heapUsed", () => process.memoryUsage().heapUsed);
    */
-  addDynamicField (name, fn) {
+  addDynamicField(name, fn) {
     this._builder.addDynamicField(name, fn);
     return this;
   }
@@ -361,7 +375,7 @@ export default class Libhoney extends EventEmitter {
    *   map.set("httpStatusCode", 200);
    *   honey.sendNow (map);
    */
-  sendNow (data) {
+  sendNow(data) {
     return this._builder.sendNow(data);
   }
 
@@ -373,7 +387,7 @@ export default class Libhoney extends EventEmitter {
    *   ev.addField("additionalField", value);
    *   ev.send();
    */
-  newEvent () {
+  newEvent() {
     return this._builder.newEvent();
   }
 
@@ -390,7 +404,7 @@ export default class Libhoney extends EventEmitter {
    *                                    process_heapUsed: () => process.memoryUsage().heapUsed
    *                                  });
    */
-  newBuilder (fields, dyn_fields) {
+  newBuilder(fields, dyn_fields) {
     return this._builder.newBuilder(fields, dyn_fields);
   }
 }
@@ -401,12 +415,14 @@ function getAndInitTransmission(transmission, options) {
   }
 
   if (typeof transmission === "string") {
-    switch(transmission) {
+    switch (transmission) {
       case "base":
         transmission = Transmission;
         break;
       case "worker":
-        console.warn("worker implementation not ready yet.  using base implementation");
+        console.warn(
+          "worker implementation not ready yet.  using base implementation"
+        );
         transmission = Transmission;
         break;
       case "mock":
@@ -419,28 +435,47 @@ function getAndInitTransmission(transmission, options) {
         transmission = NullTransmission;
         break;
       default:
-        throw new Error(`unknown transmission implementation "${transmission}".`);
+        throw new Error(
+          `unknown transmission implementation "${transmission}".`
+        );
     }
   } else if (typeof transmission !== "function") {
-    throw new Error(".transmission must be one of 'base'/'worker'/'mock'/'writer'/'null' or a constructor.");
+    throw new Error(
+      ".transmission must be one of 'base'/'worker'/'mock'/'writer'/'null' or a constructor."
+    );
   }
 
   try {
     return new transmission(options);
-  }
-  catch (e) {
+  } catch (e) {
     if (transmission == Transmission) {
-      throw new Error("unable to initialize base transmission implementation.", e);
+      throw new Error(
+        "unable to initialize base transmission implementation.",
+        e
+      );
     }
 
-    console.warn("failed to initialize transmission, falling back to base implementation.");
+    console.warn(
+      "failed to initialize transmission, falling back to base implementation."
+    );
     try {
       transmission = new Transmission(options);
-    }
-    catch (e) {
-      throw new Error("unable to initialize base transmission implementation.", e);
+    } catch (e) {
+      throw new Error(
+        "unable to initialize base transmission implementation.",
+        e
+      );
     }
   }
 
   return transmission;
+}
+
+// this will absolutely go away with the next major version bump.  right now in normal node (CJS) usage,
+// users have to do:  `let Libhoney = require("libhoney").default;`
+//
+// switching to rollup fixes that (yay!) but we need to keep it working until  we do the major bump.  hence
+// this hack.
+if (typeof module !== "undefined") {
+  Object.defineProperty(Libhoney, "default", { value: Libhoney });
 }
