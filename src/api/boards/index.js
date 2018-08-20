@@ -1,5 +1,4 @@
 import { Query } from "../queries";
-import { ifThrow } from "../util";
 
 export class BoardQuery {
   constructor(name, description, dataset, query) {
@@ -7,16 +6,6 @@ export class BoardQuery {
     this.description = description;
     this.dataset = dataset;
     this.query = query;
-
-    this.validate();
-  }
-
-  validate() {
-    ifThrow(!this.dataset, "dataset must have at least one character");
-
-    if (this.query) {
-      this.query.validate();
-    }
   }
 
   static fromJSON(bq) {
@@ -41,16 +30,6 @@ export class Board {
     this.description = description;
     this.queries = queries;
     this.id = id;
-
-    this.validate();
-  }
-
-  validate() {
-    ifThrow(!this.name, "name must have at least one character");
-
-    if (this.queries) {
-      this.queries.forEach(bq => bq.validate());
-    }
   }
 
   static fromJSON(b) {

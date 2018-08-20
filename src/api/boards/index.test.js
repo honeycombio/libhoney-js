@@ -1,32 +1,9 @@
-/* global describe, expect */
+/* eslint-env node, jest */
 import cases from "jest-in-case";
 
 import { boardQuery, board } from ".";
 
 describe("boards", () => {
-  cases(
-    "name validation failures",
-    opts => {
-      expect(() => board(opts.args)).toThrowError(Error, opts.throws);
-    },
-    [
-      {
-        name: "undefined name",
-        args: {
-          name: undefined
-        },
-        throws: "name must have at least one character"
-      },
-      {
-        name: "empty name",
-        args: {
-          name: ""
-        },
-        throws: "name must have at least one character"
-      }
-    ]
-  );
-
   cases(
     "roundtrip success",
     opts => {
@@ -97,30 +74,6 @@ describe("boards", () => {
 });
 
 describe("board queries", () => {
-  cases(
-    "dataset validation failures",
-    opts => {
-      expect(() => boardQuery(opts.args)).toThrowError(Error, opts.throws);
-    },
-    [
-      {
-        name: "undefined dataset",
-        args: {
-          name: "query name"
-        },
-        throws: "dataset must have at least one character"
-      },
-      {
-        name: "empty dataset",
-        args: {
-          name: "query name",
-          dataset: ""
-        },
-        throws: "name must have at least one character"
-      }
-    ]
-  );
-
   cases(
     "roundtrip success",
     opts => {

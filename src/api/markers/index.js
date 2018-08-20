@@ -3,12 +3,6 @@ export class Marker {
     this.message = message;
     this.type = type;
     this.url = url;
-
-    this.validate();
-  }
-
-  validate() {
-    // XXX(toshok) more here
   }
 
   static fromJSON(m) {

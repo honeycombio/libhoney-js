@@ -1,12 +1,11 @@
 import { Query } from "../queries";
-import { ifThrow } from "../util";
 
-const validThresholdOps = {
-  ">": true,
-  ">=": true,
-  "<": true,
-  "<=": true
-};
+// const validThresholdOps = {
+//   ">": true,
+//   ">=": true,
+//   "<": true,
+//   "<=": true
+// };
 
 export class Trigger {
   constructor(name, description, frequency, query, threshold, recipients, id) {
@@ -17,64 +16,6 @@ export class Trigger {
     this.threshold = threshold;
     this.recipients = recipients;
     this.id = id;
-
-    this.validate();
-  }
-
-  validate() {
-    let { name, frequency, query, threshold, recipients } = this;
-    ifThrow(!name, "name must have a least one character");
-    ifThrow(frequency < 60, "frequency must be at least one minute");
-    ifThrow(frequency > 86400, "frequency may not be longer than one day");
-    ifThrow(
-      frequency && frequency % 60 != 0,
-      "frequency must be a multiple of 60"
-    );
-
-    ifThrow(!query, "query field is required");
-    query.validate();
-    ifThrow(
-      !query.calculations || query.calculations.length != 1,
-      "trigger query requires exactly one calculation"
-    );
-    ifThrow(
-      query.orders && query.orders.length > 0,
-      "order field not allowed for trigger queries"
-    );
-
-    ifThrow(
-      typeof query.limit !== "undefined",
-      "limit field not allowed for trigger query"
-    );
-    ifThrow(
-      typeof query.startTime !== "undefined" ||
-        typeof query.endTime !== "undefined" ||
-        typeof query.timeRange !== "undefined",
-      "time fields not allowed for trigger queries"
-    );
-    ifThrow(
-      typeof query.granularity !== "undefined",
-      "granularity field not allowed for trigger queries"
-    );
-
-    ifThrow(!threshold, "threshold field is required");
-    threshold.validate();
-
-    if (recipients) {
-      for (let i = 0, e = recipients.length; i < e; i++) {
-        let recip = recipients[i];
-        recip.validate();
-
-        for (let j = i + 1; j < e; j++) {
-          let cmp = recipients[j];
-          // TODO(toshok) more generate deepEqual test here
-          ifThrow(
-            cmp.type === recip.type && cmp.target === recip.target,
-            "duplicate recipient"
-          );
-        }
-      }
-    }
   }
 
   static fromJSON(t) {
@@ -114,15 +55,6 @@ export class Threshold {
   constructor(op, value) {
     this.op = op;
     this.value = value;
-
-    this.validate();
-  }
-
-  validate() {
-    ifThrow(!this.op, "threshold requires an op");
-    ifThrow(typeof this.value === "undefined", "threshold requires a value");
-
-    ifThrow(!validThresholdOps[this.op], `unknown threshold op '${this.op}'`);
   }
 
   static fromJSON(t) {
@@ -144,27 +76,6 @@ export class Recipient {
   constructor(type, target) {
     this.type = type;
     this.target = target;
-
-    this.validate();
-  }
-
-  validate() {
-    ifThrow(!this.type, "recipients require a type");
-
-    switch (this.type) {
-      case "email":
-        ifThrow(!this.target, "recipient type email requires a target");
-        break;
-      case "slack":
-        // Nothing. Target isn't required and isn't validated.
-        break;
-      case "pagerduty":
-        ifThrow(!this.target, "recipient type pagerduty cannot have a target");
-        break;
-      default:
-        ifThrow(true, `unknown recipient type '${this.type}'`);
-        break;
-    }
   }
 
   static fromJSON(r) {
@@ -179,4 +90,6 @@ export function recipient({ type, target }) {
 }
 recipient.slack = target => new Recipient("slack", target);
 recipient.email = target => new Recipient("email", target);
+recipient.webhook = target => new Recipient("webhook", target);
+recipient.marker = target => new Recipient("marker", target);
 recipient.pagerduty = () => new Recipient("pagerduty");

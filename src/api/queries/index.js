@@ -1,5 +1,3 @@
-import { ifThrow } from "../util";
-
 /* notyet
 const validFilterOps = {
   "=": true,
@@ -51,14 +49,6 @@ export class Calculation {
     if (this.op === "COUNT") {
       this.column = "*";
     }
-    this.validate();
-  }
-
-  validate() {
-    // XXX(toshok) more here
-    ifThrow(!this.column, "column field is required");
-    ifThrow(!this.op, "op field is required");
-    ifThrow(!validCalculateOps[this.op], `unknown calculation op '${this.op}'`);
   }
 
   static fromJSON(c) {
@@ -77,12 +67,8 @@ export class Filter {
     this.column = column;
     this.op = op;
     this.value = value;
-    this.validate();
   }
 
-  validate() {
-    // XXX(toshok) more here
-  }
   static fromJSON(f) {
     return new Filter(f.column, f.op, f.value);
   }
@@ -100,21 +86,6 @@ export class Order {
     if (this.op === "COUNT") {
       this.column = "*";
     }
-
-    this.validate();
-  }
-
-  validate() {
-    ifThrow(!this.column, "column field is required");
-    //ifThrow(!this.op, "op field is required");
-    ifThrow(
-      this.op && !validCalculateOps[this.op],
-      `unknown order op '${this.op}'`
-    );
-    ifThrow(
-      this.order !== "ascending" && this.order !== "descending",
-      `unknown order '${this.order}'`
-    );
   }
 
   ascending() {
@@ -161,12 +132,6 @@ export class Query {
     this.endTime = endTime;
     this.timeRange = timeRange;
     this.granularity = granularity;
-
-    this.validate();
-  }
-
-  validate() {
-    // XXX(toshok) more here
   }
 
   static fromJSON(q) {
