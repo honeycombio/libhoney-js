@@ -1,18 +1,22 @@
-var libhoney = require('libhoney').default;
-var process = require('process');
+/* eslint-env node */
+const libhoney = require("libhoney");
+const process = require("process");
 
 module.exports = function(options) {
-  var honey = new libhoney(options);
+  let honey = new libhoney(options);
 
   // Attach dynamic fields to the global event builder in libhoney.
   // Dynamic fields calculate their values at the time the event is created
   // (the event.sendNow call below)
-  honey.addDynamicField('rss_after', () => process.memoryUsage().rss);
-  honey.addDynamicField('heapTotal_after', () => process.memoryUsage().heapTotal);
-  honey.addDynamicField('heapUsed_after', () => process.memoryUsage().heapUsed);
+  honey.addDynamicField("rss_after", () => process.memoryUsage().rss);
+  honey.addDynamicField(
+    "heapTotal_after",
+    () => process.memoryUsage().heapTotal
+  );
+  honey.addDynamicField("heapUsed_after", () => process.memoryUsage().heapUsed);
 
   return function(req, res, next) {
-    var event = honey.newEvent();
+    let event = honey.newEvent();
     event.add({
       app: req.app,
       baseUrl: req.baseUrl,

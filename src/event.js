@@ -5,7 +5,7 @@
 /**
  * @module
  */
-import foreach from './foreach';
+import foreach from "./foreach";
 
 /**
  * Represents an individual event to send to Honeycomb.
@@ -16,9 +16,7 @@ export default class Event {
    * @constructor
    * private
    */
-  constructor(libhoney,
-              fields,
-              dyn_fields) {
+  constructor(libhoney, fields, dyn_fields) {
     this.data = Object.create(null);
     this.metadata = null;
 
@@ -83,7 +81,7 @@ export default class Event {
    *   event.add (map);
    *   event.send();
    */
-  add (data) {
+  add(data) {
     foreach(data, (v, k) => this.addField(k, v));
     return this;
   }
@@ -98,7 +96,7 @@ export default class Event {
    *     .addField("responseTime_ms", 100)
    *     .send();
    */
-  addField (name, val) {
+  addField(name, val) {
     if (val == undefined) {
       val = null;
     }
@@ -111,7 +109,7 @@ export default class Event {
    * @param {any} md
    * @returns {Event} this event.
    */
-  addMetadata (md) {
+  addMetadata(md) {
     this.metadata = md;
     return this;
   }
@@ -119,7 +117,7 @@ export default class Event {
   /**
    * Sends this event to honeycomb, sampling if necessary.
    */
-  send () {
+  send() {
     this._libhoney.sendEvent(this);
   }
 
@@ -127,7 +125,7 @@ export default class Event {
    * Dispatch an event to be sent to Honeycomb.  Assumes sampling has already happened,
    * and will send every event handed to it.
    */
-  sendPresampled () {
+  sendPresampled() {
     this._libhoney.sendPresampledEvent(this);
   }
 }

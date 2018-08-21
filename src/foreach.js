@@ -14,6 +14,6 @@ export default function foreach(col, f) {
   if (col instanceof Map) {
     col.forEach(f);
   } else {
-    Object.getOwnPropertyNames(col).forEach((k) => f(col[k], k));
+    Object.getOwnPropertyNames(col).forEach(k => f(col[k], k));
   }
 }

@@ -1,11 +1,11 @@
-/* global describe, it, require */
-import assert from 'assert';
-import libhoney from '../lib/libhoney';
+/* eslint-env node, jest */
+import assert from "assert";
+import libhoney from "../libhoney";
 
-let superagent = require('superagent');
-let mock = require('superagent-mocker')(superagent);
+let superagent = require("superagent");
+let mock = require("superagent-mocker")(superagent);
 
-describe('libhoney', function() {
+describe("libhoney", function() {
   describe("constructor options", function() {
     it("should be communicated to transmission constructor", function() {
       var options = { a: 1, b: 2, c: 3, d: 4, transmission: "mock" };
@@ -30,7 +30,7 @@ describe('libhoney', function() {
         transmission: "mock"
       });
       let transmission = honey.transmission;
-      var postData = { a : 1, b : 2};
+      var postData = { a: 1, b: 2 };
       honey.sendNow(postData);
 
       assert.equal(transmission.events.length, 1);
@@ -51,7 +51,7 @@ describe('libhoney', function() {
         transmission: "mock"
       });
       let transmission = honey.transmission;
-      var postData = { a : 1, b : 2};
+      var postData = { a: 1, b: 2 };
       honey.sendNow(postData);
 
       assert.equal(transmission.events.length, 1);
@@ -64,7 +64,9 @@ describe('libhoney', function() {
 
   describe("response queue", function() {
     it("should enqueue a maximum of maxResponseQueueSize, dropping new responses (not old)", function(done) {
-      mock.post('http://localhost:9999/1/events/testResponseQueue', function(req) {
+      mock.post("http://localhost:9999/1/events/testResponseQueue", function(
+        _req
+      ) {
         return {};
       });
 
@@ -77,24 +79,25 @@ describe('libhoney', function() {
         maxResponseQueueSize: queueSize
       });
 
-      // we send queueSize+1 events, so we should see two response events with queueSize as the length
-      honey.on("response", (queue) => {
+      // we send queueSize+1 events, so we should see two response events
+      // with queueSize as the length
+      honey.on("response", queue => {
         if (queue.length !== queueSize) {
           return;
         }
 
-        queueFullCount ++;
+        queueFullCount++;
         if (queueFullCount === 2) {
-          queue.sort((a,b) => a.metadata - b.metadata);
+          queue.sort((a, b) => a.metadata - b.metadata);
           assert.equal(queue[0].metadata, 0);
-          assert.equal(queue[queueSize-1].metadata, queueSize-1);
+          assert.equal(queue[queueSize - 1].metadata, queueSize - 1);
           done();
         }
       });
 
-      for (var i = 0; i < queueSize + 1; i ++) {
+      for (var i = 0; i < queueSize + 1; i++) {
         var ev = honey.newEvent();
-        ev.add({ a : 1, b : 2});
+        ev.add({ a: 1, b: 2 });
         ev.addMetadata(i);
         ev.send();
       }

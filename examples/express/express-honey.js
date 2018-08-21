@@ -1,12 +1,13 @@
-var libhoney = require('libhoney').default;
+/* eslint-env node */
+const libhoney = require("libhoney");
 
 module.exports = function(options) {
-  var honey = new libhoney(options);
+  let honey = new libhoney(options);
 
   return function(req, res, next) {
-    const responseCallback = (queue) => {
-      var responses = queue.splice(0, queue.length);
-      for (var i = 0; i < responses.length; i ++) {
+    const responseCallback = queue => {
+      let responses = queue.splice(0, queue.length);
+      for (let i = 0; i < responses.length; i++) {
         console.log("response status =", responses[i].status_code);
       }
     };
