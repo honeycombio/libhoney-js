@@ -1,16 +1,19 @@
 # libhoney [![Build Status](https://travis-ci.org/honeycombio/libhoney-js.svg?branch=master)](https://travis-ci.org/honeycombio/libhoney-js) [![npm version](https://badge.fury.io/js/libhoney.svg)](https://badge.fury.io/js/libhoney)
 
-A node (>=4) module for interacting with [Honeycomb](https://honeycomb.io). (For more information, see the [documentation](https://honeycomb.io/docs/) and [JavaScript SDK guide](https://honeycomb.io/docs/connect/javascript).)
+A node (>=4) and browser module for interacting with [Honeycomb](https://honeycomb.io). (For more information, see the [documentation](https://honeycomb.io/docs/) and [JavaScript SDK guide](https://honeycomb.io/docs/connect/javascript).)
 
-**NOT** for use in browser-side JavaScript applications. Write keys are your auth tokens for sending data to Honeycomb and should be kept secure -- they're not per-site keys. Don't leave yourself vulnerable to malicious users.
+**NOTE** For use in browser-side JavaScript applications, generate an api key that has permission only to send events.
 
 ## Installation
 
 ### npm
+
 ```
 npm install libhoney --save
 ```
+
 ### yarn
+
 ```
 yarn add libhoney
 ```
@@ -24,7 +27,7 @@ An API reference is available at https://honeycomb.io/docs/connect/javascript/
 Honeycomb can calculate all sorts of statistics, so send the values you care about and let us crunch the averages, percentiles, lower/upper bounds, cardinality -- whatever you want -- for you.
 
 ```js
-import Libhoney from 'libhoney';
+import Libhoney from "libhoney";
 
 let hny = new Libhoney({
   writeKey: "YOUR_WRITE_KEY",
