@@ -1,10 +1,11 @@
 {
-  "title": "libhoney: a node module for interacting with Honeycomb.io",
-
-  "source": "src",
-  "destination": "docs",
-  "experimentalProposal": {
-    "classProperties": true,
-    "objectRestSpread": true
-  }
+  "source": "./src",
+  "destination": "./docs",
+  "plugins": [
+    {"name": "esdoc-standard-plugin"},
+    {"name": "esdoc-ecmascript-proposal-plugin", "option": {
+      "classProperties": true,
+      "objectRestSpread": true
+    }}
+  ]
 }
