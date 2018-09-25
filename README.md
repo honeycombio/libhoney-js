@@ -8,6 +8,8 @@ Requires node 4+.
 
 - [Usage and Examples](https://docs.honeycomb.io/sdk/javascript/)
 
+For tracing support and automatic instrumentation of Express and other common libraries, check out our [Beeline for NodeJS](https://github.com/honeycombio/beeline-nodejs).
+
 ## Contributions
 
 Features, bug fixes and other changes to libhoney are gladly accepted. Please
