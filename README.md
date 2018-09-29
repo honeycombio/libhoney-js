@@ -7,6 +7,7 @@ A nodeJS module for sending events to [Honeycomb](https://www.honeycomb.io), a s
 Requires node 4+.
 
 - [Usage and Examples](https://docs.honeycomb.io/sdk/javascript/)
+- [API Reference](https://doc.esdoc.org/github.com/honeycombio/libhoney-js/)
 
 For tracing support and automatic instrumentation of Express and other common libraries, check out our [Beeline for NodeJS](https://github.com/honeycombio/beeline-nodejs).
 
