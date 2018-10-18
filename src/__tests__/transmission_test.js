@@ -1,4 +1,5 @@
 /* eslint-env node, jest */
+import net from "net";
 import assert from "assert";
 import { Transmission, ValidatedEvent } from "../transmission";
 
@@ -6,6 +7,37 @@ let superagent = require("superagent");
 let mock = require("superagent-mocker")(superagent);
 
 describe("base transmission", function() {
+  it("will hit a proxy", function(done) {
+    let server = net.createServer(function(socket) {
+      socket.end();
+      done();
+    });
+
+    server.listen(9998, "127.0.0.1");
+
+    mock.post("http://localhost:9998", function(req) {
+      console.error("aiiieee", req);
+      done();
+    });
+
+    var transmission = new Transmission({
+      proxy: "http://127.0.0.1:9998",
+      batchTimeTrigger: 10000, // larger than the mocha timeout
+      batchSizeTrigger: 0
+    });
+
+    transmission.sendEvent(
+      new ValidatedEvent({
+        apiHost: "http://localhost:9999",
+        writeKey: "123456789",
+        dataset: "test-transmission",
+        sampleRate: 1,
+        timestamp: new Date(),
+        postData: JSON.stringify({ a: 1, b: 2 })
+      })
+    );
+  });
+
   it("should handle batchSizeTrigger of 0", function(done) {
     mock.post("http://localhost:9999/1/events/test-transmission", function(
       req

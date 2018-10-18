@@ -8,6 +8,7 @@
  * @module
  */
 import superagent from "superagent";
+import proxy from "superagent-proxy";
 import urljoin from "urljoin";
 
 const USER_AGENT = "libhoney-js/<@LIBHONEY_JS_VERSION@>";
@@ -194,6 +195,7 @@ export class Transmission {
     }
 
     this._userAgentAddition = options.userAgentAddition || "";
+    this._proxy = options.proxy;
 
     // Included for testing; to stub out randomness and verify that an event
     // was dropped.
@@ -264,6 +266,9 @@ export class Transmission {
     eachPromise(batches, batch => {
       var url = urljoin(batch.apiHost, "/1/batch", batch.dataset);
       var req = superagent.post(url);
+      if (this._proxy) {
+        req = proxy(req, this._proxy);
+      }
 
       let { encoded, numEncoded } = batchAgg.encodeBatchEvents(batch.events);
       return new Promise(resolve => {
