@@ -10,15 +10,11 @@ describe("base transmission", function() {
   it("will hit a proxy", function(done) {
     let server = net.createServer(function(socket) {
       socket.end();
+      server.unref();
       done();
     });
 
     server.listen(9998, "127.0.0.1");
-
-    mock.post("http://localhost:9998", function(req) {
-      console.error("aiiieee", req);
-      done();
-    });
 
     var transmission = new Transmission({
       proxy: "http://127.0.0.1:9998",
