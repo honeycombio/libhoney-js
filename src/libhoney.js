@@ -20,6 +20,9 @@ import { EventEmitter } from "events";
 const defaults = Object.freeze({
   apiHost: "https://api.honeycomb.io/",
 
+  // http
+  proxy: undefined,
+
   // sample rate of data.  causes us to send 1/sample-rate of events
   // i.e. `sampleRate: 10` means we only send 1/10th the events.
   sampleRate: 1,
@@ -69,6 +72,7 @@ export default class Libhoney extends EventEmitter {
    *
    * @param {Object} [opts] overrides for the defaults
    * @param {string} [opts.apiHost=https://api.honeycomb.io] - Server host to receive Honeycomb events.
+   * @param {string} opts.proxy - The proxy to send events through.
    * @param {string} opts.writeKey - Write key for your Honeycomb team. (Required)
    * @param {string} opts.dataset - Name of the dataset that should contain this event. The dataset will be created for your team if it doesn't already exist.
    * @param {number} [opts.sampleRate=1] - Sample rate of data. If set, causes us to send 1/sampleRate of events and drop the rest.
