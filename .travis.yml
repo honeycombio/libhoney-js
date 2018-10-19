@@ -1,9 +1,17 @@
 language: node_js
 node_js:
-- '6'
-- '8'
-- '9'
-- '10'
+  - '6'
+  - '8'
+  - '9'
+  - '10'
+
+before_script:
+  - yarn
+
+script:
+  - yarn test
+  - yarn build
+
 deploy:
   provider: npm
   skip_cleanup: true

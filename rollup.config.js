@@ -2,6 +2,7 @@
 const resolve = require("rollup-plugin-node-resolve");
 const commonjs = require("rollup-plugin-commonjs");
 const replace = require("rollup-plugin-replace");
+const json = require("rollup-plugin-json");
 const pkg = require("./package.json");
 
 module.exports = {
@@ -11,6 +12,7 @@ module.exports = {
   plugins: [
     resolve(),
     commonjs(),
+    json(),
     replace({
       delimiters: ["<@", "@>"],
       LIBHONEY_JS_VERSION: pkg.version
