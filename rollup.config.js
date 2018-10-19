@@ -7,7 +7,7 @@ const pkg = require("./package.json");
 
 module.exports = {
   input: "src/libhoney.js",
-  external: ["superagent", "events", "path", "url"],
+  external: ["superagent", "events", "path", "url", "superagent-proxy"],
 
   plugins: [
     resolve(),
@@ -20,7 +20,7 @@ module.exports = {
   ],
 
   output: [
-    { file: "dist/libhoney.cjs.js", format: "cjs" },
-    { file: "dist/libhoney.es.js", format: "es" }
+    { file: pkg.main, format: "cjs" },
+    { file: pkg.module, format: "es" }
   ]
 };
