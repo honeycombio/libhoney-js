@@ -7,7 +7,7 @@ module.exports = function(options) {
 
   // Attach dynamic fields to the global event builder in libhoney.
   // Dynamic fields calculate their values at the time the event is created
-  // (the event.sendNow call below)
+  // (the event.send() call below)
   honey.addDynamicField("rss_after", () => process.memoryUsage().rss);
   honey.addDynamicField(
     "heapTotal_after",
