@@ -7,7 +7,7 @@
  * for both Map and object key interation.
  * @private
  */
-export default function foreach(col, f) {
+export default function foreach(col: {[key: string]: any} | Map<string, any>, f: (value: any, key: string, map?: Map<string, any>) => void): void {
   if (!col) {
     return;
   }

@@ -1,17 +1,21 @@
 /* eslint-env node */
-const resolve = require("rollup-plugin-node-resolve");
-const commonjs = require("rollup-plugin-commonjs");
-const replace = require("rollup-plugin-replace");
-const json = require("rollup-plugin-json");
-const pkg = require("./package.json");
+import commonjs from "rollup-plugin-commonjs";
+import json from "rollup-plugin-json";
+import pkg from "./package.json";
+import replace from "rollup-plugin-replace";
+import resolve from "rollup-plugin-node-resolve";
+import typescript from "rollup-plugin-typescript2";
 
-module.exports = {
-  input: "src/libhoney.js",
+export default {
+  input: "src/libhoney.ts",
   external: ["superagent", "events", "path", "url", "superagent-proxy"],
 
   plugins: [
     resolve(),
     commonjs(),
+    typescript({
+      typescript: require("typescript")
+    }),
     json(),
     replace({
       delimiters: ["<@", "@>"],

@@ -65,7 +65,7 @@ describe("libhoney builder", () => {
     });
     let transmission = honey.transmission;
 
-    let postData = { b: 2, c: 3 };
+    let postData: {[key: string]: any} = { b: 2, c: 3 };
 
     let builder = honey.newBuilder({ b: 2 });
 

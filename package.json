@@ -12,6 +12,7 @@
   },
   "module": "dist/libhoney.es.js",
   "main": "dist/libhoney.cjs.js",
+  "types": "dist/index.d.ts",
   "files": ["dist", "README.md", "LICENSE"],
   "scripts": {
     "build": "rollup -c",
@@ -20,7 +21,7 @@
     "test-coverage": "jest --coverage",
     "format": "prettier --write \"src/**/*.js\"",
     "check-format": "prettier \"src/**/*.js\"",
-    "lint": "eslint \"src/**/*.js\"",
+    "lint": "eslint \"src/**/*.ts\"",
     "precommit": "lint-staged"
   },
   "author": "",
@@ -35,6 +36,11 @@
   "devDependencies": {
     "@babel/core": "^7.4.0",
     "@babel/preset-env": "^7.4.2",
+    "@babel/preset-typescript": "^7.3.3",
+    "@types/jest": "^24.0.11",
+    "@types/superagent": "^4.1.1",
+    "@types/url-join": "^4.0.0",
+    "@typescript-eslint/eslint-plugin": "^1.4.2",
     "babel-jest": "^24.5.0",
     "eslint": "^5.15.3",
     "husky": "^0.14.3",
@@ -47,14 +53,17 @@
     "rollup-plugin-json": "^3.1.0",
     "rollup-plugin-node-resolve": "^3.3.0",
     "rollup-plugin-replace": "^2.0.0",
-    "superagent-mocker": "^0.5.2"
+    "rollup-plugin-typescript2": "^0.20.0",
+    "superagent-mocker": "^0.5.2",
+    "typescript": "^3.3.3333"
   },
   "dependencies": {
     "superagent": "^3.8.3",
     "superagent-proxy": "^2.0.0",
-    "urljoin": "^0.1.5"
+    "url-join": "^4.0.0"
   },
   "jest": {
+    "testEnvironment": "node",
     "testPathIgnorePatterns": ["dist/", "/node_modules/"]
   }
 }

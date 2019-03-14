@@ -1,9 +1,10 @@
 /* eslint-env node, jest */
-import { Transmission, ValidatedEvent } from "../transmission";
-import net from "net";
+import * as net from "net";
+import { BaseTransmission, ValidatedEvent } from "../transmission";
+import superagent from "superagent";
+import superagentMocker from "superagent-mocker";
 
-let superagent = require("superagent");
-let mock = require("superagent-mocker")(superagent);
+let mock = superagentMocker(superagent);
 
 describe("base transmission", () => {
   it("will hit a proxy", done => {
@@ -15,7 +16,7 @@ describe("base transmission", () => {
 
     server.listen(9998, "127.0.0.1");
 
-    let transmission = new Transmission({
+    let transmission = new BaseTransmission({
       proxy: "http://127.0.0.1:9998",
       batchTimeTrigger: 10000, // larger than the mocha timeout
       batchSizeTrigger: 0
@@ -34,13 +35,13 @@ describe("base transmission", () => {
   });
 
   it("should handle batchSizeTrigger of 0", done => {
-    mock.post("http://localhost:9999/1/events/test-transmission", req => {
+    mock.post("http://localhost:9999/1/events/test-transmission", (req: any) => {
       let reqEvents = JSON.parse(req.body);
       let resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
     });
 
-    let transmission = new Transmission({
+    let transmission = new BaseTransmission({
       batchTimeTrigger: 10000, // larger than the mocha timeout
       batchSizeTrigger: 0,
       responseCallback() {
@@ -64,13 +65,13 @@ describe("base transmission", () => {
     let responseCount = 0;
     let batchSize = 5;
 
-    mock.post("http://localhost:9999/1/batch/test-transmission", req => {
+    mock.post("http://localhost:9999/1/batch/test-transmission", (req: any) => {
       let reqEvents = JSON.parse(req.body);
       let resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
     });
 
-    let transmission = new Transmission({
+    let transmission = new BaseTransmission({
       batchTimeTrigger: 10000, // larger than the mocha timeout
       batchSizeTrigger: 5,
       responseCallback(queue) {
@@ -79,9 +80,9 @@ describe("base transmission", () => {
         return responseCount === batchSize
           ? done()
           : done(
-              "The events dispatched over transmission does not align with batch size when the same number of " +
-                `events were enqueued as the batchSizeTrigger. Expected ${batchSize}, got ${responseCount}.`
-            );
+            "The events dispatched over transmission does not align with batch size when the same number of " +
+            `events were enqueued as the batchSizeTrigger. Expected ${batchSize}, got ${responseCount}.`
+          );
       }
     });
 
@@ -101,18 +102,19 @@ describe("base transmission", () => {
 
   it("should handle apiHosts with trailing slashes", done => {
     let endpointHit = false;
-    mock.post("http://localhost:9999/1/batch/test-transmission", req => {
+    mock.post("http://localhost:9999/1/batch/test-transmission", (req: any) => {
       endpointHit = true;
       let reqEvents = JSON.parse(req.body);
       let resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
     });
 
-    let transmission = new Transmission({
+    let transmission = new BaseTransmission({
       batchTimeTrigger: 0,
-      responseCallback: function(_resp) {
-        expect(endpointHit).toBe(true);
-        done();
+      responseCallback: (_resp) => {
+        endpointHit === true
+          ? done()
+          : done(Error("endpoint not hit"));
       }
     });
 
@@ -129,9 +131,9 @@ describe("base transmission", () => {
   });
 
   it("should eventually send a single event (after the timeout)", done => {
-    let transmission = new Transmission({
+    let transmission = new BaseTransmission({
       batchTimeTrigger: 10,
-      responseCallback: function(_resp) {
+      responseCallback: (_resp) => {
         done();
       }
     });
@@ -149,14 +151,14 @@ describe("base transmission", () => {
   });
 
   it("should respect sample rate and accept the event", done => {
-    let transmission = new Transmission({
+    let transmission = new BaseTransmission({
       batchTimeTrigger: 10,
-      responseCallback: function(_resp) {
+      responseCallback: (_resp) => {
         done();
       }
     });
 
-    transmission._randomFn = function() {
+    transmission._randomFn = ()  =>{
       return 0.09;
     };
     transmission.sendEvent(
@@ -172,12 +174,12 @@ describe("base transmission", () => {
   });
 
   it("should respect sample rate and drop the event", done => {
-    let transmission = new Transmission({ batchTimeTrigger: 10 });
+    let transmission = new BaseTransmission({ batchTimeTrigger: 10 });
 
-    transmission._randomFn = function() {
+    transmission._randomFn = ()  =>{
       return 0.11;
     };
-    transmission._droppedCallback = function() {
+    transmission._droppedCallback = ()  =>{
       done();
     };
 
@@ -199,13 +201,13 @@ describe("base transmission", () => {
     let responseCount = 0;
     let responseExpected = 5;
 
-    mock.post("http://localhost:9999/1/batch/test-transmission", req => {
+    mock.post("http://localhost:9999/1/batch/test-transmission", (req: any) => {
       let reqEvents = JSON.parse(req.body);
       let resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
     });
 
-    let transmission = new Transmission({
+    let transmission = new BaseTransmission({
       batchTimeTrigger: 50,
       pendingWorkCapacity: responseExpected,
       responseCallback(queue) {
@@ -217,7 +219,7 @@ describe("base transmission", () => {
       }
     });
 
-    transmission._droppedCallback = function() {
+    transmission._droppedCallback = ()  =>{
       eventDropped = true;
     };
 
@@ -257,13 +259,13 @@ describe("base transmission", () => {
     let responseCount = 0;
     let responseExpected = 10;
 
-    mock.post("http://localhost:9999/1/batch/test-transmission", req => {
+    mock.post("http://localhost:9999/1/batch/test-transmission", (req: any) => {
       let reqEvents = JSON.parse(req.body);
       let resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
     });
 
-    let transmission = new Transmission({
+    let transmission = new BaseTransmission({
       batchTimeTrigger: 50,
       batchSizeTrigger: 5,
       pendingWorkCapacity: responseExpected,
@@ -294,11 +296,11 @@ describe("base transmission", () => {
     let responseCount = 0;
     let responseExpected = 10;
 
-    mock.post("http://localhost:9999/1/batch/test-transmission", _req => {
+    mock.post("http://localhost:9999/1/batch/test-transmission", (_req: any) => {
       return { status: 404 };
     });
 
-    let transmission = new Transmission({
+    let transmission = new BaseTransmission({
       batchTimeTrigger: 50,
       batchSizeTrigger: 5,
       maxConcurrentBatches: 1,
@@ -334,13 +336,13 @@ describe("base transmission", () => {
     let responseCount = 0;
     let responseExpected = 50;
     let batchSize = 2;
-    mock.post("http://localhost:9999/1/batch/test-transmission", req => {
+    mock.post("http://localhost:9999/1/batch/test-transmission", (req: any) => {
       let reqEvents = JSON.parse(req.body);
       let resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
     });
 
-    let transmission = new Transmission({
+    let transmission = new BaseTransmission({
       batchTimeTrigger: 50,
       batchSizeTrigger: batchSize,
       pendingWorkCapacity: responseExpected,
@@ -370,13 +372,13 @@ describe("base transmission", () => {
   it("should send 100% of presampled events", done => {
     let responseCount = 0;
     let responseExpected = 10;
-    mock.post("http://localhost:9999/1/batch/test-transmission", req => {
+    mock.post("http://localhost:9999/1/batch/test-transmission", (req: any) => {
       let reqEvents = JSON.parse(req.body);
       let resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
     });
 
-    let transmission = new Transmission({
+    let transmission = new BaseTransmission({
       responseCallback(queue) {
         let responses = queue.splice(0, queue.length);
         responses.forEach(resp => {
@@ -406,71 +408,6 @@ describe("base transmission", () => {
     }
   });
 
-  it("should deal with encoding errors", done => {
-    let responseCount = 0;
-    let responseExpected = 11;
-    mock.post("http://localhost:9999/1/batch/test-transmission", req => {
-      let reqEvents = JSON.parse(req.body);
-      let resp = reqEvents.map(() => ({ status: 202 }));
-      return { text: JSON.stringify(resp) };
-    });
-
-    let transmission = new Transmission({
-      responseCallback(queue) {
-        responseCount = queue.length;
-        return responseCount === responseExpected
-          ? done()
-          : done(
-              Error(
-                "Incorrect queue length. Queue should equal length of all valid and invalid events enqueued."
-              )
-            );
-      }
-    });
-
-    let a = {};
-    a.a = a;
-    for (let i = 0; i < 5; i++) {
-      transmission.sendPresampledEvent(
-        new ValidatedEvent({
-          apiHost: "http://localhost:9999",
-          writeKey: "123456789",
-          dataset: "test-transmission",
-          sampleRate: 10,
-          timestamp: new Date(),
-          postData: JSON.stringify({ a: 1, b: 2 })
-        })
-      );
-    }
-    {
-      // send an event that fails to encode
-      let b = {};
-      b.b = b;
-      transmission.sendPresampledEvent(
-        new ValidatedEvent({
-          apiHost: "http://localhost:9999",
-          writeKey: "123456789",
-          dataset: "test-transmission",
-          sampleRate: 10,
-          timestamp: b,
-          postData: JSON.stringify({ a: 1, b: 2 })
-        })
-      );
-    }
-    for (let i = 0; i < 5; i++) {
-      transmission.sendPresampledEvent(
-        new ValidatedEvent({
-          apiHost: "http://localhost:9999",
-          writeKey: "123456789",
-          dataset: "test-transmission",
-          sampleRate: 10,
-          timestamp: new Date(),
-          postData: JSON.stringify({ a: 1, b: 2 })
-        })
-      );
-    }
-  });
-
   it("should allow user-agent additions", done => {
     let responseCount = 0;
     let responseExpected = 2;
@@ -479,22 +416,20 @@ describe("base transmission", () => {
       {
         dataset: "test-transmission1",
         addition: "",
-        probe: userAgent =>
-          userAgent.indexOf("libhoney") === 0 &&
-          userAgent.indexOf("addition") === -1
+        probe: (userAgent: string) =>
+          userAgent.indexOf("libhoney") === 0 && userAgent.indexOf("addition") === -1
       },
       {
         dataset: "test-transmission2",
         addition: "user-agent addition",
-        probe: userAgent =>
-          userAgent.indexOf("libhoney") === 0 &&
-          userAgent.indexOf("addition") !== -1
+        probe: (userAgent: string) =>
+          userAgent.indexOf("libhoney") === 0 && userAgent.indexOf("addition") !== -1
       }
     ];
 
     // set up our endpoints
     userAgents.forEach(userAgent =>
-      mock.post(`http://localhost:9999/1/batch/${userAgent.dataset}`, req => {
+      mock.post(`http://localhost:9999/1/batch/${userAgent.dataset}`, (req: any) => {
         if (!userAgent.probe(req.headers["user-agent"])) {
           done(new Error("unexpected user-agent addition"));
         }
@@ -502,12 +437,12 @@ describe("base transmission", () => {
       })
     );
 
-    // now send our events through separate transmissions with different user
-    // agent additions.
+    // now send our events through separate transmissions with different UA
+    // additions
     userAgents.forEach(userAgent => {
-      let transmission = new Transmission({
+      let transmission = new BaseTransmission({
         batchSizeTrigger: 1, // so we'll send individual events
-        responseCallback(queue) {
+        responseCallback(queue: any[]) {
           let responses = queue.splice(0, queue.length);
           responseCount += responses.length;
           if (responseCount === responseExpected) {

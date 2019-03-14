@@ -7,25 +7,32 @@
  * @module
  */
 import {
-  MockTransmission,
-  NullTransmission,
+  // eslint-disable-next-line no-unused-vars
   Transmission,
+  // eslint-disable-next-line no-unused-vars
+  TransmissionOptions,
   ValidatedEvent,
-  WriterTransmission
+  getAndInitTransmission
 } from "./transmission";
 import Builder from "./builder";
 
 import { EventEmitter } from "events";
+// eslint-disable-next-line no-unused-vars
+import HoneycombEvent from "./event";
 
-const defaults = Object.freeze({
-  apiHost: "https://api.honeycomb.io/",
+interface LibhoneyOptions {
+  apiHost?: string;
+
+  writeKey?: string;
+
+  dataset?: string;
 
   // http
-  proxy: undefined,
+  proxy?: string;
 
   // sample rate of data.  causes us to send 1/sample-rate of events
   // i.e. `sampleRate: 10` means we only send 1/10th the events.
-  sampleRate: 1,
+  sampleRate?: number;
 
   // transmission constructor, or a string to pick one of our builtin versions.
   // we fall back to the base impl if worker or a custom implementation throws on init.
@@ -35,26 +42,40 @@ const defaults = Object.freeze({
   //  - "mock": an implementation that accumulates all events sent
   //  - "writer": an implementation that logs to the console all events sent
   //  - "null": an implementation that does nothing
-  transmission: "base",
+  transmission?: string;
 
   // batch triggers
-  batchSizeTrigger: 50, // we send a batch to the api when we have this many outstanding events
-  batchTimeTrigger: 100, // ... or after this many ms has passed.
+  batchSizeTrigger?: number; // we send a batch to the api when we have this many outstanding events
+  batchTimeTrigger?: number; // ... or after this many ms has passed.
 
   // batches are sent serially (one event at a time), so we allow multiple concurrent batches
   // to increase parallelism while sending.
-  maxConcurrentBatches: 10,
+  maxConcurrentBatches?: number;
 
   // the maximum number of pending events we allow in our to-be-batched-and-transmitted queue before dropping them.
-  pendingWorkCapacity: 10000,
+  pendingWorkCapacity?: number;
 
   // the maximum number of responses we enqueue before we begin dropping them.
-  maxResponseQueueSize: 1000,
+  maxResponseQueueSize?: number;
 
   // if this is set to true, all sending is disabled.  useful for disabling libhoney when testing
-  disabled: false,
+  disabled?: boolean;
 
   // If this is non-empty, append it to the end of the User-Agent header.
+  userAgentAddition?: string;
+}
+
+const libhoneyOptionsDefaults: LibhoneyOptions = Object.freeze({
+  apiHost: "https://api.honeycomb.io/",
+  proxy: undefined,
+  sampleRate: 1,
+  transmission: "base",
+  batchSizeTrigger: 50, 
+  batchTimeTrigger: 100, 
+  maxConcurrentBatches: 10,
+  pendingWorkCapacity: 10000,
+  maxResponseQueueSize: 1000,
+  disabled: false,
   userAgentAddition: ""
 });
 
@@ -65,6 +86,12 @@ const defaults = Object.freeze({
  * @class
  */
 export default class Libhoney extends EventEmitter {
+  private _options: LibhoneyOptions;
+  private _transmission: Transmission;
+  private _usable: boolean;
+  private _builder: Builder;
+  private _responseQueue: any[];  // TODO: Is this 'Event[]'?
+
   /**
    * Constructs a libhoney context in order to configure default behavior,
    * though each of its members (`apiHost`, `writeKey`, `dataset`, and
@@ -91,17 +118,14 @@ export default class Libhoney extends EventEmitter {
    *   // disabled: true // uncomment when testing or in development
    * });
    */
-  constructor(opts) {
+  public constructor(opts?: LibhoneyOptions) {
     super();
     this._options = Object.assign(
       { responseCallback: this._responseCallback.bind(this) },
-      defaults,
+      libhoneyOptionsDefaults,
       opts
     );
-    this._transmission = getAndInitTransmission(
-      this._options.transmission,
-      this._options
-    );
+    this._transmission = getAndInitTransmission(this._options.transmission, this._options as TransmissionOptions);
     this._usable = this._transmission !== null;
     this._builder = new Builder(this);
 
@@ -113,7 +137,7 @@ export default class Libhoney extends EventEmitter {
     this._responseQueue = [];
   }
 
-  _responseCallback(responses) {
+  private _responseCallback(responses: any[]): void {
     let queue = this._responseQueue;
     if (queue.length < this._options.maxResponseQueueSize) {
       this._responseQueue = this._responseQueue.concat(responses);
@@ -125,7 +149,7 @@ export default class Libhoney extends EventEmitter {
    * The transmission implementation in use for this libhoney instance.  Useful when mocking libhoney (specify
    * "mock" for options.transmission, and use this field to get at the list of events sent through libhoney.)
    */
-  get transmission() {
+  public get transmission(): Transmission  {
     return this._transmission;
   }
 
@@ -135,7 +159,7 @@ export default class Libhoney extends EventEmitter {
    *
    * @type {string}
    */
-  set apiHost(v) {
+  public set apiHost(v: string) {
     this._builder.apiHost = v;
   }
   /**
@@ -144,7 +168,7 @@ export default class Libhoney extends EventEmitter {
    *
    * @type {string}
    */
-  get apiHost() {
+  public get apiHost(): string {
     return this._builder.apiHost;
   }
 
@@ -155,7 +179,7 @@ export default class Libhoney extends EventEmitter {
    *
    * @type {string}
    */
-  set writeKey(v) {
+  public set writeKey(v) {
     this._builder.writeKey = v;
   }
   /**
@@ -165,7 +189,7 @@ export default class Libhoney extends EventEmitter {
    *
    * @type {string}
    */
-  get writeKey() {
+  public get writeKey(): string {
     return this._builder.writeKey;
   }
 
@@ -176,7 +200,7 @@ export default class Libhoney extends EventEmitter {
    *
    * @type {string}
    */
-  set dataset(v) {
+  public set dataset(v) {
     this._builder.dataset = v;
   }
   /**
@@ -186,7 +210,7 @@ export default class Libhoney extends EventEmitter {
    *
    * @type {string}
    */
-  get dataset() {
+  public get dataset(): string {
     return this._builder.dataset;
   }
 
@@ -196,7 +220,7 @@ export default class Libhoney extends EventEmitter {
    *
    * @type {number}
    */
-  set sampleRate(v) {
+  public set sampleRate(v) {
     this._builder.sampleRate = v;
   }
   /**
@@ -205,7 +229,7 @@ export default class Libhoney extends EventEmitter {
    *
    * @type {number}
    */
-  get sampleRate() {
+  public get sampleRate(): number {
     return this._builder.sampleRate;
   }
 
@@ -222,9 +246,8 @@ export default class Libhoney extends EventEmitter {
    *
    * Sampling is done based on the supplied sampleRate, so events passed to this method might not
    * actually be sent to Honeycomb.
-   * @private
    */
-  sendEvent(event) {
+  public sendEvent(event: HoneycombEvent): void {
     let transmitEvent = this.validateEvent(event);
     if (!transmitEvent) {
       return;
@@ -248,7 +271,7 @@ export default class Libhoney extends EventEmitter {
    * are sent to Honeycomb.
    * @private
    */
-  sendPresampledEvent(event) {
+  public sendPresampledEvent(event: HoneycombEvent): void {
     let transmitEvent = this.validateEvent(event);
     if (!transmitEvent) {
       return;
@@ -264,7 +287,7 @@ export default class Libhoney extends EventEmitter {
    *                   the event was invalid in some way or unable to be sent.
    * @private
    */
-  validateEvent(event) {
+  private validateEvent(event: HoneycombEvent): ValidatedEvent | null {
     if (!this._usable) return null;
 
     let timestamp = event.timestamp || Date.now();
@@ -334,7 +357,7 @@ export default class Libhoney extends EventEmitter {
    *   map.set("env", "staging");
    *   honey.add (map);
    */
-  add(data) {
+  public add(data: object | Map<string, any> ): Libhoney {
     this._builder.add(data);
     return this;
   }
@@ -347,7 +370,7 @@ export default class Libhoney extends EventEmitter {
    * @example
    *   honey.addField("build_id", "a6cc38a1");
    */
-  addField(name, val) {
+  public addField(name: string, val: any): Libhoney {
     this._builder.addField(name, val);
     return this;
   }
@@ -360,7 +383,7 @@ export default class Libhoney extends EventEmitter {
    * @example
    *   honey.addDynamicField("process_heapUsed", () => process.memoryUsage().heapUsed);
    */
-  addDynamicField(name, fn) {
+  public addDynamicField(name: string, fn: () => any): Libhoney {
     this._builder.addDynamicField(name, fn);
     return this;
   }
@@ -379,19 +402,19 @@ export default class Libhoney extends EventEmitter {
    *   map.set("httpStatusCode", 200);
    *   honey.sendNow (map);
    */
-  sendNow(data) {
+  public sendNow(data: object | Map<string, any>): void {
     return this._builder.sendNow(data);
   }
 
   /**
-   * creates and returns a new Event containing all fields/dynFields from the global Builder, that can be further fleshed out and sent on its own.
-   * @returns {Event} an Event instance
+   * creates and returns a new Event containing all fields/dyn_fields from the global Builder, that can be further fleshed out and sent on its own.
+   * @returns {HoneycombEvent} an Event instance
    * @example <caption>adding data at send-time</caption>
    *   let ev = honey.newEvent();
    *   ev.addField("additionalField", value);
    *   ev.send();
    */
-  newEvent() {
+  public newEvent(): HoneycombEvent {
     return this._builder.newEvent();
   }
 
@@ -408,76 +431,7 @@ export default class Libhoney extends EventEmitter {
    *                                    process_heapUsed: () => process.memoryUsage().heapUsed
    *                                  });
    */
-  newBuilder(fields, dynFields) {
+  public newBuilder(fields?: object|Map<string, any>, dynFields?: object|Map<string, Function>): Builder {
     return this._builder.newBuilder(fields, dynFields);
   }
-}
-
-const getTransmissionClass = transmissionClassName => {
-  switch (transmissionClassName) {
-    case "base":
-      return Transmission;
-    case "mock":
-      return MockTransmission;
-    case "null":
-      return NullTransmission;
-    case "worker":
-      console.warn(
-        "worker implementation not ready yet.  using base implementation"
-      );
-      return Transmission;
-    case "writer":
-      return WriterTransmission;
-    default:
-      throw new Error(
-        `unknown transmission implementation "${transmissionClassName}".`
-      );
-  }
-};
-
-function getAndInitTransmission(transmission, options) {
-  if (options.disabled) {
-    return null;
-  }
-
-  if (typeof transmission === "string") {
-    const transmissionClass = getTransmissionClass(transmission);
-    return new transmissionClass(options);
-  } else if (typeof transmission !== "function") {
-    throw new Error(
-      ".transmission must be one of 'base'/'worker'/'mock'/'writer'/'null' or a constructor."
-    );
-  }
-
-  try {
-    return new transmission(options);
-  } catch (initialisationError) {
-    if (transmission === Transmission) {
-      throw new Error(
-        "unable to initialize base transmission implementation.",
-        initialisationError
-      );
-    }
-
-    console.warn(
-      "failed to initialize transmission, falling back to base implementation."
-    );
-    try {
-      return new Transmission(options);
-    } catch (fallbackInitialisationError) {
-      throw new Error(
-        "unable to initialize base transmission implementation.",
-        fallbackInitialisationError
-      );
-    }
-  }
-}
-
-// this will absolutely go away with the next major version bump.  right now in normal node (CJS) usage,
-// users have to do:  `let Libhoney = require("libhoney").default;`
-//
-// switching to rollup fixes that (yay!) but we need to keep it working until  we do the major bump.  hence
-// this hack.
-if (typeof module !== "undefined") {
-  Object.defineProperty(Libhoney, "default", { value: Libhoney });
 }

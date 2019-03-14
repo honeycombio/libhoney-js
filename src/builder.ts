@@ -1,3 +1,4 @@
+/* eslint-disable sort-imports */
 // Copyright 2016 Hound Technology, Inc. All rights reserved.
 // Use of this source code is governed by the Apache License 2.0
 // license that can be found in the LICENSE file.
@@ -7,17 +8,24 @@
  */
 import Event from "./event";
 import foreach from "./foreach";
+// eslint-disable-next-line no-unused-vars
+import Libhoney from "./libhoney";
 
 /**
  * Allows piecemeal creation of events.
  * @class
  */
 export default class Builder {
-  /**
-   * @constructor
-   * @private
-   */
-  constructor(libhoney, fields, dynFields) {
+  public apiHost: string;
+  public writeKey: string;
+  public dataset: string;
+  public sampleRate: number;
+  private _libhoney: any;
+  public _fields: any;
+  public _dynFields: any;
+
+
+  public constructor(libhoney: Libhoney, fields?: object|Map<string, any>, dynFields?: object|Map<string, Function>) {
     this._libhoney = libhoney;
     this._fields = Object.create(null);
     this._dynFields = Object.create(null);
@@ -25,36 +33,28 @@ export default class Builder {
     /**
      * The hostname for the Honeycomb API server to which to send events created through this
      * builder.  default: https://api.honeycomb.io/
-     *
-     * @type {string}
      */
     this.apiHost = "";
     /**
      * The Honeycomb authentication token. If it is set on a libhoney instance it will be used as the
      * default write key for all events. If absent, it must be explicitly set on a Builder or
      * Event. Find your team write key at https://ui.honeycomb.io/account
-     *
-     * @type {string}
      */
     this.writeKey = "";
     /**
      * The name of the Honeycomb dataset to which to send these events.  If it is specified during
      * libhoney initialization, it will be used as the default dataset for all events. If absent,
      * dataset must be explicitly set on a builder or event.
-     *
-     * @type {string}
      */
     this.dataset = "";
     /**
      * The rate at which to sample events. Default is 1, meaning no sampling. If you want to send one
      * event out of every 250 times send() is called, you would specify 250 here.
-     *
-     * @type {number}
      */
     this.sampleRate = 1;
 
-    foreach(fields, (v, k) => this.addField(k, v));
-    foreach(dynFields, (v, k) => this.addDynamicField(k, v));
+    foreach(fields, (v: any, k: string) => this.addField(k, v));
+    foreach(dynFields, (v: any, k: string) => this.addDynamicField(k, v));
   }
 
   /**
@@ -74,8 +74,8 @@ export default class Builder {
    *   map.set("depth", 200);
    *   builder.add (map);
    */
-  add(data) {
-    foreach(data, (v, k) => this.addField(k, v));
+  public add(data: object | Map<string, any>): Builder {
+    foreach(data, (v: any, k: string) => this.addField(k, v));
     return this;
   }
 
@@ -87,10 +87,10 @@ export default class Builder {
    * @example
    *   builder.addField("component", "web");
    */
-  addField(name, val) {
+  public addField(name: string, val: any): Builder {
     if (val === undefined) {
-      this._fields[name] = null;
-      return this;
+      // eslint-disable-next-line no-param-reassign
+      val = null;
     }
     this._fields[name] = val;
     return this;
@@ -104,8 +104,9 @@ export default class Builder {
    * @example
    *   builder.addDynamicField("process_heapUsed", () => process.memoryUsage().heapUsed);
    */
-  addDynamicField(name, fn) {
+  public addDynamicField(name: string, fn: () => (string|boolean|number)): Builder {
     this._dynFields[name] = fn;
+    return this;
   }
 
   /**
@@ -118,7 +119,7 @@ export default class Builder {
    *     additionalField: value
    *   });
    */
-  sendNow(data) {
+  public sendNow(data: object | Map<string, any>): void {
     let ev = this.newEvent();
     ev.add(data);
     ev.send();
@@ -132,7 +133,7 @@ export default class Builder {
    *   ev.addField("additionalField", value);
    *   ev.send();
    */
-  newEvent() {
+  public newEvent(): Event {
     let ev = new Event(this._libhoney, this._fields, this._dynFields);
     ev.apiHost = this.apiHost;
     ev.writeKey = this.writeKey;
@@ -154,11 +155,11 @@ export default class Builder {
    *                                             process_heapUsed: () => process.memoryUsage().heapUsed
    *                                           });
    */
-  newBuilder(fields, dynFields) {
+  public newBuilder(fields: object | Map<string, any>, dynFields: object | Map<string, Function>): Builder {
     let b = new Builder(this._libhoney, this._fields, this._dynFields);
 
-    foreach(fields, (v, k) => b.addField(k, v));
-    foreach(dynFields, (v, k) => b.addDynamicField(k, v));
+    foreach(fields, (v: any, k: string) => b.addField(k, v));
+    foreach(dynFields, (v: any, k: string) => b.addDynamicField(k, v));
 
     b.apiHost = this.apiHost;
     b.writeKey = this.writeKey;

@@ -6,17 +6,27 @@
  * @module
  */
 import foreach from "./foreach";
+// eslint-disable-next-line sort-imports, no-unused-vars
+import Libhoney from "./libhoney";
 
 /**
  * Represents an individual event to send to Honeycomb.
  * @class
  */
 export default class Event {
+  private _libhoney: Libhoney;
+  public data: any;
+  public metadata: any;
+  public apiHost: string;
+  public writeKey: string;
+  public dataset: string;
+  public sampleRate: number;
+  public timestamp: Date
   /**
    * @constructor
    * private
    */
-  constructor(libhoney, fields, dynFields) {
+  public constructor(libhoney: Libhoney, fields: any, dynFields: any) {
     this.data = Object.create(null);
     this.metadata = null;
 
@@ -55,8 +65,8 @@ export default class Event {
      */
     this.timestamp = null;
 
-    foreach(fields, (v, k) => this.addField(k, v));
-    foreach(dynFields, (v, k) => this.addField(k, v()));
+    foreach(fields, (v: any, k: string) => this.addField(k, v));
+    foreach(dynFields, (v: any, k: string) => this.addField(k, v())); // NOTE: What does v return? Currently my type suggests void but if we are storing something I think it needs to be string|number|boolean
 
     // stash this away for .send()
     this._libhoney = libhoney;
@@ -81,8 +91,8 @@ export default class Event {
    *   event.add (map);
    *   event.send();
    */
-  add(data) {
-    foreach(data, (v, k) => this.addField(k, v));
+  public add(data: object | Map<string, any>): Event {
+    foreach(data, (v: any, k: string) => this.addField(k, v));
     return this;
   }
 
@@ -96,10 +106,10 @@ export default class Event {
    *     .addField("responseTime_ms", 100)
    *     .send();
    */
-  addField(name, val) {
+  public addField(name: string, val: any): Event {
     if (val === undefined) {
-      this.data[name] = null;
-      return this;
+      // eslint-disable-next-line no-param-reassign
+      val = null;
     }
     this.data[name] = val;
     return this;
@@ -110,7 +120,7 @@ export default class Event {
    * @param {any} md
    * @returns {Event} this event.
    */
-  addMetadata(md) {
+  public addMetadata(md: any): Event {
     this.metadata = md;
     return this;
   }
@@ -118,7 +128,7 @@ export default class Event {
   /**
    * Sends this event to honeycomb, sampling if necessary.
    */
-  send() {
+  public send(): void {
     this._libhoney.sendEvent(this);
   }
 
@@ -126,7 +136,7 @@ export default class Event {
    * Dispatch an event to be sent to Honeycomb.  Assumes sampling has already happened,
    * and will send every event handed to it.
    */
-  sendPresampled() {
+  public sendPresampled(): void {
     this._libhoney.sendPresampledEvent(this);
   }
 }

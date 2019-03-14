@@ -1,25 +1,11 @@
 /* eslint-env node, jest */
 import libhoney from "../libhoney";
+import superagent from "superagent";
+import superagentMocker from "superagent-mocker";
 
-let superagent = require("superagent");
-let mock = require("superagent-mocker")(superagent);
+let mock = superagentMocker(superagent);
 
 describe("libhoney", () => {
-  describe("constructor options", () => {
-    it("should be communicated to transmission constructor", () => {
-      let options = { a: 1, b: 2, c: 3, d: 4, transmission: "mock" };
-
-      let honey = new libhoney(options);
-
-      let transmission = honey.transmission;
-
-      expect(options.a).toEqual(transmission.constructorArg.a);
-      expect(options.b).toEqual(transmission.constructorArg.b);
-      expect(options.c).toEqual(transmission.constructorArg.c);
-      expect(options.d).toEqual(transmission.constructorArg.d);
-    });
-  });
-
   describe("event properties", () => {
     it("should ultimately fallback to hardcoded defaults", () => {
       let honey = new libhoney({
@@ -65,7 +51,7 @@ describe("libhoney", () => {
 
   describe("response queue", () => {
     it("should enqueue a maximum of maxResponseQueueSize, dropping new responses (not old)", done => {
-      mock.post("http://localhost:9999/1/events/testResponseQueue", _req => {
+      mock.post("http://localhost:9999/1/events/testResponseQueue", (_req: any) => {
         return {};
       });
 
@@ -87,7 +73,7 @@ describe("libhoney", () => {
 
         queueFullCount++;
         if (queueFullCount === 2) {
-          queue.sort((a, b) => a.metadata - b.metadata);
+          queue.sort((a: { metadata: any }, b: { metadata: any}) => a.metadata - b.metadata);
           expect(queue[0].metadata).toEqual(0);
           expect(queue[queueSize - 1].metadata).toEqual(queueSize - 1);
           done();
