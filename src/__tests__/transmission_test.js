@@ -1,6 +1,5 @@
 /* eslint-env node, jest */
 import net from "net";
-import assert from "assert";
 import { Transmission, ValidatedEvent } from "../transmission";
 
 let superagent = require("superagent");
@@ -111,7 +110,7 @@ describe("base transmission", function() {
     var transmission = new Transmission({
       batchTimeTrigger: 0,
       responseCallback: function(_resp) {
-        assert.equal(true, endpointHit);
+        expect(endpointHit).toBe(true);
         done();
       }
     });
@@ -250,7 +249,7 @@ describe("base transmission", function() {
           postData: JSON.stringify({ a: 1, b: 2 })
         })
       );
-      assert.equal(true, eventDropped);
+      expect(eventDropped).toBe(true);
     }
   });
 
@@ -309,8 +308,8 @@ describe("base transmission", function() {
       responseCallback(queue) {
         let responses = queue.splice(0, queue.length);
         responses.forEach(({ error, status_code }) => {
-          assert.equal(404, error.status);
-          assert.equal(404, status_code);
+          expect(error.status).toEqual(404);
+          expect(status_code).toEqual(404);
           responseCount++;
           if (responseCount == responseExpected) {
             done();
