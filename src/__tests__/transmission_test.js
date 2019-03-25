@@ -479,34 +479,38 @@ describe("base transmission", function() {
     var responseCount = 0;
     var responseExpected = 2;
 
-    var UAs = [
+    var userAgents = [
       {
         dataset: "test-transmission1",
         addition: "",
-        probe: ua =>
-          ua.indexOf("libhoney") === 0 && ua.indexOf("addition") === -1
+        probe: userAgent =>
+          userAgent.indexOf("libhoney") === 0 &&
+          userAgent.indexOf("addition") === -1
       },
       {
         dataset: "test-transmission2",
         addition: "user-agent addition",
-        probe: ua =>
-          ua.indexOf("libhoney") === 0 && ua.indexOf("addition") !== -1
+        probe: userAgent =>
+          userAgent.indexOf("libhoney") === 0 &&
+          userAgent.indexOf("addition") !== -1
       }
     ];
 
     // set up our endpoints
-    UAs.forEach(ua =>
-      mock.post(`http://localhost:9999/1/batch/${ua.dataset}`, function(req) {
-        if (!ua.probe(req.headers["user-agent"])) {
+    userAgents.forEach(userAgent =>
+      mock.post(`http://localhost:9999/1/batch/${userAgent.dataset}`, function(
+        req
+      ) {
+        if (!userAgent.probe(req.headers["user-agent"])) {
           done(new Error("unexpected user-agent addition"));
         }
         return {};
       })
     );
 
-    // now send our events through separate transmissions with different UA
-    // additions
-    UAs.forEach(ua => {
+    // now send our events through separate transmissions with different user
+    // agent additions.
+    userAgents.forEach(userAgent => {
       var transmission = new Transmission({
         batchSizeTrigger: 1, // so we'll send individual events
         responseCallback(queue) {
@@ -516,14 +520,14 @@ describe("base transmission", function() {
             done();
           }
         },
-        userAgentAddition: ua.addition
+        userAgentAddition: userAgent.addition
       });
 
       transmission.sendPresampledEvent(
         new ValidatedEvent({
           apiHost: "http://localhost:9999",
           writeKey: "123456789",
-          dataset: ua.dataset,
+          dataset: userAgent.dataset,
           sampleRate: 1,
           timestamp: new Date(),
           postData: JSON.stringify({ a: 1, b: 2 })
