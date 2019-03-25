@@ -238,8 +238,7 @@ describe("base transmission", function() {
     }
 
     // send the events we expect to drop.  Since JS is single threaded we can
-    // verify that
-    // droppedCount behaves the way we want
+    // verify that droppedCount behaves the way we want.
     for (let i = 0; i < droppedExpected; i++) {
       eventDropped = false;
       transmission.sendEvent(
