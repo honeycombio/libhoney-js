@@ -64,7 +64,7 @@ describe("base transmission", function() {
 
   it("should send a batch when batchSizeTrigger is met, not exceeded", function(done) {
     var responseCount = 0;
-    var responseExpected = 5;
+    var batchSize = 5;
 
     mock.post("http://localhost:9999/1/batch/test-transmission", function(req) {
       let reqEvents = JSON.parse(req.body);
@@ -78,13 +78,16 @@ describe("base transmission", function() {
       responseCallback(queue) {
         responseCount += queue.length;
         queue.splice(0, queue.length);
-        if (responseCount == responseExpected) {
-          done();
-        }
+        return responseCount == batchSize
+          ? done()
+          : done(
+              `The events dispatched over transmission does not align with batch size when the same number of ` +
+                `events were enqueued as the batchSizeTrigger. Expected ${batchSize}, got ${responseCount}.`
+            );
       }
     });
 
-    for (let i = 0; i < responseExpected; i++) {
+    for (let i = 0; i < batchSize; i++) {
       transmission.sendEvent(
         new ValidatedEvent({
           apiHost: "http://localhost:9999",
@@ -419,13 +422,14 @@ describe("base transmission", function() {
 
     var transmission = new Transmission({
       responseCallback(queue) {
-        let responses = queue.splice(0, queue.length);
-        responses.forEach(_resp => {
-          responseCount++;
-          if (responseCount == responseExpected) {
-            done();
-          }
-        });
+        responseCount = queue.length;
+        return responseCount === responseExpected
+          ? done()
+          : done(
+              Error(
+                "Incorrect queue length. Queue should equal length of all valid and invalid events enqueued."
+              )
+            );
       }
     });
 
