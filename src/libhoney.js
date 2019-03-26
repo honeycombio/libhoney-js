@@ -451,11 +451,11 @@ function getAndInitTransmission(transmission, options) {
 
   try {
     return new transmission(options);
-  } catch (e) {
+  } catch (initialisationError) {
     if (transmission === Transmission) {
       throw new Error(
         "unable to initialize base transmission implementation.",
-        e
+        initialisationError
       );
     }
 
@@ -464,10 +464,10 @@ function getAndInitTransmission(transmission, options) {
     );
     try {
       return new Transmission(options);
-    } catch (e) {
+    } catch (fallbackInitialisationError) {
       throw new Error(
         "unable to initialize base transmission implementation.",
-        e
+        fallbackInitialisationError
       );
     }
   }

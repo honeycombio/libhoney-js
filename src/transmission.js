@@ -245,9 +245,9 @@ export class Transmission {
 
     this._batchCount++;
 
-    let batch = this._eventQueue.splice(0, this._batchSizeTrigger);
-
-    let batchAgg = new BatchEndpointAggregator(batch);
+    let batchAgg = new BatchEndpointAggregator(
+      this._eventQueue.splice(0, this._batchSizeTrigger)
+    );
 
     const finishBatch = () => {
       this._batchCount--;
@@ -321,13 +321,13 @@ export class Transmission {
                       error: ev.encodeError
                     };
                   } else {
-                    let res = response[respIdx++];
+                    let nextResponse = response[respIdx++];
                     return {
                       // eslint-disable-next-line camelcase
-                      status_code: res.status,
+                      status_code: nextResponse.status,
                       duration: end - start,
                       metadata: ev.metadata,
-                      error: res.err
+                      error: nextResponse.err
                     };
                   }
                 })

@@ -19,6 +19,7 @@
     "quotes": "error",
     "camelcase": "error",
     "sort-imports": "error",
-    "no-param-reassign": "error"
+    "no-param-reassign": "error",
+    "no-shadow": "error"
   }
 }

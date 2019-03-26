@@ -444,15 +444,15 @@ describe("base transmission", () => {
     }
     {
       // send an event that fails to encode
-      let a = {};
-      a.a = a;
+      let b = {};
+      b.b = b;
       transmission.sendPresampledEvent(
         new ValidatedEvent({
           apiHost: "http://localhost:9999",
           writeKey: "123456789",
           dataset: "test-transmission",
           sampleRate: 10,
-          timestamp: a,
+          timestamp: b,
           postData: JSON.stringify({ a: 1, b: 2 })
         })
       );
