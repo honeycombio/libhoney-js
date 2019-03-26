@@ -14,6 +14,7 @@
     "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "prefer-arrow-callback": "error",
     "no-var": "error",
-    "eqeqeq": "error"
+    "eqeqeq": "error",
+    "comma-dangle": "error"
   }
 }
