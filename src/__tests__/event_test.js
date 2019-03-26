@@ -1,10 +1,10 @@
 /* eslint-env node, jest */
 import libhoney from "../libhoney";
 
-describe("libhoney events", function() {
+describe("libhoney events", () => {
   var hny = new libhoney();
 
-  it("inherit fields and dyn_fields from builder", function() {
+  it("inherit fields and dyn_fields from builder", () => {
     var b = hny.newBuilder(
       { a: 5 },
       {
@@ -19,7 +19,7 @@ describe("libhoney events", function() {
     expect(ev.data.b).toEqual(3);
   });
 
-  it("accepts dict-like arguments to .add()", function() {
+  it("accepts dict-like arguments to .add()", () => {
     var b = hny.newBuilder();
     var ev = b.newEvent();
 
@@ -33,7 +33,7 @@ describe("libhoney events", function() {
     expect(ev2.data.a).toEqual(5);
   });
 
-  it("it toString()'s keys from Maps in .add()", function() {
+  it("it toString()'s keys from Maps in .add()", () => {
     var b = hny.newBuilder();
     var ev = b.newEvent();
 
@@ -51,7 +51,7 @@ describe("libhoney events", function() {
     expect(ev.data.hello).toEqual(5);
   });
 
-  it("doesn't stringify object values", function() {
+  it("doesn't stringify object values", () => {
     var postData = { c: { a: 1 } };
 
     var ev = hny.newEvent();
@@ -61,7 +61,7 @@ describe("libhoney events", function() {
     expect(JSON.stringify(ev.data)).toEqual(JSON.stringify(postData));
   });
 
-  it("converts all values to primitive types in .add/.addField", function() {
+  it("converts all values to primitive types in .add/.addField", () => {
     var b = hny.newBuilder();
     var ev;
     var map;

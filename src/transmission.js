@@ -33,8 +33,8 @@ const pendingWorkCapacity = 10000;
 const emptyResponseCallback = function() {};
 
 const eachPromise = (arr, iteratorFn) =>
-  arr.reduce(function(p, item) {
-    return p.then(function() {
+  arr.reduce((p, item) => {
+    return p.then(() => {
       return iteratorFn(item);
     });
   }, Promise.resolve());

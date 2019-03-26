@@ -5,9 +5,9 @@ import { Transmission, ValidatedEvent } from "../transmission";
 let superagent = require("superagent");
 let mock = require("superagent-mocker")(superagent);
 
-describe("base transmission", function() {
-  it("will hit a proxy", function(done) {
-    let server = net.createServer(function(socket) {
+describe("base transmission", () => {
+  it("will hit a proxy", done => {
+    let server = net.createServer(socket => {
       socket.end();
       server.unref();
       done();
@@ -33,10 +33,8 @@ describe("base transmission", function() {
     );
   });
 
-  it("should handle batchSizeTrigger of 0", function(done) {
-    mock.post("http://localhost:9999/1/events/test-transmission", function(
-      req
-    ) {
+  it("should handle batchSizeTrigger of 0", done => {
+    mock.post("http://localhost:9999/1/events/test-transmission", req => {
       let reqEvents = JSON.parse(req.body);
       let resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
@@ -62,11 +60,11 @@ describe("base transmission", function() {
     );
   });
 
-  it("should send a batch when batchSizeTrigger is met, not exceeded", function(done) {
+  it("should send a batch when batchSizeTrigger is met, not exceeded", done => {
     var responseCount = 0;
     var batchSize = 5;
 
-    mock.post("http://localhost:9999/1/batch/test-transmission", function(req) {
+    mock.post("http://localhost:9999/1/batch/test-transmission", req => {
       let reqEvents = JSON.parse(req.body);
       let resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
@@ -101,9 +99,9 @@ describe("base transmission", function() {
     }
   });
 
-  it("should handle apiHosts with trailing slashes", function(done) {
+  it("should handle apiHosts with trailing slashes", done => {
     let endpointHit = false;
-    mock.post("http://localhost:9999/1/batch/test-transmission", function(req) {
+    mock.post("http://localhost:9999/1/batch/test-transmission", req => {
       endpointHit = true;
       let reqEvents = JSON.parse(req.body);
       let resp = reqEvents.map(() => ({ status: 202 }));
@@ -130,7 +128,7 @@ describe("base transmission", function() {
     );
   });
 
-  it("should eventually send a single event (after the timeout)", function(done) {
+  it("should eventually send a single event (after the timeout)", done => {
     var transmission = new Transmission({
       batchTimeTrigger: 10,
       responseCallback: function(_resp) {
@@ -150,7 +148,7 @@ describe("base transmission", function() {
     );
   });
 
-  it("should respect sample rate and accept the event", function(done) {
+  it("should respect sample rate and accept the event", done => {
     var transmission = new Transmission({
       batchTimeTrigger: 10,
       responseCallback: function(_resp) {
@@ -173,7 +171,7 @@ describe("base transmission", function() {
     );
   });
 
-  it("should respect sample rate and drop the event", function(done) {
+  it("should respect sample rate and drop the event", done => {
     var transmission = new Transmission({ batchTimeTrigger: 10 });
 
     transmission._randomFn = function() {
@@ -195,13 +193,13 @@ describe("base transmission", function() {
     );
   });
 
-  it("should drop events beyond the pendingWorkCapacity", function(done) {
+  it("should drop events beyond the pendingWorkCapacity", done => {
     var eventDropped;
     var droppedExpected = 5;
     var responseCount = 0;
     var responseExpected = 5;
 
-    mock.post("http://localhost:9999/1/batch/test-transmission", function(req) {
+    mock.post("http://localhost:9999/1/batch/test-transmission", req => {
       let reqEvents = JSON.parse(req.body);
       let resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
@@ -255,11 +253,11 @@ describe("base transmission", function() {
     }
   });
 
-  it("should send the right number events even if it requires multiple concurrent batches", function(done) {
+  it("should send the right number events even if it requires multiple concurrent batches", done => {
     var responseCount = 0;
     var responseExpected = 10;
 
-    mock.post("http://localhost:9999/1/batch/test-transmission", function(req) {
+    mock.post("http://localhost:9999/1/batch/test-transmission", req => {
       let reqEvents = JSON.parse(req.body);
       let resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
@@ -292,13 +290,11 @@ describe("base transmission", function() {
     }
   });
 
-  it("should send the right number of events even if they all fail", function(done) {
+  it("should send the right number of events even if they all fail", done => {
     var responseCount = 0;
     var responseExpected = 10;
 
-    mock.post("http://localhost:9999/1/batch/test-transmission", function(
-      _req
-    ) {
+    mock.post("http://localhost:9999/1/batch/test-transmission", _req => {
       return { status: 404 };
     });
 
@@ -334,11 +330,11 @@ describe("base transmission", function() {
     }
   });
 
-  it("should send the right number of events even it requires more batches than maxConcurrentBatch", function(done) {
+  it("should send the right number of events even it requires more batches than maxConcurrentBatch", done => {
     var responseCount = 0;
     var responseExpected = 50;
     var batchSize = 2;
-    mock.post("http://localhost:9999/1/batch/test-transmission", function(req) {
+    mock.post("http://localhost:9999/1/batch/test-transmission", req => {
       let reqEvents = JSON.parse(req.body);
       let resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
@@ -371,10 +367,10 @@ describe("base transmission", function() {
     }
   });
 
-  it("should send 100% of presampled events", function(done) {
+  it("should send 100% of presampled events", done => {
     var responseCount = 0;
     var responseExpected = 10;
-    mock.post("http://localhost:9999/1/batch/test-transmission", function(req) {
+    mock.post("http://localhost:9999/1/batch/test-transmission", req => {
       let reqEvents = JSON.parse(req.body);
       let resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
@@ -410,10 +406,10 @@ describe("base transmission", function() {
     }
   });
 
-  it("should deal with encoding errors", function(done) {
+  it("should deal with encoding errors", done => {
     var responseCount = 0;
     var responseExpected = 11;
-    mock.post("http://localhost:9999/1/batch/test-transmission", function(req) {
+    mock.post("http://localhost:9999/1/batch/test-transmission", req => {
       let reqEvents = JSON.parse(req.body);
       let resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
@@ -475,7 +471,7 @@ describe("base transmission", function() {
     }
   });
 
-  it("should allow user-agent additions", function(done) {
+  it("should allow user-agent additions", done => {
     var responseCount = 0;
     var responseExpected = 2;
 
@@ -498,9 +494,7 @@ describe("base transmission", function() {
 
     // set up our endpoints
     userAgents.forEach(userAgent =>
-      mock.post(`http://localhost:9999/1/batch/${userAgent.dataset}`, function(
-        req
-      ) {
+      mock.post(`http://localhost:9999/1/batch/${userAgent.dataset}`, req => {
         if (!userAgent.probe(req.headers["user-agent"])) {
           done(new Error("unexpected user-agent addition"));
         }

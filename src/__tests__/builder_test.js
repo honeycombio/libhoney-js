@@ -1,10 +1,10 @@
 /* eslint-env node, jest */
 import libhoney from "../libhoney";
 
-describe("libhoney builder", function() {
+describe("libhoney builder", () => {
   var hny = new libhoney();
 
-  it("takes fields and dynamic fields in ctor", function() {
+  it("takes fields and dynamic fields in ctor", () => {
     var b = hny.newBuilder(
       { a: 5 },
       {
@@ -20,7 +20,7 @@ describe("libhoney builder", function() {
     expect(Object.getOwnPropertyNames(b._dyn_fields)).toHaveLength(0);
   });
 
-  it("accepts dict-like arguments to .add()", function() {
+  it("accepts dict-like arguments to .add()", () => {
     var b;
     var ev;
 
@@ -37,7 +37,7 @@ describe("libhoney builder", function() {
     expect(ev.data.a).toEqual(5);
   });
 
-  it("doesn't stringify object values", function() {
+  it("doesn't stringify object values", () => {
     var honey = new libhoney({
       apiHost: "http://foo/bar",
       writeKey: "12345",
@@ -56,7 +56,7 @@ describe("libhoney builder", function() {
     expect(transmission.events[0].postData).toEqual(JSON.stringify(postData));
   });
 
-  it("includes snapshot of global fields/dyn_fields", function() {
+  it("includes snapshot of global fields/dyn_fields", () => {
     var honey = new libhoney({
       apiHost: "http://foo/bar",
       writeKey: "12345",

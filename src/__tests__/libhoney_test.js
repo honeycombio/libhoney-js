@@ -4,9 +4,9 @@ import libhoney from "../libhoney";
 let superagent = require("superagent");
 let mock = require("superagent-mocker")(superagent);
 
-describe("libhoney", function() {
-  describe("constructor options", function() {
-    it("should be communicated to transmission constructor", function() {
+describe("libhoney", () => {
+  describe("constructor options", () => {
+    it("should be communicated to transmission constructor", () => {
       var options = { a: 1, b: 2, c: 3, d: 4, transmission: "mock" };
 
       let honey = new libhoney(options);
@@ -20,8 +20,8 @@ describe("libhoney", function() {
     });
   });
 
-  describe("event properties", function() {
-    it("should ultimately fallback to hardcoded defaults", function() {
+  describe("event properties", () => {
+    it("should ultimately fallback to hardcoded defaults", () => {
       var honey = new libhoney({
         // these two properties are required
         writeKey: "12345",
@@ -44,7 +44,7 @@ describe("libhoney", function() {
       expect(transmission.events[0].postData).toEqual(JSON.stringify(postData));
     });
 
-    it("should come from libhoney options if not specified in event", function() {
+    it("should come from libhoney options if not specified in event", () => {
       var honey = new libhoney({
         apiHost: "http://foo/bar",
         writeKey: "12345",
@@ -63,11 +63,9 @@ describe("libhoney", function() {
     });
   });
 
-  describe("response queue", function() {
-    it("should enqueue a maximum of maxResponseQueueSize, dropping new responses (not old)", function(done) {
-      mock.post("http://localhost:9999/1/events/testResponseQueue", function(
-        _req
-      ) {
+  describe("response queue", () => {
+    it("should enqueue a maximum of maxResponseQueueSize, dropping new responses (not old)", done => {
+      mock.post("http://localhost:9999/1/events/testResponseQueue", _req => {
         return {};
       });
 
@@ -105,8 +103,8 @@ describe("libhoney", function() {
     });
   });
 
-  describe("disabled = true", function() {
-    it("should not hit transmission", function() {
+  describe("disabled = true", () => {
+    it("should not hit transmission", () => {
       var honey = new libhoney({
         // these two properties are required
         writeKey: "12345",
