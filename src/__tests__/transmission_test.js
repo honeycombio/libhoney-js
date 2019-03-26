@@ -1,6 +1,6 @@
 /* eslint-env node, jest */
-import net from "net";
 import { Transmission, ValidatedEvent } from "../transmission";
+import net from "net";
 
 let superagent = require("superagent");
 let mock = require("superagent-mocker")(superagent);

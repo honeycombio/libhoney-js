@@ -17,6 +17,7 @@
     "eqeqeq": "error",
     "comma-dangle": "error",
     "quotes": "error",
-    "camelcase": "error"
+    "camelcase": "error",
+    "sort-imports": "error"
   }
 }

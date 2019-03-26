@@ -7,11 +7,11 @@
  * @module
  */
 import {
-  Transmission,
   MockTransmission,
-  WriterTransmission,
   NullTransmission,
-  ValidatedEvent
+  Transmission,
+  ValidatedEvent,
+  WriterTransmission
 } from "./transmission";
 import Builder from "./builder";
 

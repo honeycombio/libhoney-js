@@ -7,8 +7,8 @@
 /**
  * @module
  */
-import superagent from "superagent";
 import proxy from "superagent-proxy";
+import superagent from "superagent";
 import urljoin from "urljoin";
 
 const USER_AGENT = "libhoney-js/<@LIBHONEY_JS_VERSION@>";
