@@ -1,5 +1,4 @@
 /* eslint-env node, jest */
-import assert from "assert";
 import libhoney from "../libhoney";
 
 describe("libhoney events", function() {
@@ -16,8 +15,8 @@ describe("libhoney events", function() {
     );
 
     var ev = b.newEvent();
-    assert.equal(5, ev.data.a);
-    assert.equal(3, ev.data.b);
+    expect(ev.data.a).toEqual(5);
+    expect(ev.data.b).toEqual(3);
   });
 
   it("accepts dict-like arguments to .add()", function() {
@@ -25,13 +24,13 @@ describe("libhoney events", function() {
     var ev = b.newEvent();
 
     ev.add({ a: 5 });
-    assert.equal(5, ev.data.a);
+    expect(ev.data.a).toEqual(5);
 
     var ev2 = b.newEvent();
     var map = new Map();
     map.set("a", 5);
     ev2.add(map);
-    assert.equal(5, ev2.data.a);
+    expect(ev2.data.a).toEqual(5);
   });
 
   it("it toString()'s keys from Maps in .add()", function() {
@@ -49,7 +48,7 @@ describe("libhoney events", function() {
     );
     ev.add(map);
 
-    assert.equal(5, ev.data.hello);
+    expect(ev.data.hello).toEqual(5);
   });
 
   it("doesn't stringify object values", function() {
@@ -59,7 +58,7 @@ describe("libhoney events", function() {
 
     ev.add(postData);
 
-    assert.equal(JSON.stringify(ev.data), JSON.stringify(postData));
+    expect(JSON.stringify(ev.data)).toEqual(JSON.stringify(postData));
   });
 
   it("converts all values to primitive types in .add/.addField", function() {
@@ -96,8 +95,7 @@ describe("libhoney events", function() {
 
     ev.add(map);
 
-    assert.equal(
-      JSON.stringify(ev.data),
+    expect(JSON.stringify(ev.data)).toEqual(
       `{"obj":{"a":1,"b":2},"String":"a:1","string":"a:1","Number":5,"number":5,"Boolean":true,"boolean":true,"Date":${JSON.stringify(
         d
       )},"null":null,"undefined":null}`
