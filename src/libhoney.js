@@ -413,36 +413,36 @@ export default class Libhoney extends EventEmitter {
   }
 }
 
+const getTransmissionClass = transmissionClassName => {
+  switch (transmissionClassName) {
+    case "base":
+      return Transmission;
+    case "mock":
+      return MockTransmission;
+    case "null":
+      return NullTransmission;
+    case "worker":
+      console.warn(
+        "worker implementation not ready yet.  using base implementation"
+      );
+      return Transmission;
+    case "writer":
+      return WriterTransmission;
+    default:
+      throw new Error(
+        `unknown transmission implementation "${transmissionClassName}".`
+      );
+  }
+};
+
 function getAndInitTransmission(transmission, options) {
   if (options.disabled) {
     return null;
   }
 
   if (typeof transmission === "string") {
-    switch (transmission) {
-      case "base":
-        transmission = Transmission;
-        break;
-      case "worker":
-        console.warn(
-          "worker implementation not ready yet.  using base implementation"
-        );
-        transmission = Transmission;
-        break;
-      case "mock":
-        transmission = MockTransmission;
-        break;
-      case "writer":
-        transmission = WriterTransmission;
-        break;
-      case "null":
-        transmission = NullTransmission;
-        break;
-      default:
-        throw new Error(
-          `unknown transmission implementation "${transmission}".`
-        );
-    }
+    const transmissionClass = getTransmissionClass(transmission);
+    return new transmissionClass(options);
   } else if (typeof transmission !== "function") {
     throw new Error(
       ".transmission must be one of 'base'/'worker'/'mock'/'writer'/'null' or a constructor."
@@ -463,7 +463,7 @@ function getAndInitTransmission(transmission, options) {
       "failed to initialize transmission, falling back to base implementation."
     );
     try {
-      transmission = new Transmission(options);
+      return new Transmission(options);
     } catch (e) {
       throw new Error(
         "unable to initialize base transmission implementation.",
@@ -471,8 +471,6 @@ function getAndInitTransmission(transmission, options) {
       );
     }
   }
-
-  return transmission;
 }
 
 // this will absolutely go away with the next major version bump.  right now in normal node (CJS) usage,

@@ -98,7 +98,8 @@ export default class Event {
    */
   addField(name, val) {
     if (val === undefined) {
-      val = null;
+      this.data[name] = null;
+      return this;
     }
     this.data[name] = val;
     return this;

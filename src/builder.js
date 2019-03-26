@@ -89,7 +89,8 @@ export default class Builder {
    */
   addField(name, val) {
     if (val === undefined) {
-      val = null;
+      this._fields[name] = null;
+      return this;
     }
     this._fields[name] = val;
     return this;

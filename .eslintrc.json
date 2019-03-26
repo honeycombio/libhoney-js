@@ -18,6 +18,7 @@
     "comma-dangle": "error",
     "quotes": "error",
     "camelcase": "error",
-    "sort-imports": "error"
+    "sort-imports": "error",
+    "no-param-reassign": "error"
   }
 }
