@@ -79,7 +79,7 @@ describe("base transmission", () => {
         return responseCount === batchSize
           ? done()
           : done(
-              `The events dispatched over transmission does not align with batch size when the same number of ` +
+              "The events dispatched over transmission does not align with batch size when the same number of " +
                 `events were enqueued as the batchSizeTrigger. Expected ${batchSize}, got ${responseCount}.`
             );
       }

@@ -15,6 +15,7 @@
     "prefer-arrow-callback": "error",
     "no-var": "error",
     "eqeqeq": "error",
-    "comma-dangle": "error"
+    "comma-dangle": "error",
+    "quotes": "error"
   }
 }
