@@ -88,7 +88,7 @@ export default class Builder {
    *   builder.addField("component", "web");
    */
   addField(name, val) {
-    if (val == undefined) {
+    if (val === undefined) {
       val = null;
     }
     this._fields[name] = val;

@@ -97,7 +97,7 @@ export default class Event {
    *     .send();
    */
   addField(name, val) {
-    if (val == undefined) {
+    if (val === undefined) {
       val = null;
     }
     this.data[name] = val;

@@ -452,7 +452,7 @@ function getAndInitTransmission(transmission, options) {
   try {
     return new transmission(options);
   } catch (e) {
-    if (transmission == Transmission) {
+    if (transmission === Transmission) {
       throw new Error(
         "unable to initialize base transmission implementation.",
         e

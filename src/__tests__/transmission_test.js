@@ -76,7 +76,7 @@ describe("base transmission", () => {
       responseCallback(queue) {
         responseCount += queue.length;
         queue.splice(0, queue.length);
-        return responseCount == batchSize
+        return responseCount === batchSize
           ? done()
           : done(
               `The events dispatched over transmission does not align with batch size when the same number of ` +
@@ -211,7 +211,7 @@ describe("base transmission", () => {
       responseCallback(queue) {
         responseCount += queue.length;
         queue.splice(0, queue.length);
-        if (responseCount == responseExpected) {
+        if (responseCount === responseExpected) {
           done();
         }
       }
@@ -270,7 +270,7 @@ describe("base transmission", () => {
       responseCallback(queue) {
         responseCount += queue.length;
         queue.splice(0, queue.length);
-        if (responseCount == responseExpected) {
+        if (responseCount === responseExpected) {
           done();
         }
       }
@@ -309,7 +309,7 @@ describe("base transmission", () => {
           expect(error.status).toEqual(404);
           expect(status_code).toEqual(404);
           responseCount++;
-          if (responseCount == responseExpected) {
+          if (responseCount === responseExpected) {
             done();
           }
         });
@@ -347,7 +347,7 @@ describe("base transmission", () => {
       responseCallback(queue) {
         responseCount += queue.length;
         queue.splice(0, queue.length);
-        if (responseCount == responseExpected) {
+        if (responseCount === responseExpected) {
           done();
         }
       }
@@ -385,7 +385,7 @@ describe("base transmission", () => {
             return;
           }
           responseCount++;
-          if (responseCount == responseExpected) {
+          if (responseCount === responseExpected) {
             done();
           }
         });

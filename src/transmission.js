@@ -178,19 +178,19 @@ export class Transmission {
     this._eventQueue = [];
     this._batchCount = 0;
 
-    if (typeof options.responseCallback == "function") {
+    if (typeof options.responseCallback === "function") {
       this._responseCallback = options.responseCallback;
     }
-    if (typeof options.batchSizeTrigger == "number") {
+    if (typeof options.batchSizeTrigger === "number") {
       this._batchSizeTrigger = Math.max(options.batchSizeTrigger, 1);
     }
-    if (typeof options.batchTimeTrigger == "number") {
+    if (typeof options.batchTimeTrigger === "number") {
       this._batchTimeTrigger = options.batchTimeTrigger;
     }
-    if (typeof options.maxConcurrentBatches == "number") {
+    if (typeof options.maxConcurrentBatches === "number") {
       this._maxConcurrentBatches = options.maxConcurrentBatches;
     }
-    if (typeof options.pendingWorkCapacity == "number") {
+    if (typeof options.pendingWorkCapacity === "number") {
       this._pendingWorkCapacity = options.pendingWorkCapacity;
     }
 
@@ -235,7 +235,7 @@ export class Transmission {
   }
 
   _sendBatch() {
-    if (this._batchCount == maxConcurrentBatches) {
+    if (this._batchCount === maxConcurrentBatches) {
       // don't start up another concurrent batch.  the next timeout/sendEvent or batch completion
       // will cause us to send another
       return;
