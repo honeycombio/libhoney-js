@@ -302,6 +302,7 @@ export class Transmission {
             if (err) {
               this._responseCallback(
                 batch.events.map(ev => ({
+                  // eslint-disable-next-line camelcase
                   status_code: ev.encodeError ? undefined : err.status,
                   duration: end - start,
                   metadata: ev.metadata,
@@ -322,6 +323,7 @@ export class Transmission {
                   } else {
                     let res = response[respIdx++];
                     return {
+                      // eslint-disable-next-line camelcase
                       status_code: res.status,
                       duration: end - start,
                       metadata: ev.metadata,

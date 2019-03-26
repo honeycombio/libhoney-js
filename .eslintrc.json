@@ -16,6 +16,7 @@
     "no-var": "error",
     "eqeqeq": "error",
     "comma-dangle": "error",
-    "quotes": "error"
+    "quotes": "error",
+    "camelcase": "error"
   }
 }

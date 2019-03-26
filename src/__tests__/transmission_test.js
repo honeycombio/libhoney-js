@@ -305,9 +305,9 @@ describe("base transmission", () => {
       pendingWorkCapacity: responseExpected,
       responseCallback(queue) {
         let responses = queue.splice(0, queue.length);
-        responses.forEach(({ error, status_code }) => {
+        responses.forEach(({ error, status_code: statusCode }) => {
           expect(error.status).toEqual(404);
-          expect(status_code).toEqual(404);
+          expect(statusCode).toEqual(404);
           responseCount++;
           if (responseCount === responseExpected) {
             done();

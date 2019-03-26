@@ -16,7 +16,7 @@ export default class Event {
    * @constructor
    * private
    */
-  constructor(libhoney, fields, dyn_fields) {
+  constructor(libhoney, fields, dynFields) {
     this.data = Object.create(null);
     this.metadata = null;
 
@@ -56,7 +56,7 @@ export default class Event {
     this.timestamp = null;
 
     foreach(fields, (v, k) => this.addField(k, v));
-    foreach(dyn_fields, (v, k) => this.addField(k, v()));
+    foreach(dynFields, (v, k) => this.addField(k, v()));
 
     // stash this away for .send()
     this._libhoney = libhoney;

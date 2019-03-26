@@ -17,7 +17,7 @@ describe("libhoney builder", () => {
     expect(b._fields.b).toEqual(undefined);
     b = hny.newBuilder();
     expect(Object.getOwnPropertyNames(b._fields)).toHaveLength(0);
-    expect(Object.getOwnPropertyNames(b._dyn_fields)).toHaveLength(0);
+    expect(Object.getOwnPropertyNames(b._dynFields)).toHaveLength(0);
   });
 
   it("accepts dict-like arguments to .add()", () => {
@@ -56,7 +56,7 @@ describe("libhoney builder", () => {
     expect(transmission.events[0].postData).toEqual(JSON.stringify(postData));
   });
 
-  it("includes snapshot of global fields/dyn_fields", () => {
+  it("includes snapshot of global fields/dynFields", () => {
     let honey = new libhoney({
       apiHost: "http://foo/bar",
       writeKey: "12345",

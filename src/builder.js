@@ -17,10 +17,10 @@ export default class Builder {
    * @constructor
    * @private
    */
-  constructor(libhoney, fields, dyn_fields) {
+  constructor(libhoney, fields, dynFields) {
     this._libhoney = libhoney;
     this._fields = Object.create(null);
-    this._dyn_fields = Object.create(null);
+    this._dynFields = Object.create(null);
 
     /**
      * The hostname for the Honeycomb API server to which to send events created through this
@@ -54,7 +54,7 @@ export default class Builder {
     this.sampleRate = 1;
 
     foreach(fields, (v, k) => this.addField(k, v));
-    foreach(dyn_fields, (v, k) => this.addDynamicField(k, v));
+    foreach(dynFields, (v, k) => this.addDynamicField(k, v));
   }
 
   /**
@@ -104,11 +104,11 @@ export default class Builder {
    *   builder.addDynamicField("process_heapUsed", () => process.memoryUsage().heapUsed);
    */
   addDynamicField(name, fn) {
-    this._dyn_fields[name] = fn;
+    this._dynFields[name] = fn;
   }
 
   /**
-   * creates and sends an event, including all builder fields/dyn_fields, as well as anything in the optional data parameter.
+   * creates and sends an event, including all builder fields/dynFields, as well as anything in the optional data parameter.
    * @param {Object|Map<string, any>} [data] field->value mapping to add to the event sent.
    * @example <caption>empty sendNow</caption>
    *   builder.sendNow(); // sends just the data that has been added via add/addField/addDynamicField.
@@ -124,7 +124,7 @@ export default class Builder {
   }
 
   /**
-   * creates and returns a new Event containing all fields/dyn_fields from this builder, that can be further fleshed out and sent on its own.
+   * creates and returns a new Event containing all fields/dynFields from this builder, that can be further fleshed out and sent on its own.
    * @returns {Event} an Event instance
    * @example <caption>adding data at send-time</caption>
    *   let ev = builder.newEvent();
@@ -132,7 +132,7 @@ export default class Builder {
    *   ev.send();
    */
   newEvent() {
-    let ev = new Event(this._libhoney, this._fields, this._dyn_fields);
+    let ev = new Event(this._libhoney, this._fields, this._dynFields);
     ev.apiHost = this.apiHost;
     ev.writeKey = this.writeKey;
     ev.dataset = this.dataset;
@@ -141,9 +141,9 @@ export default class Builder {
   }
 
   /**
-   * creates and returns a clone of this builder, merged with fields and dyn_fields passed as arguments.
+   * creates and returns a clone of this builder, merged with fields and dynFields passed as arguments.
    * @param {Object|Map<string, any>} fields a field->value mapping to merge into the new builder.
-   * @param {Object|Map<string, any>} dyn_fields a field->dynamic function mapping to merge into the new builder.
+   * @param {Object|Map<string, any>} dynFields a field->dynamic function mapping to merge into the new builder.
    * @returns {Builder} a Builder instance
    * @example <caption>no additional fields/dyn_field</caption>
    *   let anotherBuilder = builder.newBuilder();
@@ -153,11 +153,11 @@ export default class Builder {
    *                                             process_heapUsed: () => process.memoryUsage().heapUsed
    *                                           });
    */
-  newBuilder(fields, dyn_fields) {
-    let b = new Builder(this._libhoney, this._fields, this._dyn_fields);
+  newBuilder(fields, dynFields) {
+    let b = new Builder(this._libhoney, this._fields, this._dynFields);
 
     foreach(fields, (v, k) => b.addField(k, v));
-    foreach(dyn_fields, (v, k) => b.addDynamicField(k, v));
+    foreach(dynFields, (v, k) => b.addDynamicField(k, v));
 
     b.apiHost = this.apiHost;
     b.writeKey = this.writeKey;

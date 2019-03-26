@@ -366,7 +366,7 @@ export default class Libhoney extends EventEmitter {
   }
 
   /**
-   * creates and sends an event, including all global builder fields/dyn_fields, as well as anything in the optional data parameter.
+   * creates and sends an event, including all global builder fields/dynFields, as well as anything in the optional data parameter.
    * @param {Object|Map<string, any>} data field->value mapping.
    * @example <caption>using an object</caption>
    *   honey.sendNow ({
@@ -384,7 +384,7 @@ export default class Libhoney extends EventEmitter {
   }
 
   /**
-   * creates and returns a new Event containing all fields/dyn_fields from the global Builder, that can be further fleshed out and sent on its own.
+   * creates and returns a new Event containing all fields/dynFields from the global Builder, that can be further fleshed out and sent on its own.
    * @returns {Event} an Event instance
    * @example <caption>adding data at send-time</caption>
    *   let ev = honey.newEvent();
@@ -396,9 +396,9 @@ export default class Libhoney extends EventEmitter {
   }
 
   /**
-   * creates and returns a clone of the global Builder, merged with fields and dyn_fields passed as arguments.
+   * creates and returns a clone of the global Builder, merged with fields and dynFields passed as arguments.
    * @param {Object|Map<string, any>} fields a field->value mapping to merge into the new builder.
-   * @param {Object|Map<string, any>} dyn_fields a field->dynamic function mapping to merge into the new builder.
+   * @param {Object|Map<string, any>} dynFields a field->dynamic function mapping to merge into the new builder.
    * @returns {Builder} a Builder instance
    * @example <caption>no additional fields/dyn_field</caption>
    *   let builder = honey.newBuilder();
@@ -408,8 +408,8 @@ export default class Libhoney extends EventEmitter {
    *                                    process_heapUsed: () => process.memoryUsage().heapUsed
    *                                  });
    */
-  newBuilder(fields, dyn_fields) {
-    return this._builder.newBuilder(fields, dyn_fields);
+  newBuilder(fields, dynFields) {
+    return this._builder.newBuilder(fields, dynFields);
   }
 }
 
