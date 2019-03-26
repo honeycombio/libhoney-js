@@ -12,6 +12,7 @@
     "no-console": "off",
     "semi": 2,
     "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
-    "prefer-arrow-callback": "error"
+    "prefer-arrow-callback": "error",
+    "no-var": "error"
   }
 }

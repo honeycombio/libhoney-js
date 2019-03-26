@@ -118,7 +118,7 @@ export default class Builder {
    *   });
    */
   sendNow(data) {
-    var ev = this.newEvent();
+    let ev = this.newEvent();
     ev.add(data);
     ev.send();
   }
@@ -132,7 +132,7 @@ export default class Builder {
    *   ev.send();
    */
   newEvent() {
-    var ev = new Event(this._libhoney, this._fields, this._dyn_fields);
+    let ev = new Event(this._libhoney, this._fields, this._dyn_fields);
     ev.apiHost = this.apiHost;
     ev.writeKey = this.writeKey;
     ev.dataset = this.dataset;
@@ -154,7 +154,7 @@ export default class Builder {
    *                                           });
    */
   newBuilder(fields, dyn_fields) {
-    var b = new Builder(this._libhoney, this._fields, this._dyn_fields);
+    let b = new Builder(this._libhoney, this._fields, this._dyn_fields);
 
     foreach(fields, (v, k) => b.addField(k, v));
     foreach(dyn_fields, (v, k) => b.addDynamicField(k, v));

@@ -245,7 +245,7 @@ export class Transmission {
 
     this._batchCount++;
 
-    var batch = this._eventQueue.splice(0, this._batchSizeTrigger);
+    let batch = this._eventQueue.splice(0, this._batchSizeTrigger);
 
     let batchAgg = new BatchEndpointAggregator(batch);
 
@@ -264,8 +264,8 @@ export class Transmission {
 
     let batches = Object.keys(batchAgg.batches).map(k => batchAgg.batches[k]);
     eachPromise(batches, batch => {
-      var url = urljoin(batch.apiHost, "/1/batch", batch.dataset);
-      var req = superagent.post(url);
+      let url = urljoin(batch.apiHost, "/1/batch", batch.dataset);
+      let req = superagent.post(url);
       if (this._proxy) {
         req = proxy(req, this._proxy);
       }
@@ -290,7 +290,7 @@ export class Transmission {
           userAgent = `${USER_AGENT} ${trimmedAddition}`;
         }
 
-        var start = Date.now();
+        let start = Date.now();
         req
           .set("X-Hny-Team", batch.writeKey)
           .set("User-Agent", userAgent)
@@ -342,7 +342,7 @@ export class Transmission {
   }
 
   _shouldSendEvent(ev) {
-    var { sampleRate } = ev;
+    let { sampleRate } = ev;
     if (sampleRate <= 1) {
       return true;
     }

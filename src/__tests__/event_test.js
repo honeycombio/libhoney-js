@@ -2,10 +2,10 @@
 import libhoney from "../libhoney";
 
 describe("libhoney events", () => {
-  var hny = new libhoney();
+  let hny = new libhoney();
 
   it("inherit fields and dyn_fields from builder", () => {
-    var b = hny.newBuilder(
+    let b = hny.newBuilder(
       { a: 5 },
       {
         b: function() {
@@ -14,30 +14,30 @@ describe("libhoney events", () => {
       }
     );
 
-    var ev = b.newEvent();
+    let ev = b.newEvent();
     expect(ev.data.a).toEqual(5);
     expect(ev.data.b).toEqual(3);
   });
 
   it("accepts dict-like arguments to .add()", () => {
-    var b = hny.newBuilder();
-    var ev = b.newEvent();
+    let b = hny.newBuilder();
+    let ev = b.newEvent();
 
     ev.add({ a: 5 });
     expect(ev.data.a).toEqual(5);
 
-    var ev2 = b.newEvent();
-    var map = new Map();
+    let ev2 = b.newEvent();
+    let map = new Map();
     map.set("a", 5);
     ev2.add(map);
     expect(ev2.data.a).toEqual(5);
   });
 
   it("it toString()'s keys from Maps in .add()", () => {
-    var b = hny.newBuilder();
-    var ev = b.newEvent();
+    let b = hny.newBuilder();
+    let ev = b.newEvent();
 
-    var map = new Map();
+    let map = new Map();
     map.set(
       {
         toString: function() {
@@ -52,9 +52,9 @@ describe("libhoney events", () => {
   });
 
   it("doesn't stringify object values", () => {
-    var postData = { c: { a: 1 } };
+    let postData = { c: { a: 1 } };
 
-    var ev = hny.newEvent();
+    let ev = hny.newEvent();
 
     ev.add(postData);
 
@@ -62,9 +62,9 @@ describe("libhoney events", () => {
   });
 
   it("converts all values to primitive types in .add/.addField", () => {
-    var b = hny.newBuilder();
-    var ev;
-    var map;
+    let b = hny.newBuilder();
+    let ev;
+    let map;
 
     ev = b.newEvent();
     map = new Map();
@@ -86,7 +86,7 @@ describe("libhoney events", () => {
     map.set("boolean", true);
 
     // Date does not convert
-    var d = new Date(1, 2, 3, 4, 5, 6, 7);
+    let d = new Date(1, 2, 3, 4, 5, 6, 7);
     map.set("Date", d);
 
     // Null/undefined both end up being null in the output

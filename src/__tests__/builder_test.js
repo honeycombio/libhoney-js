@@ -2,10 +2,10 @@
 import libhoney from "../libhoney";
 
 describe("libhoney builder", () => {
-  var hny = new libhoney();
+  let hny = new libhoney();
 
   it("takes fields and dynamic fields in ctor", () => {
-    var b = hny.newBuilder(
+    let b = hny.newBuilder(
       { a: 5 },
       {
         b: function() {
@@ -21,15 +21,15 @@ describe("libhoney builder", () => {
   });
 
   it("accepts dict-like arguments to .add()", () => {
-    var b;
-    var ev;
+    let b;
+    let ev;
 
     b = hny.newBuilder();
     b.add({ a: 5 });
     ev = b.newEvent();
     expect(ev.data.a).toEqual(5);
 
-    var map = new Map();
+    let map = new Map();
     map.set("a", 5);
     b = hny.newBuilder();
     b.add(map);
@@ -38,17 +38,17 @@ describe("libhoney builder", () => {
   });
 
   it("doesn't stringify object values", () => {
-    var honey = new libhoney({
+    let honey = new libhoney({
       apiHost: "http://foo/bar",
       writeKey: "12345",
       dataset: "testing",
       transmission: "mock"
     });
-    var transmission = honey.transmission;
+    let transmission = honey.transmission;
 
-    var postData = { a: { b: 1 }, c: { d: 2 } };
+    let postData = { a: { b: 1 }, c: { d: 2 } };
 
-    var builder = honey.newBuilder({ a: { b: 1 } });
+    let builder = honey.newBuilder({ a: { b: 1 } });
 
     builder.sendNow({ c: { d: 2 } });
 
@@ -57,17 +57,17 @@ describe("libhoney builder", () => {
   });
 
   it("includes snapshot of global fields/dyn_fields", () => {
-    var honey = new libhoney({
+    let honey = new libhoney({
       apiHost: "http://foo/bar",
       writeKey: "12345",
       dataset: "testing",
       transmission: "mock"
     });
-    var transmission = honey.transmission;
+    let transmission = honey.transmission;
 
-    var postData = { b: 2, c: 3 };
+    let postData = { b: 2, c: 3 };
 
-    var builder = honey.newBuilder({ b: 2 });
+    let builder = honey.newBuilder({ b: 2 });
 
     // add a global field *after* creating the builder.  it shouldn't show up in the post data
     honey.addField("a", 1);

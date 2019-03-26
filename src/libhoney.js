@@ -267,7 +267,7 @@ export default class Libhoney extends EventEmitter {
   validateEvent(event) {
     if (!this._usable) return null;
 
-    var timestamp = event.timestamp || Date.now();
+    let timestamp = event.timestamp || Date.now();
     if (typeof timestamp === "string" || typeof timestamp === "number")
       timestamp = new Date(timestamp);
 
@@ -275,7 +275,7 @@ export default class Libhoney extends EventEmitter {
       console.error(".data must be an object");
       return null;
     }
-    var postData;
+    let postData;
     try {
       postData = JSON.stringify(event.data);
     } catch (e) {
@@ -283,31 +283,31 @@ export default class Libhoney extends EventEmitter {
       return null;
     }
 
-    var apiHost = event.apiHost;
+    let apiHost = event.apiHost;
     if (typeof apiHost !== "string" || apiHost === "") {
       console.error(".apiHost must be a non-empty string");
       return null;
     }
 
-    var writeKey = event.writeKey;
+    let writeKey = event.writeKey;
     if (typeof writeKey !== "string" || writeKey === "") {
       console.error(".writeKey must be a non-empty string");
       return null;
     }
 
-    var dataset = event.dataset;
+    let dataset = event.dataset;
     if (typeof dataset !== "string" || dataset === "") {
       console.error(".dataset must be a non-empty string");
       return null;
     }
 
-    var sampleRate = event.sampleRate;
+    let sampleRate = event.sampleRate;
     if (typeof sampleRate !== "number") {
       console.error(".sampleRate must be a number");
       return null;
     }
 
-    var metadata = event.metadata;
+    let metadata = event.metadata;
     return new ValidatedEvent({
       timestamp,
       apiHost,
