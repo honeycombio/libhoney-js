@@ -1,10 +1,10 @@
 # libhoney [![Build Status](https://travis-ci.org/honeycombio/libhoney-js.svg?branch=master)](https://travis-ci.org/honeycombio/libhoney-js) [![npm version](https://badge.fury.io/js/libhoney.svg)](https://badge.fury.io/js/libhoney)
 
-A nodeJS module for sending events to [Honeycomb](https://www.honeycomb.io), a service for debugging your software in production.
+A Node.js module for sending events to [Honeycomb](https://www.honeycomb.io), a service for debugging your software in production.
 
-**NOTE** For use in browser-side JavaScript applications, generate an api key that has permission only to send events.
+**NOTE** For use in browser-side JavaScript applications, generate an API key that has permission only to send events.
 
-Requires node 4+.
+Requires any current LTS release of Node.js. Currently v6, v8, and v10.
 
 - [Usage and Examples](https://docs.honeycomb.io/sdk/javascript/)
 - [API Reference](https://doc.esdoc.org/github.com/honeycombio/libhoney-js/)
