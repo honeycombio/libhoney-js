@@ -7,11 +7,11 @@
  * @module
  */
 import {
-  Transmission,
   MockTransmission,
-  WriterTransmission,
   NullTransmission,
-  ValidatedEvent
+  Transmission,
+  ValidatedEvent,
+  WriterTransmission
 } from "./transmission";
 import Builder from "./builder";
 
@@ -267,7 +267,7 @@ export default class Libhoney extends EventEmitter {
   validateEvent(event) {
     if (!this._usable) return null;
 
-    var timestamp = event.timestamp || Date.now();
+    let timestamp = event.timestamp || Date.now();
     if (typeof timestamp === "string" || typeof timestamp === "number")
       timestamp = new Date(timestamp);
 
@@ -275,7 +275,7 @@ export default class Libhoney extends EventEmitter {
       console.error(".data must be an object");
       return null;
     }
-    var postData;
+    let postData;
     try {
       postData = JSON.stringify(event.data);
     } catch (e) {
@@ -283,31 +283,31 @@ export default class Libhoney extends EventEmitter {
       return null;
     }
 
-    var apiHost = event.apiHost;
+    let apiHost = event.apiHost;
     if (typeof apiHost !== "string" || apiHost === "") {
       console.error(".apiHost must be a non-empty string");
       return null;
     }
 
-    var writeKey = event.writeKey;
+    let writeKey = event.writeKey;
     if (typeof writeKey !== "string" || writeKey === "") {
       console.error(".writeKey must be a non-empty string");
       return null;
     }
 
-    var dataset = event.dataset;
+    let dataset = event.dataset;
     if (typeof dataset !== "string" || dataset === "") {
       console.error(".dataset must be a non-empty string");
       return null;
     }
 
-    var sampleRate = event.sampleRate;
+    let sampleRate = event.sampleRate;
     if (typeof sampleRate !== "number") {
       console.error(".sampleRate must be a number");
       return null;
     }
 
-    var metadata = event.metadata;
+    let metadata = event.metadata;
     return new ValidatedEvent({
       timestamp,
       apiHost,
@@ -366,7 +366,7 @@ export default class Libhoney extends EventEmitter {
   }
 
   /**
-   * creates and sends an event, including all global builder fields/dyn_fields, as well as anything in the optional data parameter.
+   * creates and sends an event, including all global builder fields/dynFields, as well as anything in the optional data parameter.
    * @param {Object|Map<string, any>} data field->value mapping.
    * @example <caption>using an object</caption>
    *   honey.sendNow ({
@@ -384,7 +384,7 @@ export default class Libhoney extends EventEmitter {
   }
 
   /**
-   * creates and returns a new Event containing all fields/dyn_fields from the global Builder, that can be further fleshed out and sent on its own.
+   * creates and returns a new Event containing all fields/dynFields from the global Builder, that can be further fleshed out and sent on its own.
    * @returns {Event} an Event instance
    * @example <caption>adding data at send-time</caption>
    *   let ev = honey.newEvent();
@@ -396,9 +396,9 @@ export default class Libhoney extends EventEmitter {
   }
 
   /**
-   * creates and returns a clone of the global Builder, merged with fields and dyn_fields passed as arguments.
+   * creates and returns a clone of the global Builder, merged with fields and dynFields passed as arguments.
    * @param {Object|Map<string, any>} fields a field->value mapping to merge into the new builder.
-   * @param {Object|Map<string, any>} dyn_fields a field->dynamic function mapping to merge into the new builder.
+   * @param {Object|Map<string, any>} dynFields a field->dynamic function mapping to merge into the new builder.
    * @returns {Builder} a Builder instance
    * @example <caption>no additional fields/dyn_field</caption>
    *   let builder = honey.newBuilder();
@@ -408,10 +408,32 @@ export default class Libhoney extends EventEmitter {
    *                                    process_heapUsed: () => process.memoryUsage().heapUsed
    *                                  });
    */
-  newBuilder(fields, dyn_fields) {
-    return this._builder.newBuilder(fields, dyn_fields);
+  newBuilder(fields, dynFields) {
+    return this._builder.newBuilder(fields, dynFields);
   }
 }
+
+const getTransmissionClass = transmissionClassName => {
+  switch (transmissionClassName) {
+    case "base":
+      return Transmission;
+    case "mock":
+      return MockTransmission;
+    case "null":
+      return NullTransmission;
+    case "worker":
+      console.warn(
+        "worker implementation not ready yet.  using base implementation"
+      );
+      return Transmission;
+    case "writer":
+      return WriterTransmission;
+    default:
+      throw new Error(
+        `unknown transmission implementation "${transmissionClassName}".`
+      );
+  }
+};
 
 function getAndInitTransmission(transmission, options) {
   if (options.disabled) {
@@ -419,30 +441,8 @@ function getAndInitTransmission(transmission, options) {
   }
 
   if (typeof transmission === "string") {
-    switch (transmission) {
-      case "base":
-        transmission = Transmission;
-        break;
-      case "worker":
-        console.warn(
-          "worker implementation not ready yet.  using base implementation"
-        );
-        transmission = Transmission;
-        break;
-      case "mock":
-        transmission = MockTransmission;
-        break;
-      case "writer":
-        transmission = WriterTransmission;
-        break;
-      case "null":
-        transmission = NullTransmission;
-        break;
-      default:
-        throw new Error(
-          `unknown transmission implementation "${transmission}".`
-        );
-    }
+    const transmissionClass = getTransmissionClass(transmission);
+    return new transmissionClass(options);
   } else if (typeof transmission !== "function") {
     throw new Error(
       ".transmission must be one of 'base'/'worker'/'mock'/'writer'/'null' or a constructor."
@@ -451,11 +451,11 @@ function getAndInitTransmission(transmission, options) {
 
   try {
     return new transmission(options);
-  } catch (e) {
-    if (transmission == Transmission) {
+  } catch (initialisationError) {
+    if (transmission === Transmission) {
       throw new Error(
         "unable to initialize base transmission implementation.",
-        e
+        initialisationError
       );
     }
 
@@ -463,16 +463,14 @@ function getAndInitTransmission(transmission, options) {
       "failed to initialize transmission, falling back to base implementation."
     );
     try {
-      transmission = new Transmission(options);
-    } catch (e) {
+      return new Transmission(options);
+    } catch (fallbackInitialisationError) {
       throw new Error(
         "unable to initialize base transmission implementation.",
-        e
+        fallbackInitialisationError
       );
     }
   }
-
-  return transmission;
 }
 
 // this will absolutely go away with the next major version bump.  right now in normal node (CJS) usage,

@@ -7,8 +7,8 @@
 /**
  * @module
  */
-import superagent from "superagent";
 import proxy from "superagent-proxy";
+import superagent from "superagent";
 import urljoin from "urljoin";
 
 const USER_AGENT = "libhoney-js/<@LIBHONEY_JS_VERSION@>";
@@ -33,8 +33,8 @@ const pendingWorkCapacity = 10000;
 const emptyResponseCallback = function() {};
 
 const eachPromise = (arr, iteratorFn) =>
-  arr.reduce(function(p, item) {
-    return p.then(function() {
+  arr.reduce((p, item) => {
+    return p.then(() => {
       return iteratorFn(item);
     });
   }, Promise.resolve());
@@ -178,19 +178,19 @@ export class Transmission {
     this._eventQueue = [];
     this._batchCount = 0;
 
-    if (typeof options.responseCallback == "function") {
+    if (typeof options.responseCallback === "function") {
       this._responseCallback = options.responseCallback;
     }
-    if (typeof options.batchSizeTrigger == "number") {
+    if (typeof options.batchSizeTrigger === "number") {
       this._batchSizeTrigger = Math.max(options.batchSizeTrigger, 1);
     }
-    if (typeof options.batchTimeTrigger == "number") {
+    if (typeof options.batchTimeTrigger === "number") {
       this._batchTimeTrigger = options.batchTimeTrigger;
     }
-    if (typeof options.maxConcurrentBatches == "number") {
+    if (typeof options.maxConcurrentBatches === "number") {
       this._maxConcurrentBatches = options.maxConcurrentBatches;
     }
-    if (typeof options.pendingWorkCapacity == "number") {
+    if (typeof options.pendingWorkCapacity === "number") {
       this._pendingWorkCapacity = options.pendingWorkCapacity;
     }
 
@@ -235,7 +235,7 @@ export class Transmission {
   }
 
   _sendBatch() {
-    if (this._batchCount == maxConcurrentBatches) {
+    if (this._batchCount === maxConcurrentBatches) {
       // don't start up another concurrent batch.  the next timeout/sendEvent or batch completion
       // will cause us to send another
       return;
@@ -245,9 +245,9 @@ export class Transmission {
 
     this._batchCount++;
 
-    var batch = this._eventQueue.splice(0, this._batchSizeTrigger);
-
-    let batchAgg = new BatchEndpointAggregator(batch);
+    let batchAgg = new BatchEndpointAggregator(
+      this._eventQueue.splice(0, this._batchSizeTrigger)
+    );
 
     const finishBatch = () => {
       this._batchCount--;
@@ -264,8 +264,8 @@ export class Transmission {
 
     let batches = Object.keys(batchAgg.batches).map(k => batchAgg.batches[k]);
     eachPromise(batches, batch => {
-      var url = urljoin(batch.apiHost, "/1/batch", batch.dataset);
-      var req = superagent.post(url);
+      let url = urljoin(batch.apiHost, "/1/batch", batch.dataset);
+      let req = superagent.post(url);
       if (this._proxy) {
         req = proxy(req, this._proxy);
       }
@@ -290,7 +290,7 @@ export class Transmission {
           userAgent = `${USER_AGENT} ${trimmedAddition}`;
         }
 
-        var start = Date.now();
+        let start = Date.now();
         req
           .set("X-Hny-Team", batch.writeKey)
           .set("User-Agent", userAgent)
@@ -302,6 +302,7 @@ export class Transmission {
             if (err) {
               this._responseCallback(
                 batch.events.map(ev => ({
+                  // eslint-disable-next-line camelcase
                   status_code: ev.encodeError ? undefined : err.status,
                   duration: end - start,
                   metadata: ev.metadata,
@@ -320,12 +321,13 @@ export class Transmission {
                       error: ev.encodeError
                     };
                   } else {
-                    let res = response[respIdx++];
+                    let nextResponse = response[respIdx++];
                     return {
-                      status_code: res.status,
+                      // eslint-disable-next-line camelcase
+                      status_code: nextResponse.status,
                       duration: end - start,
                       metadata: ev.metadata,
-                      error: res.err
+                      error: nextResponse.err
                     };
                   }
                 })
@@ -342,7 +344,7 @@ export class Transmission {
   }
 
   _shouldSendEvent(ev) {
-    var { sampleRate } = ev;
+    let { sampleRate } = ev;
     if (sampleRate <= 1) {
       return true;
     }

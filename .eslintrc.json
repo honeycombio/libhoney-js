@@ -11,6 +11,15 @@
   "rules": {
     "no-console": "off",
     "semi": 2,
-    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }]
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "prefer-arrow-callback": "error",
+    "no-var": "error",
+    "eqeqeq": "error",
+    "comma-dangle": "error",
+    "quotes": "error",
+    "camelcase": "error",
+    "sort-imports": "error",
+    "no-param-reassign": "error",
+    "no-shadow": "error"
   }
 }

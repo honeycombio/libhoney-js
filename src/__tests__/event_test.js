@@ -1,11 +1,11 @@
 /* eslint-env node, jest */
 import libhoney from "../libhoney";
 
-describe("libhoney events", function() {
-  var hny = new libhoney();
+describe("libhoney events", () => {
+  let hny = new libhoney();
 
-  it("inherit fields and dyn_fields from builder", function() {
-    var b = hny.newBuilder(
+  it("inherit fields and dyn_fields from builder", () => {
+    let b = hny.newBuilder(
       { a: 5 },
       {
         b: function() {
@@ -14,30 +14,30 @@ describe("libhoney events", function() {
       }
     );
 
-    var ev = b.newEvent();
+    let ev = b.newEvent();
     expect(ev.data.a).toEqual(5);
     expect(ev.data.b).toEqual(3);
   });
 
-  it("accepts dict-like arguments to .add()", function() {
-    var b = hny.newBuilder();
-    var ev = b.newEvent();
+  it("accepts dict-like arguments to .add()", () => {
+    let b = hny.newBuilder();
+    let ev = b.newEvent();
 
     ev.add({ a: 5 });
     expect(ev.data.a).toEqual(5);
 
-    var ev2 = b.newEvent();
-    var map = new Map();
+    let ev2 = b.newEvent();
+    let map = new Map();
     map.set("a", 5);
     ev2.add(map);
     expect(ev2.data.a).toEqual(5);
   });
 
-  it("it toString()'s keys from Maps in .add()", function() {
-    var b = hny.newBuilder();
-    var ev = b.newEvent();
+  it("it toString()'s keys from Maps in .add()", () => {
+    let b = hny.newBuilder();
+    let ev = b.newEvent();
 
-    var map = new Map();
+    let map = new Map();
     map.set(
       {
         toString: function() {
@@ -51,20 +51,20 @@ describe("libhoney events", function() {
     expect(ev.data.hello).toEqual(5);
   });
 
-  it("doesn't stringify object values", function() {
-    var postData = { c: { a: 1 } };
+  it("doesn't stringify object values", () => {
+    let postData = { c: { a: 1 } };
 
-    var ev = hny.newEvent();
+    let ev = hny.newEvent();
 
     ev.add(postData);
 
     expect(JSON.stringify(ev.data)).toEqual(JSON.stringify(postData));
   });
 
-  it("converts all values to primitive types in .add/.addField", function() {
-    var b = hny.newBuilder();
-    var ev;
-    var map;
+  it("converts all values to primitive types in .add/.addField", () => {
+    let b = hny.newBuilder();
+    let ev;
+    let map;
 
     ev = b.newEvent();
     map = new Map();
@@ -86,7 +86,7 @@ describe("libhoney events", function() {
     map.set("boolean", true);
 
     // Date does not convert
-    var d = new Date(1, 2, 3, 4, 5, 6, 7);
+    let d = new Date(1, 2, 3, 4, 5, 6, 7);
     map.set("Date", d);
 
     // Null/undefined both end up being null in the output
