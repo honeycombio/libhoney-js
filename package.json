@@ -12,7 +12,8 @@
   },
   "module": "dist/libhoney.es.js",
   "main": "dist/libhoney.cjs.js",
-  "files": ["dist", "README.md", "LICENSE"],
+  "types": "types/libhoney.d.ts",
+  "files": ["dist", "types", "README.md", "LICENSE"],
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
