@@ -1,0 +1,63 @@
+version: 2.1
+
+jobs:
+  test_node6:
+    docker:
+      - image: circleci/node:6.17.1-stretch
+    steps:
+      - checkout
+      - run: yarn
+      - run: yarn test
+      - run: yarn build
+
+  test_node8:
+    docker:
+      - image: circleci/node:8.16.0-stretch
+    steps:
+      - checkout
+      - run: yarn
+      - run: yarn test
+      - run: yarn build
+
+  test_node10:
+    docker:
+      - image: circleci/node:10.9.0-stretch
+    steps:
+      - checkout
+      - run: yarn
+      - run: yarn test
+      - run: yarn build
+
+  test_node11:
+    docker:
+      - image: circleci/node:11.15.0-stretch
+    steps:
+      - checkout
+      - run: yarn
+      - run: yarn test
+      - run: yarn build
+
+  publish:
+    docker:
+      - image: circleci/node:11.15.0-stretch
+    steps:
+      - checkout
+      - run: yarn
+      - run: yarn lint
+      - run: yarn build
+      - run: echo should publish here
+
+workflows:
+  version: 2
+  build-hound:
+    jobs:
+      - test_node6
+      - test_node8
+      - test_node10
+      - test_node11
+      - publish:
+        filters:
+            branches:
+              only: master
+            tags:
+              only: /.*/
