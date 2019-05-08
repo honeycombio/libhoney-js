@@ -51,7 +51,7 @@ jobs:
 
 workflows:
   version: 2
-  build-hound:
+  build-libhoney:
     jobs:
       - test_node6
       - test_node8
