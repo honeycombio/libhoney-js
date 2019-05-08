@@ -1,4 +1,4 @@
-# libhoney [![Build Status](https://travis-ci.org/honeycombio/libhoney-js.svg?branch=master)](https://travis-ci.org/honeycombio/libhoney-js) [![npm version](https://badge.fury.io/js/libhoney.svg)](https://badge.fury.io/js/libhoney)
+# libhoney [![CircleCI](https://circleci.com/gh/honeycombio/libhoney-js.svg?style=svg&circle-token=c7056d820eeaa624756e03c3da01deab9d647663)](https://circleci.com/gh/honeycombio/libhoney-js) [![npm version](https://badge.fury.io/js/libhoney.svg)](https://badge.fury.io/js/libhoney)
 
 A Node.js module for sending events to [Honeycomb](https://www.honeycomb.io), a service for debugging your software in production.
 
