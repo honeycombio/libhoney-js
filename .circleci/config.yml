@@ -42,10 +42,12 @@ jobs:
       - image: circleci/node:11.15.0-stretch
     steps:
       - checkout
+      - run:
+          name: store npm auth token
+          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
       - run: yarn
-      - run: yarn lint
       - run: yarn build
-      - run: echo should publish here
+      - run: npm publish
 
 workflows:
   version: 2
