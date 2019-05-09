@@ -1,42 +1,29 @@
 version: 2.1
 
+executors:
+  node:
+    parameters:
+      nodeversion:
+        type: string
+        default: "11"
+    docker:
+      - image: circleci/node:<< parameters.nodeversion >>
+
 jobs:
-  test_node6:
-    docker:
-      - image: circleci/node:6.17.1-stretch
+  test_libhoney:
+    parameters:
+      nodeversion:
+        type: string
+        default: "11"
+    executor:
+      name: node
+      nodeversion: "<< parameters.nodeversion >>"
     steps:
       - checkout
       - run: yarn
       - run: yarn test
       - run: yarn build
-
-  test_node8:
-    docker:
-      - image: circleci/node:8.16.0-stretch
-    steps:
-      - checkout
-      - run: yarn
-      - run: yarn test
-      - run: yarn build
-
-  test_node10:
-    docker:
-      - image: circleci/node:10.9.0-stretch
-    steps:
-      - checkout
-      - run: yarn
-      - run: yarn test
-      - run: yarn build
-
-  test_node11:
-    docker:
-      - image: circleci/node:11.15.0-stretch
-    steps:
-      - checkout
-      - run: yarn
-      - run: yarn test
-      - run: yarn build
-
+      
   publish:
     docker:
       - image: circleci/node:11.15.0-stretch
@@ -46,6 +33,7 @@ jobs:
           name: store npm auth token
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
       - run: yarn
+      - run: yarn lint
       - run: yarn build
       - run: npm publish
 
@@ -53,10 +41,18 @@ workflows:
   version: 2
   build-libhoney:
     jobs:
-      - test_node6
-      - test_node8
-      - test_node10
-      - test_node11
+      - test_libhoney:
+          name: test_node6
+          nodeversion: "6"
+      - test_libhoney:
+          name: test_node8
+          nodeversion: "8"
+      - test_libhoney:
+          name: test_node10
+          nodeversion: "10"
+      - test_libhoney:
+          name: test_node11
+          nodeversion: "11"
       - publish:
           requires:
             - test_node6
