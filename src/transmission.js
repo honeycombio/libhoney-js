@@ -234,6 +234,20 @@ export class Transmission {
     }
   }
 
+  flush() {
+    if (this._eventQueue.length === 0 && this._batchCount === 0) {
+      // we're not currently waiting on anything, we're done!
+      return Promise.resolve();
+    }
+
+    return new Promise(resolve => {
+      this.flushCallback = () => {
+        this.flushCallback = null;
+        resolve();
+      };
+    });
+  }
+
   _sendBatch() {
     if (this._batchCount === maxConcurrentBatches) {
       // don't start up another concurrent batch.  the next timeout/sendEvent or batch completion
@@ -259,6 +273,11 @@ export class Transmission {
         } else {
           this._ensureSendTimeout();
         }
+        return;
+      }
+
+      if (this._batchCount === 0 && this.flushCallback) {
+        this.flushCallback();
       }
     };
 

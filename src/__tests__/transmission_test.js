@@ -1,4 +1,6 @@
 /* eslint-env node, jest */
+import "babel-polyfill";
+
 import { Transmission, ValidatedEvent } from "../transmission";
 import net from "net";
 
@@ -469,6 +471,43 @@ describe("base transmission", () => {
         })
       );
     }
+  });
+
+  it("should block on flush", async () => {
+    let responseCount = 0;
+    let responseExpected = 50;
+    let batchSize = 2;
+    mock.post("http://localhost:9999/1/batch/test-transmission", req => {
+      let reqEvents = JSON.parse(req.body);
+      let resp = reqEvents.map(() => ({ status: 202 }));
+      return { text: JSON.stringify(resp) };
+    });
+
+    let transmission = new Transmission({
+      batchTimeTrigger: 50,
+      batchSizeTrigger: batchSize,
+      pendingWorkCapacity: responseExpected,
+      responseCallback(queue) {
+        responseCount += queue.length;
+        queue.splice(0, queue.length);
+      }
+    });
+
+    for (let i = 0; i < responseExpected; i++) {
+      transmission.sendEvent(
+        new ValidatedEvent({
+          apiHost: "http://localhost:9999",
+          writeKey: "123456789",
+          dataset: "test-transmission",
+          sampleRate: 1,
+          timestamp: new Date(),
+          postData: JSON.stringify({ a: 1, b: 2 })
+        })
+      );
+    }
+
+    await transmission.flush();
+    expect(responseCount).toBe(responseExpected);
   });
 
   it("should allow user-agent additions", done => {
