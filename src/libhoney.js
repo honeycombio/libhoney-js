@@ -411,6 +411,23 @@ export default class Libhoney extends EventEmitter {
   newBuilder(fields, dynFields) {
     return this._builder.newBuilder(fields, dynFields);
   }
+
+  /**
+   * Allows you to easily wait for everything to be sent to Honeycomb (and for responses to come back for
+   * events). Also initializes a transmission instance for libhoney to use, so any events sent
+   * after a call to flush will not be waited on.
+   * @returns {Promise} a promise that will resolve when all currently enqueued events/batches are sent.
+   */
+  flush() {
+    const transmission = this._transmission;
+
+    this._transmission = getAndInitTransmission(
+      this._options.transmission,
+      this._options
+    );
+
+    return transmission.flush();
+  }
 }
 
 const getTransmissionClass = transmissionClassName => {
