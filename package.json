@@ -8,7 +8,7 @@
     "url": "https://github.com/honeycombio/libhoney-js.git"
   },
   "engines": {
-    "node": "6.* || 8.* || >= 10.*"
+    "node": "8.* || >= 10.*"
   },
   "module": "dist/libhoney.es.js",
   "main": "dist/libhoney.cjs.js",
@@ -37,23 +37,26 @@
     "@babel/preset-env": "^7.4.2",
     "babel-jest": "^24.5.0",
     "babel-polyfill": "^6.26.0",
-    "eslint": "^5.15.3",
+    "eslint": "^6.5.1",
     "husky": "^0.14.3",
     "jest": "^24.5.0",
     "jest-in-case": "^1.0.2",
     "lint-staged": "^7.2.0",
-    "prettier": "^1.14.0",
-    "rollup": "^0.66.6",
-    "rollup-plugin-commonjs": "^9.1.4",
-    "rollup-plugin-json": "^3.1.0",
-    "rollup-plugin-node-resolve": "^3.3.0",
-    "rollup-plugin-replace": "^2.0.0",
+    "prettier": "^1.18.2",
+    "rollup": "^1.25.1",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-json": "^4.0.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-replace": "^2.2.0",
     "superagent-mocker": "^0.5.2"
   },
   "dependencies": {
     "superagent": "^3.8.3",
     "superagent-proxy": "^2.0.0",
     "urljoin": "^0.1.5"
+  },
+  "resolutions": {
+    "https-proxy-agent": "^3.0.0"
   },
   "jest": {
     "testPathIgnorePatterns": ["dist/", "/node_modules/"]
