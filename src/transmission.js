@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Apache License 2.0
 // license that can be found in the LICENSE file.
 
-/* global window, global */
+/* global global */
 
 /**
  * @module
@@ -17,8 +17,8 @@ const _global =
   typeof window !== "undefined"
     ? window
     : typeof global !== "undefined"
-      ? global
-      : undefined;
+    ? global
+    : undefined;
 
 // how many events to collect in a batch
 const batchSizeTrigger = 50; // either when the eventQueue is > this length
