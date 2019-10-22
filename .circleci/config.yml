@@ -60,7 +60,7 @@ workflows:
             - test_node11
             - test_node12
           filters:
-              branches:
-                only: master
-              tags:
-                only: /.+/
+            tags:
+              only: /^.*/
+            branches:
+              ignore: /.*/
