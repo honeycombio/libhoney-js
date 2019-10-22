@@ -489,12 +489,3 @@ function getAndInitTransmission(transmission, options) {
     }
   }
 }
-
-// this will absolutely go away with the next major version bump.  right now in normal node (CJS) usage,
-// users have to do:  `let Libhoney = require("libhoney").default;`
-//
-// switching to rollup fixes that (yay!) but we need to keep it working until  we do the major bump.  hence
-// this hack.
-if (typeof module !== "undefined") {
-  Object.defineProperty(Libhoney, "default", { value: Libhoney });
-}
