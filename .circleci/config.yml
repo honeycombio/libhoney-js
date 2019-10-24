@@ -1,5 +1,10 @@
 version: 2.1
 
+tag_filters: &tag_filters
+  filters:
+      tags:
+        only: /.*/
+
 executors:
   node:
     parameters:
@@ -44,15 +49,19 @@ workflows:
       - test_libhoney:
           name: test_node8
           nodeversion: "8"
+          filters: *tag_filters
       - test_libhoney:
           name: test_node10
           nodeversion: "10"
+          filters: *tag_filters
       - test_libhoney:
           name: test_node11
           nodeversion: "11"
+          filters: *tag_filters
       - test_libhoney:
           name: test_node12
           nodeversion: "12"
+          filters: *tag_filters
       - publish:
           requires:
             - test_node8
