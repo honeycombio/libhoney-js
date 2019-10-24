@@ -1,9 +1,8 @@
 version: 2.1
 
 tag_filters: &tag_filters
-  filters:
-      tags:
-        only: /.*/
+    tags:
+      only: /.*/
 
 executors:
   node:
