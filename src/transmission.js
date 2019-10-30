@@ -311,7 +311,7 @@ export class Transmission {
 
         let start = Date.now();
         req
-          .set("X-Hny-Team", batch.writeKey)
+          .set("X-Honeycomb-Team", batch.writeKey)
           .set("User-Agent", userAgent)
           .type("json")
           .send(encoded)
