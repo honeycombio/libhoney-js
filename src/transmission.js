@@ -7,7 +7,6 @@
 /**
  * @module
  */
-import proxy from "superagent-proxy";
 import superagent from "superagent";
 import urljoin from "urljoin";
 
@@ -284,79 +283,86 @@ export class Transmission {
     let batches = Object.keys(batchAgg.batches).map(k => batchAgg.batches[k]);
     eachPromise(batches, batch => {
       let url = urljoin(batch.apiHost, "/1/batch", batch.dataset);
-      let req = superagent.post(url);
-      if (this._proxy) {
-        req = proxy(req, this._proxy);
-      }
+      let postReq = superagent.post(url);
 
-      let { encoded, numEncoded } = batchAgg.encodeBatchEvents(batch.events);
-      return new Promise(resolve => {
-        // if we failed to encode any of the events, no point in sending anything to honeycomb
-        if (numEncoded === 0) {
-          this._responseCallback(
-            batch.events.map(ev => ({
-              metadata: ev.metadata,
-              error: ev.encodeError
+      const reqPromise = Promise.resolve(
+        this._proxy
+          ? import("superagent-proxy").then(({ default: proxy }) => ({
+              req: proxy(postReq, this._proxy)
             }))
-          );
-          resolve();
-          return;
-        }
-
-        let userAgent = USER_AGENT;
-        let trimmedAddition = this._userAgentAddition.trim();
-        if (trimmedAddition) {
-          userAgent = `${USER_AGENT} ${trimmedAddition}`;
-        }
-
-        let start = Date.now();
-        req
-          .set("X-Honeycomb-Team", batch.writeKey)
-          .set("User-Agent", userAgent)
-          .type("json")
-          .send(encoded)
-          .end((err, res) => {
-            let end = Date.now();
-
-            if (err) {
+          : { req: postReq }
+      );
+      let { encoded, numEncoded } = batchAgg.encodeBatchEvents(batch.events);
+      return reqPromise.then(
+        ({ req }) =>
+          new Promise(resolve => {
+            // if we failed to encode any of the events, no point in sending anything to honeycomb
+            if (numEncoded === 0) {
               this._responseCallback(
                 batch.events.map(ev => ({
-                  // eslint-disable-next-line camelcase
-                  status_code: ev.encodeError ? undefined : err.status,
-                  duration: end - start,
                   metadata: ev.metadata,
-                  error: ev.encodeError || err
+                  error: ev.encodeError
                 }))
               );
-            } else {
-              let response = JSON.parse(res.text);
-              let respIdx = 0;
-              this._responseCallback(
-                batch.events.map(ev => {
-                  if (ev.encodeError) {
-                    return {
-                      duration: end - start,
-                      metadata: ev.metadata,
-                      error: ev.encodeError
-                    };
-                  } else {
-                    let nextResponse = response[respIdx++];
-                    return {
-                      // eslint-disable-next-line camelcase
-                      status_code: nextResponse.status,
-                      duration: end - start,
-                      metadata: ev.metadata,
-                      error: nextResponse.err
-                    };
-                  }
-                })
-              );
+              resolve();
+              return;
             }
-            // we resolve unconditionally to continue the iteration in eachSeries.  errors will cause
-            // the event to be re-enqueued/dropped.
-            resolve();
-          });
-      });
+
+            let userAgent = USER_AGENT;
+            let trimmedAddition = this._userAgentAddition.trim();
+            if (trimmedAddition) {
+              userAgent = `${USER_AGENT} ${trimmedAddition}`;
+            }
+
+            let start = Date.now();
+            req
+              .set("X-Honeycomb-Team", batch.writeKey)
+              .set("User-Agent", userAgent)
+              .type("json")
+              .send(encoded)
+              .end((err, res) => {
+                let end = Date.now();
+
+                if (err) {
+                  this._responseCallback(
+                    batch.events.map(ev => ({
+                      // eslint-disable-next-line camelcase
+                      status_code: ev.encodeError ? undefined : err.status,
+                      duration: end - start,
+                      metadata: ev.metadata,
+                      error: ev.encodeError || err
+                    }))
+                  );
+                } else {
+                  let response = JSON.parse(res.text);
+                  let respIdx = 0;
+                  this._responseCallback(
+                    batch.events.map(ev => {
+                      if (ev.encodeError) {
+                        return {
+                          duration: end - start,
+                          metadata: ev.metadata,
+                          error: ev.encodeError
+                        };
+                      } else {
+                        let nextResponse = response[respIdx++];
+                        return {
+                          // eslint-disable-next-line camelcase
+                          status_code: nextResponse.status,
+                          duration: end - start,
+                          metadata: ev.metadata,
+                          error: nextResponse.err
+                        };
+                      }
+                    })
+                  );
+                }
+                // we resolve unconditionally to continue the iteration in eachSeries.  errors will cause
+                // the event to be re-enqueued/dropped.
+                resolve();
+              });
+          })
+      );
     })
       .then(finishBatch)
       .catch(finishBatch);
