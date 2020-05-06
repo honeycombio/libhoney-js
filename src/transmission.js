@@ -314,10 +314,15 @@ export class Transmission {
               userAgent = `${USER_AGENT} ${trimmedAddition}`;
             }
 
+            const _isNode = typeof process !== "undefined";
+            const UserAgentHeader = _isNode
+              ? "User-Agent"
+              : "X-Honeycomb-UserAgent";
+
             let start = Date.now();
             req
               .set("X-Honeycomb-Team", batch.writeKey)
-              .set("User-Agent", userAgent)
+              .set(UserAgentHeader, userAgent)
               .type("json")
               .send(encoded)
               .end((err, res) => {
