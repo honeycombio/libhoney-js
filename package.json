@@ -10,17 +10,20 @@
   "engines": {
     "node": "8.* || >= 10.*"
   },
+  "browser": "dist/libhoney.browser.js",
   "module": "dist/libhoney.es.js",
   "main": "dist/libhoney.cjs.js",
   "files": ["dist", "README.md", "LICENSE"],
   "scripts": {
-    "build": "rollup -c",
+    "build": "yarn build:node && yarn build:browser",
+    "build:node": "rollup -c rollup.config.js",
+    "build:browser": "rollup -c rollup.browser.config.js",
     "dev": "rollup -c -w",
     "test": "jest",
     "test-coverage": "jest --coverage",
-    "format": "prettier --write \"src/**/*.js\"",
-    "check-format": "prettier \"src/**/*.js\"",
-    "lint": "eslint \"src/**/*.js\"",
+    "format": "prettier --write \"src/**/*.js\" rollup.config.js rollup.browser.config.js",
+    "check-format": "prettier \"src/**/*.js\" rollup.config.js rollup.browser.config.js",
+    "lint": "eslint \"src/**/*.js\" rollup.config.js rollup.browser.config.js",
     "precommit": "lint-staged"
   },
   "author": "",

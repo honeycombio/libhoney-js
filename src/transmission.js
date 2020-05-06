@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Apache License 2.0
 // license that can be found in the LICENSE file.
 
-/* global global */
+/* global global, process */
 
 /**
  * @module
@@ -196,9 +196,6 @@ export class Transmission {
     this._userAgentAddition = options.userAgentAddition || "";
     this._proxy = options.proxy;
 
-    const _isNode = typeof process !== "undefined";
-    this._UserAgentHeader = _isNode ? "User-Agent" : "X-Honeycomb-UserAgent";
-
     // Included for testing; to stub out randomness and verify that an event
     // was dropped.
     this._randomFn = Math.random;
@@ -288,13 +285,18 @@ export class Transmission {
       let url = urljoin(batch.apiHost, "/1/batch", batch.dataset);
       let postReq = superagent.post(url);
 
-      const reqPromise = Promise.resolve(
-        this._proxy
-          ? import("superagent-proxy").then(({ default: proxy }) => ({
-              req: proxy(postReq, this._proxy)
-            }))
-          : { req: postReq }
-      );
+      let reqPromise;
+      if (process.env.LIBHONEY_TARGET === "browser") {
+        reqPromise = Promise.resolve({ req: postReq });
+      } else {
+        reqPromise = Promise.resolve(
+          this._proxy
+            ? import("superagent-proxy").then(({ default: proxy }) => ({
+                req: proxy(postReq, this._proxy)
+              }))
+            : { req: postReq }
+        );
+      }
       let { encoded, numEncoded } = batchAgg.encodeBatchEvents(batch.events);
       return reqPromise.then(
         ({ req }) =>
@@ -320,7 +322,12 @@ export class Transmission {
             let start = Date.now();
             req
               .set("X-Honeycomb-Team", batch.writeKey)
-              .set(this._UserAgentHeader, userAgent)
+              .set(
+                process.env.LIBHONEY_TARGET === "browser"
+                  ? "X-Honeycomb-UserAgent"
+                  : "User-Agent",
+                userAgent
+              )
               .type("json")
               .send(encoded)
               .end((err, res) => {

@@ -17,7 +17,7 @@
     "no-var": "error",
     "eqeqeq": "error",
     "comma-dangle": "error",
-    "quotes": "error",
+    "quotes": ["error", "double", { "avoidEscape": true }],
     "camelcase": "error",
     "sort-imports": "error",
     "no-param-reassign": "error",

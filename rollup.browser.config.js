@@ -18,18 +18,14 @@ module.exports = {
       LIBHONEY_JS_VERSION: pkg.version
     }),
     replace({
-      "process.env.LIBHONEY_TARGET": '"node"'
+      "process.env.LIBHONEY_TARGET": '"browser"'
     })
   ],
 
   output: [
     {
-      file: pkg.main,
+      file: pkg.browser,
       format: "cjs"
-    },
-    {
-      file: pkg.module,
-      format: "es"
     }
   ]
 };
