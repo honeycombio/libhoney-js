@@ -196,6 +196,9 @@ export class Transmission {
     this._userAgentAddition = options.userAgentAddition || "";
     this._proxy = options.proxy;
 
+    const _isNode = typeof process !== "undefined";
+    this._UserAgentHeader = _isNode ? "User-Agent" : "X-Honeycomb-UserAgent";
+
     // Included for testing; to stub out randomness and verify that an event
     // was dropped.
     this._randomFn = Math.random;
@@ -314,15 +317,10 @@ export class Transmission {
               userAgent = `${USER_AGENT} ${trimmedAddition}`;
             }
 
-            const _isNode = typeof process !== "undefined";
-            const UserAgentHeader = _isNode
-              ? "User-Agent"
-              : "X-Honeycomb-UserAgent";
-
             let start = Date.now();
             req
               .set("X-Honeycomb-Team", batch.writeKey)
-              .set(UserAgentHeader, userAgent)
+              .set(this._UserAgentHeader, userAgent)
               .type("json")
               .send(encoded)
               .end((err, res) => {
