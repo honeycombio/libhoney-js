@@ -571,7 +571,15 @@ describe("base transmission", () => {
 
   it("should use X-Honeycomb-UserAgent in browser", done => {
     // terrible hack to get our "are we running in node" check to return false
+    const oldProcess = global.process;
     global.process = undefined;
+
+    let transmission = new Transmission({
+      batchTimeTrigger: 10000, // larger than the mocha timeout
+      batchSizeTrigger: 0
+    });
+
+    global.process = oldProcess;
 
     mock.post("http://localhost:9999/1/batch/browser-test", req => {
       if (req.headers["user-agent"]) {
@@ -585,11 +593,6 @@ describe("base transmission", () => {
       done();
 
       return {};
-    });
-
-    let transmission = new Transmission({
-      batchTimeTrigger: 10000, // larger than the mocha timeout
-      batchSizeTrigger: 0
     });
 
     transmission.sendPresampledEvent(
