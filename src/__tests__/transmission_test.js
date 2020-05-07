@@ -568,4 +568,41 @@ describe("base transmission", () => {
       );
     });
   });
+
+  it("should use X-Honeycomb-UserAgent in browser", done => {
+    // terrible hack to get our "are we running in node" check to return false
+    process.env.LIBHONEY_TARGET = "browser";
+
+    let transmission = new Transmission({
+      batchTimeTrigger: 10000, // larger than the mocha timeout
+      batchSizeTrigger: 0
+    });
+
+    mock.post("http://localhost:9999/1/batch/browser-test", req => {
+      if (req.headers["user-agent"]) {
+        done(new Error("unexpected user-agent addition"));
+      }
+
+      if (!req.headers["x-honeycomb-useragent"]) {
+        done(new Error("missing X-Honeycomb-UserAgent header"));
+      }
+
+      done();
+
+      process.env.LIBHONEY_TARGET = "";
+
+      return {};
+    });
+
+    transmission.sendPresampledEvent(
+      new ValidatedEvent({
+        apiHost: "http://localhost:9999",
+        writeKey: "123456789",
+        dataset: "browser-test",
+        sampleRate: 1,
+        timestamp: new Date(),
+        postData: JSON.stringify({ a: 1, b: 2 })
+      })
+    );
+  });
 });
