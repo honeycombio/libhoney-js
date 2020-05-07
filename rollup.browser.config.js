@@ -22,10 +22,5 @@ module.exports = {
     })
   ],
 
-  output: [
-    {
-      file: pkg.browser,
-      format: "cjs"
-    }
-  ]
+  output: [{ file: pkg.browser, format: "cjs" }]
 };
