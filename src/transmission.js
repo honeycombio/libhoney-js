@@ -29,6 +29,9 @@ const maxConcurrentBatches = 10;
 // how many events to queue up for busy batches before we start dropping
 const pendingWorkCapacity = 10000;
 
+// how long (in ms) to give a single POST before we timeout
+const deadlineTimeoutMs = 60000;
+
 const emptyResponseCallback = function() {};
 
 const eachPromise = (arr, iteratorFn) =>
@@ -173,6 +176,7 @@ export class Transmission {
     this._batchTimeTrigger = batchTimeTrigger;
     this._maxConcurrentBatches = maxConcurrentBatches;
     this._pendingWorkCapacity = pendingWorkCapacity;
+    this._timeout = deadlineTimeoutMs;
     this._sendTimeoutId = -1;
     this._eventQueue = [];
     this._batchCount = 0;
@@ -191,6 +195,9 @@ export class Transmission {
     }
     if (typeof options.pendingWorkCapacity === "number") {
       this._pendingWorkCapacity = options.pendingWorkCapacity;
+    }
+    if (typeof options.timeout === "number") {
+      this._timeout = options.timeout;
     }
 
     this._userAgentAddition = options.userAgentAddition || "";
@@ -329,6 +336,7 @@ export class Transmission {
                 userAgent
               )
               .type("json")
+              .timeout(this._timeout)
               .send(encoded)
               .end((err, res) => {
                 let end = Date.now();

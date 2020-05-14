@@ -2,16 +2,25 @@
 import "babel-polyfill";
 
 import { Transmission, ValidatedEvent } from "../transmission";
-import net from "net";
 
-let superagent = require("superagent");
-let mock = require("superagent-mocker")(superagent);
+import http from "http";
+import net from "net";
+import superagent from "superagent";
+import superagentMocker from "superagent-mocker";
+
+let mock;
 
 describe("base transmission", () => {
+  beforeEach(() => (mock = superagentMocker(superagent)));
+  afterEach(() => {
+    mock.clearRoutes();
+    mock.unmock(superagent);
+  });
+
   it("will hit a proxy", done => {
     let server = net.createServer(socket => {
       socket.end();
-      server.unref();
+      server.close();
       done();
     });
 
@@ -604,5 +613,67 @@ describe("base transmission", () => {
         postData: JSON.stringify({ a: 1, b: 2 })
       })
     );
+  });
+
+  it("should respect options.deadlineTimeoutMs and fail sending the batch", done => {
+    // we can't use superagent-mocker here, since we want the request to timeout,
+    // and there's no async flow in -mocker :(
+
+    const server = http.createServer((req, res) => {
+      setTimeout(
+        () => {
+          // this part doesn't really matter
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end("[{ status: 666 }]");
+        },
+        // because this number is longer than our 5000 timeout.
+        7500
+      );
+    });
+    server.listen(6666, "localhost", () => {
+      let transmission = new Transmission({
+        batchTimeTrigger: 10,
+        timeout: 2000,
+        responseCallback: function(respQueue) {
+          server.close();
+
+          if (respQueue.length !== 1) {
+            done(
+              new Error(
+                `expected response queue length = 1, got ${respQueue.length}`
+              )
+            );
+            return;
+          }
+
+          const resp = respQueue[0];
+
+          if (resp.error && resp.error.timeout) {
+            done();
+            return;
+          }
+
+          done(
+            new Error(
+              `expected a timeout error, instead got ${JSON.stringify(
+                resp.error
+              )}`
+            )
+          );
+        }
+      });
+
+      transmission.sendEvent(
+        new ValidatedEvent({
+          apiHost: "http://localhost:6666",
+          writeKey: "123456789",
+          dataset: "test-transmission",
+          sampleRate: 1,
+          timestamp: new Date(),
+          postData: JSON.stringify({ a: 1, b: 2 }),
+          metadata: "my metadata"
+        })
+      );
+    });
   });
 });
