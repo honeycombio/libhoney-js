@@ -626,7 +626,8 @@ describe("base transmission", () => {
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end("[{ status: 666 }]");
         },
-        // because this number is longer than our 5000 timeout.
+        // because this number is longer than our 5000 global test timeout, as well as (more importantly)
+        // the `timeout: 2000` below.
         7500
       );
     });
