@@ -615,7 +615,7 @@ describe("base transmission", () => {
     );
   });
 
-  it("should respect options.deadlineTimeoutMs and fail sending the batch", done => {
+  it("should respect options.timeout and fail sending the batch", done => {
     // we can't use superagent-mocker here, since we want the request to timeout,
     // and there's no async flow in -mocker :(
 
