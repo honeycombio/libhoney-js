@@ -51,6 +51,9 @@ const defaults = Object.freeze({
   // the maximum number of responses we enqueue before we begin dropping them.
   maxResponseQueueSize: 1000,
 
+  // how long (in ms) to give a single POST before we timeout.
+  timeout: 60000,
+
   // if this is set to true, all sending is disabled.  useful for disabling libhoney when testing
   disabled: false,
 
@@ -81,6 +84,7 @@ export default class Libhoney extends EventEmitter {
    * @param {number} [opts.maxConcurrentBatches=10] - We process batches concurrently to increase parallelism while sending.
    * @param {number} [opts.pendingWorkCapacity=10000] - The maximum number of pending events we allow to accumulate in our sending queue before dropping them.
    * @param {number} [opts.maxResponseQueueSize=1000] - The maximum number of responses we enqueue before dropping them.
+   * @param {number} [opts.timeout=60000] - How long (in ms) to give a single POST before we timeout.
    * @param {boolean} [opts.disabled=false] - Disable transmission of events to the specified `apiHost`, particularly useful for testing or development.
    * @constructor
    * @example
