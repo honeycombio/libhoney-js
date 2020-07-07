@@ -117,11 +117,28 @@ export default class Libhoney extends EventEmitter {
     this._responseQueue = [];
   }
 
+  _clearResponseQueue() {}
+
   _responseCallback(responses) {
     let queue = this._responseQueue;
-    if (queue.length < this._options.maxResponseQueueSize) {
+
+    //check that incoming responses can fit in under the max queue size
+    const responsesFitUnderMax =
+      queue.length + responses.length < this._options.maxResponseQueueSize;
+
+    // if so, do the easy thing and concat
+    if (responsesFitUnderMax) {
       this._responseQueue = this._responseQueue.concat(responses);
     }
+
+    // if incoming responses do not fit under the max setting, but the current queue
+    // is still under the limit, find the difference and fill the queue to max
+    else if (queue.length < this._options.maxResponseQueueSize) {
+      const diff = this._options.maxResponseQueueSize - queue.length;
+      const slicedArray = responses.slice(0, diff);
+      this._responseQueue = this._responseQueue.concat(slicedArray);
+    }
+
     this.emit("response", this._responseQueue);
   }
 
@@ -352,6 +369,7 @@ export default class Libhoney extends EventEmitter {
    *   honey.addField("build_id", "a6cc38a1");
    */
   addField(name, val) {
+    console.log("add field");
     this._builder.addField(name, val);
     return this;
   }
