@@ -369,7 +369,6 @@ export default class Libhoney extends EventEmitter {
    *   honey.addField("build_id", "a6cc38a1");
    */
   addField(name, val) {
-    console.log("add field");
     this._builder.addField(name, val);
     return this;
   }
