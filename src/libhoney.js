@@ -117,8 +117,6 @@ export default class Libhoney extends EventEmitter {
     this._responseQueue = [];
   }
 
-  _clearResponseQueue() {}
-
   _responseCallback(responses) {
     let queue = this._responseQueue;
 
