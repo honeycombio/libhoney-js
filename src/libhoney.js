@@ -118,23 +118,15 @@ export default class Libhoney extends EventEmitter {
   }
 
   _responseCallback(responses) {
-    let queue = this._responseQueue;
+    const [queue, limit] = [
+      this._responseQueue,
+      this._options.maxResponseQueueSize
+    ];
 
-    //check that incoming responses can fit in under the max queue size
-    const responsesFitUnderMax =
-      queue.length + responses.length < this._options.maxResponseQueueSize;
-
-    // if so, do the easy thing and concat
-    if (responsesFitUnderMax) {
-      this._responseQueue = this._responseQueue.concat(responses);
-    }
-
-    // if incoming responses do not fit under the max setting, but the current queue
-    // is still under the limit, find the difference and fill the queue to max
-    else if (queue.length < this._options.maxResponseQueueSize) {
-      const diff = this._options.maxResponseQueueSize - queue.length;
-      const slicedArray = responses.slice(0, diff);
-      this._responseQueue = this._responseQueue.concat(slicedArray);
+    if (queue.length < limit) {
+      this._responseQueue = this._responseQueue.concat(
+        concatWithMaxLimit(queue, responses, limit)
+      );
     }
 
     this.emit("response", this._responseQueue);
@@ -507,4 +499,18 @@ function getAndInitTransmission(transmission, options) {
       );
     }
   }
+}
+
+function concatWithMaxLimit(arr1, arr2, limit) {
+  // default return value to response array unchanged
+  let responsesToConcat = arr2;
+
+  // if the length of both arrays combined is over the limit
+  // find the difference and return only enough responses to fill the queue
+  if (arr1.length + arr2.length > limit) {
+    const diff = limit - arr1.length;
+    responsesToConcat = arr2.slice(0, diff);
+  }
+
+  return responsesToConcat;
 }
