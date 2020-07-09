@@ -123,11 +123,7 @@ export default class Libhoney extends EventEmitter {
       this._options.maxResponseQueueSize
     ];
 
-    if (queue.length < limit) {
-      this._responseQueue = this._responseQueue.concat(
-        concatWithMaxLimit(queue, responses, limit)
-      );
-    }
+    this._responseQueue = concatWithMaxLimit(queue, responses, limit);
 
     this.emit("response", this._responseQueue);
   }
@@ -502,15 +498,21 @@ function getAndInitTransmission(transmission, options) {
 }
 
 function concatWithMaxLimit(arr1, arr2, limit) {
-  // default return value to response array unchanged
-  let responsesToConcat = arr2;
-
-  // if the length of both arrays combined is over the limit
-  // find the difference and return only enough responses to fill the queue
-  if (arr1.length + arr2.length > limit) {
-    const diff = limit - arr1.length;
-    responsesToConcat = arr2.slice(0, diff);
+  // if queue is full or somehow over the max
+  if (arr1.length >= limit) {
+    //return up to the max length
+    return arr1.slice(0, limit);
   }
 
-  return responsesToConcat;
+  // if queue is not yet full but incoming responses
+  // would put the queue over
+  else if (arr1.length + arr2.length > limit) {
+    // find the difference and return only enough responses to fill the queue
+    const diff = limit - arr1.length;
+    const slicedArr2 = arr2.slice(0, diff);
+    return arr1.concat(slicedArr2);
+  }
+
+  // otherwise assume it'll all fit, combine the responses with the queue
+  return arr1.concat(arr2);
 }
