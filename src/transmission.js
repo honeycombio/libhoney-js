@@ -128,6 +128,20 @@ export class ValidatedEvent {
     }
     return json;
   }
+
+  toBrokenJSON() {
+    let fields = [];
+    if (this.timestamp) {
+      fields.push(`"time":${JSON.stringify(this.timestamp)}`);
+    }
+    if (this.sampleRate) {
+      fields.push(`"samplerate":${JSON.stringify(this.sampleRate)}`);
+    }
+    if (this.postData) {
+      fields.push(`"data":${JSON.stringify(this.postData)}`);
+    }
+    return `{${fields.join(",")}}`;
+  }
 }
 
 export class MockTransmission {
@@ -150,7 +164,18 @@ export class MockTransmission {
   }
 }
 
+// deprecated.  Use ConsoleTransmission instead.
 export class WriterTransmission {
+  sendEvent(ev) {
+    console.log(JSON.stringify(ev.toBrokenJSON()));
+  }
+
+  sendPresampledEvent(ev) {
+    console.log(JSON.stringify(ev.toBrokenJSON()));
+  }
+}
+
+export class ConsoleTransmission {
   sendEvent(ev) {
     console.log(JSON.stringify(ev));
   }

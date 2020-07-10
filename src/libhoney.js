@@ -7,6 +7,7 @@
  * @module
  */
 import {
+  ConsoleTransmission,
   MockTransmission,
   NullTransmission,
   Transmission,
@@ -33,7 +34,8 @@ const defaults = Object.freeze({
   //  - "base": the default transmission implementation
   //  - "worker": a web-worker based transmission (not currently available, see https://github.com/honeycombio/libhoney-js/issues/22)
   //  - "mock": an implementation that accumulates all events sent
-  //  - "writer": an implementation that logs to the console all events sent
+  //  - "writer": an implementation that logs to the console all events sent (deprecated.  use "console" instead)
+  //  - "console": an implementation that logs correct json objects to the console for all events sent.
   //  - "null": an implementation that does nothing
   transmission: "base",
 
@@ -448,7 +450,12 @@ const getTransmissionClass = transmissionClassName => {
       );
       return Transmission;
     case "writer":
+      console.warn(
+        "writer implementation is deprecated.  Please switch to console implementation."
+      );
       return WriterTransmission;
+    case "console":
+      return ConsoleTransmission;
     default:
       throw new Error(
         `unknown transmission implementation "${transmissionClassName}".`
@@ -466,7 +473,7 @@ function getAndInitTransmission(transmission, options) {
     return new transmissionClass(options);
   } else if (typeof transmission !== "function") {
     throw new Error(
-      ".transmission must be one of 'base'/'worker'/'mock'/'writer'/'null' or a constructor."
+      ".transmission must be one of 'base'/'worker'/'mock'/'writer'/'console'/'null' or a constructor."
     );
   }
 
