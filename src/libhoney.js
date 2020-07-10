@@ -497,7 +497,16 @@ function getAndInitTransmission(transmission, options) {
   }
 }
 
-function concatWithMaxLimit(arr1, arr2, limit) {
+  /**
+   * Concatenates two arrays while keeping the length of the returned result 
+   * less than the limit. As many elements from arr2 will be appended onto the 
+   * end of arr1 as will remain under the limit. If arr1 is already too long it 
+   * will be truncated to match the limit. Order is preserved; arr2's contents 
+   * will appear after those already in arr1.
+   * 
+   * Modifies and returns arr1.
+   */
+   function concatWithMaxLimit(arr1, arr2, limit) {
   // if queue is full or somehow over the max
   if (arr1.length >= limit) {
     //return up to the max length
