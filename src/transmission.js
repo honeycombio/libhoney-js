@@ -77,7 +77,7 @@ class BatchEndpointAggregator {
     let numEncoded = 0;
     let encodedEvents = events.reduce((acc, ev) => {
       try {
-        let encodedEvent = ev.toJSON(); // directly call toJSON, not JSON.stringify, because the latter wraps it in an additional set of quotes
+        let encodedEvent = JSON.stringify(ev);
         numEncoded++;
         let newAcc = acc + (!first ? "," : "") + encodedEvent;
         first = false;
@@ -116,17 +116,17 @@ export class ValidatedEvent {
   }
 
   toJSON() {
-    let fields = [];
+    let json = {};
     if (this.timestamp) {
-      fields.push(`"time":${JSON.stringify(this.timestamp)}`);
+      json.time = this.timestamp;
     }
     if (this.sampleRate) {
-      fields.push(`"samplerate":${JSON.stringify(this.sampleRate)}`);
+      json.samplerate = this.sampleRate;
     }
     if (this.postData) {
-      fields.push(`"data":${this.postData}`);
+      json.data = this.postData;
     }
-    return `{${fields.join(",")}}`;
+    return json;
   }
 }
 

@@ -281,9 +281,9 @@ export default class Libhoney extends EventEmitter {
     }
     let postData;
     try {
-      postData = JSON.stringify(event.data);
+      postData = JSON.parse(JSON.stringify(event.data));
     } catch (e) {
-      console.error("error converting event data to JSON: " + e);
+      console.error("error cloning event data: " + e);
       return null;
     }
 
