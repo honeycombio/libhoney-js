@@ -506,7 +506,7 @@ function concatWithMaxLimit(arr1, arr2, limit) {
 
   // if queue is not yet full but incoming responses
   // would put the queue over
-  else if (arr1.length + arr2.length > limit) {
+  if (arr1.length + arr2.length > limit) {
     // find the difference and return only enough responses to fill the queue
     const diff = limit - arr1.length;
     const slicedArr2 = arr2.slice(0, diff);
