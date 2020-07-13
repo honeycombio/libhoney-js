@@ -53,7 +53,7 @@ describe("libhoney builder", () => {
     builder.sendNow({ c: { d: 2 } });
 
     expect(transmission.events).toHaveLength(1);
-    expect(transmission.events[0].postData).toEqual(JSON.stringify(postData));
+    expect(transmission.events[0].postData).toEqual(postData);
   });
 
   it("includes snapshot of global fields/dynFields", () => {
@@ -75,7 +75,7 @@ describe("libhoney builder", () => {
     builder.sendNow({ c: 3 });
 
     expect(transmission.events).toHaveLength(1);
-    expect(transmission.events[0].postData).toEqual(JSON.stringify(postData));
+    expect(transmission.events[0].postData).toEqual(postData);
 
     // but if we create another builder, it should show up in the post data.
     postData = { a: 1, b: 2, c: 3 };
@@ -85,6 +85,6 @@ describe("libhoney builder", () => {
     builder.sendNow({ c: 3 });
 
     expect(transmission.events).toHaveLength(2);
-    expect(transmission.events[1].postData).toEqual(JSON.stringify(postData));
+    expect(transmission.events[1].postData).toEqual(postData);
   });
 });

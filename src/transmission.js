@@ -77,7 +77,7 @@ class BatchEndpointAggregator {
     let numEncoded = 0;
     let encodedEvents = events.reduce((acc, ev) => {
       try {
-        let encodedEvent = ev.toJSON(); // directly call toJSON, not JSON.stringify, because the latter wraps it in an additional set of quotes
+        let encodedEvent = JSON.stringify(ev);
         numEncoded++;
         let newAcc = acc + (!first ? "," : "") + encodedEvent;
         first = false;
@@ -116,6 +116,20 @@ export class ValidatedEvent {
   }
 
   toJSON() {
+    let json = {};
+    if (this.timestamp) {
+      json.time = this.timestamp;
+    }
+    if (this.sampleRate) {
+      json.samplerate = this.sampleRate;
+    }
+    if (this.postData) {
+      json.data = this.postData;
+    }
+    return json;
+  }
+
+  toBrokenJSON() {
     let fields = [];
     if (this.timestamp) {
       fields.push(`"time":${JSON.stringify(this.timestamp)}`);
@@ -124,7 +138,7 @@ export class ValidatedEvent {
       fields.push(`"samplerate":${JSON.stringify(this.sampleRate)}`);
     }
     if (this.postData) {
-      fields.push(`"data":${this.postData}`);
+      fields.push(`"data":${JSON.stringify(this.postData)}`);
     }
     return `{${fields.join(",")}}`;
   }
@@ -150,7 +164,18 @@ export class MockTransmission {
   }
 }
 
+// deprecated.  Use ConsoleTransmission instead.
 export class WriterTransmission {
+  sendEvent(ev) {
+    console.log(JSON.stringify(ev.toBrokenJSON()));
+  }
+
+  sendPresampledEvent(ev) {
+    console.log(JSON.stringify(ev.toBrokenJSON()));
+  }
+}
+
+export class ConsoleTransmission {
   sendEvent(ev) {
     console.log(JSON.stringify(ev));
   }

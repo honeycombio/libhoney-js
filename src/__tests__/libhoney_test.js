@@ -41,7 +41,7 @@ describe("libhoney", () => {
       expect(transmission.events[0].dataset).toEqual("testing");
       expect(transmission.events[0].sampleRate).toEqual(1);
       expect(transmission.events[0].timestamp).toBeInstanceOf(Date);
-      expect(transmission.events[0].postData).toEqual(JSON.stringify(postData));
+      expect(transmission.events[0].postData).toEqual(postData);
     });
 
     it("should come from libhoney options if not specified in event", () => {
@@ -59,7 +59,7 @@ describe("libhoney", () => {
       expect(transmission.events[0].apiHost).toEqual("http://foo/bar");
       expect(transmission.events[0].writeKey).toEqual("12345");
       expect(transmission.events[0].dataset).toEqual("testing");
-      expect(transmission.events[0].postData).toEqual(JSON.stringify(postData));
+      expect(transmission.events[0].postData).toEqual(postData);
     });
   });
 
