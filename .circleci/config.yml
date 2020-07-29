@@ -43,6 +43,32 @@ jobs:
 
 workflows:
   version: 2
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - main
+    jobs:
+      - test_libhoney:
+          name: test_node8
+          nodeversion: "8"
+          filters: *tag_filters
+      - test_libhoney:
+          name: test_node10
+          nodeversion: "10"
+          filters: *tag_filters
+      - test_libhoney:
+          name: test_node11
+          nodeversion: "11"
+          filters: *tag_filters
+      - test_libhoney:
+          name: test_node12
+          nodeversion: "12"
+          filters: *tag_filters
+
   build-libhoney:
     jobs:
       - test_libhoney:
