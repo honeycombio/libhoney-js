@@ -82,7 +82,7 @@ jobs:
       - run: mkdir -p ~/artifacts
       - run: yarn
       - run: yarn build
-      - run: cp ./libhoney-*.tgz ~/artifacts/
+      - run: cp ./dist/* ~/artifacts/
       - persist_to_workspace:
           root: ~/
           paths:
