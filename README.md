@@ -6,8 +6,8 @@ A Node.js module for sending events to [Honeycomb](https://www.honeycomb.io), a 
 
 Requires any current LTS release of Node.js. Currently v8, and >= v10.
 
-- [Usage and Examples](https://docs.honeycomb.io/sdk/javascript/)
-- [API Reference](https://doc.esdoc.org/github.com/honeycombio/libhoney-js/)
+-   [Usage and Examples](https://docs.honeycomb.io/sdk/javascript/)
+-   [API Reference](https://doc.esdoc.org/github.com/honeycombio/libhoney-js/)
 
 For tracing support and automatic instrumentation of Express and other common libraries, check out our [Beeline for NodeJS](https://github.com/honeycombio/beeline-nodejs).
 
@@ -21,4 +21,6 @@ All contributions will be released under the Apache License 2.0.
 
 ### Releasing a new version
 
-Travis will automatically upload tagged releases to NPM.
+Use `npm version --no-git-tag-version` to update the version number using `major`, `minor`, `patch`, or the prerelease variants `premajor`, `preminor`, or `prepatch`. We use `--no-git-tag-version` to avoid automatically tagging - tagging with the version automatically triggers a CI run that publishes, and we only want to do that upon merging the PR into `main`.
+
+After doing this, follow our usual instructions for the actual process of tagging and releasing the package.

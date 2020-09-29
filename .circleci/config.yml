@@ -1,24 +1,70 @@
 version: 2.1
 
-tag_filters: &tag_filters
+# YAML Anchors to reduce copypasta
+
+# This is necessary for job to run when a tag is created
+filters_always: &filters_always
+  filters:
     tags:
       only: /.*/
+
+# Restrict running to only be on tags starting with vNNNN
+filters_publish: &filters_publish
+  filters:
+    tags:
+      only: /^v[0-9].*/
+    branches:
+      ignore: /.*/
+
+matrix_nodeversions: &matrix_nodeversions
+  matrix:
+    parameters:
+      nodeversion: ["8", "10", "11", "12", "14"]
+
+# Default version of node to use for lint and publishing
+default_nodeversion: &default_nodeversion "12"
 
 executors:
   node:
     parameters:
       nodeversion:
         type: string
-        default: "12"
+        default: *default_nodeversion
     docker:
       - image: circleci/node:<< parameters.nodeversion >>
+  github:
+    docker:
+      - image: cibuilds/github:0.13.0
+
+commands:
+  publish_github:
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: "Artifacts being published"
+          command: |
+            echo "about to publish to tag ${CIRCLE_TAG}"
+            ls -l ~/artifacts/*
+      - run:
+          name: "GHR Draft"
+          command: ghr -draft -n ${CIRCLE_TAG} -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} ${CIRCLE_TAG} ~/artifacts
 
 jobs:
-  test_libhoney:
+  lint:
+    executor:
+      name: node
+      nodeversion: *default_nodeversion
+    steps:
+      - checkout
+      - run: yarn
+      - run: yarn lint
+
+  test:
     parameters:
       nodeversion:
         type: string
-        default: "12"
+        default: *default_nodeversion
     executor:
       name: node
       nodeversion: "<< parameters.nodeversion >>"
@@ -27,22 +73,40 @@ jobs:
       - run: yarn
       - run: yarn test
       - run: yarn build
-      
-  publish:
-    docker:
-      - image: circleci/node:12.12.0-buster
+
+  build_artifacts:
+    executor:
+      name: node
+    steps:
+      - checkout
+      - run: mkdir -p ~/artifacts
+      - run: yarn
+      - run: yarn build
+      - run: cp ./dist/* ~/artifacts/
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - artifacts
+      - store_artifacts:
+          path: ~/artifacts
+
+  publish_github:
+    executor: github
+    steps:
+      - publish_github
+
+  publish_npm:
+    executor:
+      name: node
     steps:
       - checkout
       - run:
           name: store npm auth token
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
       - run: yarn
-      - run: yarn lint
-      - run: yarn build
       - run: npm publish
 
 workflows:
-  version: 2
   nightly:
     triggers:
       - schedule:
@@ -52,49 +116,32 @@ workflows:
               only:
                 - main
     jobs:
-      - test_libhoney:
-          name: test_node8
-          nodeversion: "8"
-          filters: *tag_filters
-      - test_libhoney:
-          name: test_node10
-          nodeversion: "10"
-          filters: *tag_filters
-      - test_libhoney:
-          name: test_node11
-          nodeversion: "11"
-          filters: *tag_filters
-      - test_libhoney:
-          name: test_node12
-          nodeversion: "12"
-          filters: *tag_filters
-
-  build-libhoney:
-    jobs:
-      - test_libhoney:
-          name: test_node8
-          nodeversion: "8"
-          filters: *tag_filters
-      - test_libhoney:
-          name: test_node10
-          nodeversion: "10"
-          filters: *tag_filters
-      - test_libhoney:
-          name: test_node11
-          nodeversion: "11"
-          filters: *tag_filters
-      - test_libhoney:
-          name: test_node12
-          nodeversion: "12"
-          filters: *tag_filters
-      - publish:
+      - lint
+      - test:
           requires:
-            - test_node8
-            - test_node10
-            - test_node11
-            - test_node12
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              ignore: /.*/
+            - lint
+          <<: *matrix_nodeversions
+
+  build:
+    jobs:
+      - lint:
+          <<: *filters_always
+      - test:
+          <<: *filters_always
+          requires:
+            - lint
+          <<: *matrix_nodeversions
+      - build_artifacts:
+          <<: *filters_always
+          requires:
+            - test
+      - publish_github:
+          <<: *filters_publish
+          context: Honeycomb Secrets
+          requires:
+            - build_artifacts
+      - publish_npm:
+          <<: *filters_publish
+          context: Honeycomb Secrets
+          requires:
+            - test
