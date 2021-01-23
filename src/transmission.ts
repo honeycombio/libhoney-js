@@ -55,6 +55,7 @@ const partition = (arr, keyfn, createfn, addfn) => {
 };
 
 class BatchEndpointAggregator {
+  batches: any;
   constructor(events) {
     this.batches = partition(
       events,
@@ -97,6 +98,13 @@ class BatchEndpointAggregator {
  * @private
  */
 export class ValidatedEvent {
+  timestamp: any;
+  apiHost: any;
+  postData: any;
+  writeKey: any;
+  dataset: any;
+  sampleRate: any;
+  metadata: any;
   constructor({
     timestamp,
     apiHost,
@@ -116,7 +124,7 @@ export class ValidatedEvent {
   }
 
   toJSON() {
-    let json = {};
+    let json: any = {};
     if (this.timestamp) {
       json.time = this.timestamp;
     }
@@ -146,6 +154,8 @@ export class ValidatedEvent {
 }
 
 export class MockTransmission {
+  constructorArg: any;
+  events: any[];
   constructor(options) {
     this.constructorArg = options;
     this.events = [];
@@ -196,6 +206,19 @@ export class NullTransmission {
  * @private
  */
 export class Transmission {
+  _responseCallback: (() => void) | ((_d: any) => void);
+  _batchSizeTrigger: number;
+  _batchTimeTrigger: number;
+  _maxConcurrentBatches: number;
+  _pendingWorkCapacity: number;
+  _timeout: number;
+  _sendTimeoutId: any;
+  _eventQueue: any[];
+  _batchCount: number;
+  _userAgentAddition: any;
+  _proxy: any;
+  _randomFn: () => number;
+  flushCallback: () => void;
   constructor(options) {
     this._responseCallback = emptyResponseCallback;
     this._batchSizeTrigger = batchSizeTrigger;
@@ -272,7 +295,7 @@ export class Transmission {
       return Promise.resolve();
     }
 
-    return new Promise(resolve => {
+    return new Promise<void>(resolve => {
       this.flushCallback = () => {
         this.flushCallback = null;
         resolve();
@@ -333,7 +356,7 @@ export class Transmission {
       let { encoded, numEncoded } = batchAgg.encodeBatchEvents(batch.events);
       return reqPromise.then(
         ({ req }) =>
-          new Promise(resolve => {
+          new Promise<void>(resolve => {
             // if we failed to encode any of the events, no point in sending anything to honeycomb
             if (numEncoded === 0) {
               this._responseCallback(

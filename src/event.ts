@@ -12,6 +12,14 @@ import foreach from "./foreach";
  * @class
  */
 export default class Event {
+  apiHost: any;
+  writeKey: any;
+  dataset: any;
+  sampleRate: any;
+  data: any;
+  metadata: any;
+  timestamp: any;
+  _libhoney: any;
   /**
    * @constructor
    * private

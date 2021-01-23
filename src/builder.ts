@@ -13,11 +13,18 @@ import foreach from "./foreach";
  * @class
  */
 export default class Builder {
+  _libhoney: any;
+  _fields: any;
+  _dynFields: any;
+  apiHost: string;
+  writeKey: string;
+  dataset: string;
+  sampleRate: number;
   /**
    * @constructor
    * @private
    */
-  constructor(libhoney, fields, dynFields) {
+  constructor(libhoney, fields = {}, dynFields = {}) {
     this._libhoney = libhoney;
     this._fields = Object.create(null);
     this._dynFields = Object.create(null);
