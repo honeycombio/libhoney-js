@@ -453,7 +453,7 @@ describe("base transmission", () => {
     }
     {
       // send an event that fails to encode
-      let b = {};
+      let b: any = {};
       b.b = b;
       transmission.sendPresampledEvent(
         new ValidatedEvent({

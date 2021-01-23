@@ -102,7 +102,7 @@ export default class Libhoney extends EventEmitter {
    *   // disabled: true // uncomment when testing or in development
    * });
    */
-  constructor(opts) {
+  constructor(opts = {}) {
     super();
     this._options = Object.assign(
       { responseCallback: this._responseCallback.bind(this) },
@@ -422,7 +422,7 @@ export default class Libhoney extends EventEmitter {
    *                                    process_heapUsed: () => process.memoryUsage().heapUsed
    *                                  });
    */
-  newBuilder(fields, dynFields) {
+  newBuilder(fields = {}, dynFields = {}) {
     return this._builder.newBuilder(fields, dynFields);
   }
 

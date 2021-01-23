@@ -112,7 +112,7 @@ export class ValidatedEvent {
     writeKey,
     dataset,
     sampleRate,
-    metadata
+    metadata = undefined
   }) {
     this.timestamp = timestamp;
     this.apiHost = apiHost;
