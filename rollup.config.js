@@ -6,7 +6,7 @@ const json = require("rollup-plugin-json");
 const pkg = require("./package.json");
 
 module.exports = {
-  input: "src/libhoney.js",
+  input: "built/libhoney.js",
   external: ["superagent", "events", "path", "url", "superagent-proxy"],
 
   plugins: [

@@ -4,11 +4,13 @@
     "browser": true
   },
   "extends": ["eslint:recommended"],
-  "parser": "babel-eslint",
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
+    "project": "tsconfig.json",
     "ecmaVersion": 2017,
     "sourceType": "module"
   },
+  "plugins": ["@typescript-eslint/eslint-plugin"],
   "rules": {
     "no-console": "off",
     "semi": 2,
