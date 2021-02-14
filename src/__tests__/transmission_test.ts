@@ -18,7 +18,7 @@ describe("base transmission", () => {
   });
 
   it("will hit a proxy", done => {
-    let server = net.createServer(socket => {
+    const server = net.createServer(socket => {
       socket.end();
       server.close();
       done();
@@ -26,7 +26,7 @@ describe("base transmission", () => {
 
     server.listen(9998, "127.0.0.1");
 
-    let transmission = new Transmission({
+    const transmission = new Transmission({
       proxy: "http://127.0.0.1:9998",
       batchTimeTrigger: 10000, // larger than the mocha timeout
       batchSizeTrigger: 0
@@ -46,12 +46,12 @@ describe("base transmission", () => {
 
   it("should handle batchSizeTrigger of 0", done => {
     mock.post("http://localhost:9999/1/events/test-transmission", req => {
-      let reqEvents = JSON.parse(req.body);
-      let resp = reqEvents.map(() => ({ status: 202 }));
+      const reqEvents = JSON.parse(req.body);
+      const resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
     });
 
-    let transmission = new Transmission({
+    const transmission = new Transmission({
       batchTimeTrigger: 10000, // larger than the mocha timeout
       batchSizeTrigger: 0,
       responseCallback() {
@@ -73,15 +73,15 @@ describe("base transmission", () => {
 
   it("should send a batch when batchSizeTrigger is met, not exceeded", done => {
     let responseCount = 0;
-    let batchSize = 5;
+    const batchSize = 5;
 
     mock.post("http://localhost:9999/1/batch/test-transmission", req => {
-      let reqEvents = JSON.parse(req.body);
-      let resp = reqEvents.map(() => ({ status: 202 }));
+      const reqEvents = JSON.parse(req.body);
+      const resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
     });
 
-    let transmission = new Transmission({
+    const transmission = new Transmission({
       batchTimeTrigger: 10000, // larger than the mocha timeout
       batchSizeTrigger: 5,
       responseCallback(queue) {
@@ -114,12 +114,12 @@ describe("base transmission", () => {
     let endpointHit = false;
     mock.post("http://localhost:9999/1/batch/test-transmission", req => {
       endpointHit = true;
-      let reqEvents = JSON.parse(req.body);
-      let resp = reqEvents.map(() => ({ status: 202 }));
+      const reqEvents = JSON.parse(req.body);
+      const resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
     });
 
-    let transmission = new Transmission({
+    const transmission = new Transmission({
       batchTimeTrigger: 0,
       responseCallback: function(_resp) {
         expect(endpointHit).toBe(true);
@@ -140,7 +140,7 @@ describe("base transmission", () => {
   });
 
   it("should eventually send a single event (after the timeout)", done => {
-    let transmission = new Transmission({
+    const transmission = new Transmission({
       batchTimeTrigger: 10,
       responseCallback: function(_resp) {
         done();
@@ -160,7 +160,7 @@ describe("base transmission", () => {
   });
 
   it("should respect sample rate and accept the event", done => {
-    let transmission = new Transmission({
+    const transmission = new Transmission({
       batchTimeTrigger: 10,
       responseCallback: function(_resp) {
         done();
@@ -183,7 +183,7 @@ describe("base transmission", () => {
   });
 
   it("should respect sample rate and drop the event", done => {
-    let transmission = new Transmission({ batchTimeTrigger: 10 });
+    const transmission = new Transmission({ batchTimeTrigger: 10 });
 
     transmission._randomFn = function() {
       return 0.11;
@@ -206,17 +206,17 @@ describe("base transmission", () => {
 
   it("should drop events beyond the pendingWorkCapacity", done => {
     let eventDropped;
-    let droppedExpected = 5;
+    const droppedExpected = 5;
     let responseCount = 0;
-    let responseExpected = 5;
+    const responseExpected = 5;
 
     mock.post("http://localhost:9999/1/batch/test-transmission", req => {
-      let reqEvents = JSON.parse(req.body);
-      let resp = reqEvents.map(() => ({ status: 202 }));
+      const reqEvents = JSON.parse(req.body);
+      const resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
     });
 
-    let transmission = new Transmission({
+    const transmission = new Transmission({
       batchTimeTrigger: 50,
       pendingWorkCapacity: responseExpected,
       responseCallback(queue) {
@@ -266,15 +266,15 @@ describe("base transmission", () => {
 
   it("should send the right number events even if it requires multiple concurrent batches", done => {
     let responseCount = 0;
-    let responseExpected = 10;
+    const responseExpected = 10;
 
     mock.post("http://localhost:9999/1/batch/test-transmission", req => {
-      let reqEvents = JSON.parse(req.body);
-      let resp = reqEvents.map(() => ({ status: 202 }));
+      const reqEvents = JSON.parse(req.body);
+      const resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
     });
 
-    let transmission = new Transmission({
+    const transmission = new Transmission({
       batchTimeTrigger: 50,
       batchSizeTrigger: 5,
       pendingWorkCapacity: responseExpected,
@@ -303,19 +303,19 @@ describe("base transmission", () => {
 
   it("should send the right number of events even if they all fail", done => {
     let responseCount = 0;
-    let responseExpected = 10;
+    const responseExpected = 10;
 
     mock.post("http://localhost:9999/1/batch/test-transmission", _req => {
       return { status: 404 };
     });
 
-    let transmission = new Transmission({
+    const transmission = new Transmission({
       batchTimeTrigger: 50,
       batchSizeTrigger: 5,
       maxConcurrentBatches: 1,
       pendingWorkCapacity: responseExpected,
       responseCallback(queue) {
-        let responses = queue.splice(0, queue.length);
+        const responses = queue.splice(0, queue.length);
         responses.forEach(({ error, status_code: statusCode }) => {
           expect(error.status).toEqual(404);
           expect(statusCode).toEqual(404);
@@ -343,15 +343,15 @@ describe("base transmission", () => {
 
   it("should send the right number of events even it requires more batches than maxConcurrentBatch", done => {
     let responseCount = 0;
-    let responseExpected = 50;
-    let batchSize = 2;
+    const responseExpected = 50;
+    const batchSize = 2;
     mock.post("http://localhost:9999/1/batch/test-transmission", req => {
-      let reqEvents = JSON.parse(req.body);
-      let resp = reqEvents.map(() => ({ status: 202 }));
+      const reqEvents = JSON.parse(req.body);
+      const resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
     });
 
-    let transmission = new Transmission({
+    const transmission = new Transmission({
       batchTimeTrigger: 50,
       batchSizeTrigger: batchSize,
       pendingWorkCapacity: responseExpected,
@@ -380,16 +380,16 @@ describe("base transmission", () => {
 
   it("should send 100% of presampled events", done => {
     let responseCount = 0;
-    let responseExpected = 10;
+    const responseExpected = 10;
     mock.post("http://localhost:9999/1/batch/test-transmission", req => {
-      let reqEvents = JSON.parse(req.body);
-      let resp = reqEvents.map(() => ({ status: 202 }));
+      const reqEvents = JSON.parse(req.body);
+      const resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
     });
 
-    let transmission = new Transmission({
+    const transmission = new Transmission({
       responseCallback(queue) {
-        let responses = queue.splice(0, queue.length);
+        const responses = queue.splice(0, queue.length);
         responses.forEach(resp => {
           if (resp.error) {
             console.log(resp.error);
@@ -419,14 +419,14 @@ describe("base transmission", () => {
 
   it("should deal with encoding errors", done => {
     let responseCount = 0;
-    let responseExpected = 11;
+    const responseExpected = 11;
     mock.post("http://localhost:9999/1/batch/test-transmission", req => {
-      let reqEvents = JSON.parse(req.body);
-      let resp = reqEvents.map(() => ({ status: 202 }));
+      const reqEvents = JSON.parse(req.body);
+      const resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
     });
 
-    let transmission = new Transmission({
+    const transmission = new Transmission({
       responseCallback(queue) {
         responseCount = queue.length;
         return responseCount === responseExpected
@@ -453,7 +453,7 @@ describe("base transmission", () => {
     }
     {
       // send an event that fails to encode
-      let b: any = {};
+      const b: any = {};
       b.b = b;
       transmission.sendPresampledEvent(
         new ValidatedEvent({
@@ -482,15 +482,15 @@ describe("base transmission", () => {
 
   it("should block on flush", async () => {
     let responseCount = 0;
-    let responseExpected = 50;
-    let batchSize = 2;
+    const responseExpected = 50;
+    const batchSize = 2;
     mock.post("http://localhost:9999/1/batch/test-transmission", req => {
-      let reqEvents = JSON.parse(req.body);
-      let resp = reqEvents.map(() => ({ status: 202 }));
+      const reqEvents = JSON.parse(req.body);
+      const resp = reqEvents.map(() => ({ status: 202 }));
       return { text: JSON.stringify(resp) };
     });
 
-    let transmission = new Transmission({
+    const transmission = new Transmission({
       batchTimeTrigger: 50,
       batchSizeTrigger: batchSize,
       pendingWorkCapacity: responseExpected,
@@ -519,9 +519,9 @@ describe("base transmission", () => {
 
   it("should allow user-agent additions", done => {
     let responseCount = 0;
-    let responseExpected = 2;
+    const responseExpected = 2;
 
-    let userAgents = [
+    const userAgents = [
       {
         dataset: "test-transmission1",
         addition: "",
@@ -551,10 +551,10 @@ describe("base transmission", () => {
     // now send our events through separate transmissions with different user
     // agent additions.
     userAgents.forEach(userAgent => {
-      let transmission = new Transmission({
+      const transmission = new Transmission({
         batchSizeTrigger: 1, // so we'll send individual events
         responseCallback(queue) {
-          let responses = queue.splice(0, queue.length);
+          const responses = queue.splice(0, queue.length);
           responseCount += responses.length;
           if (responseCount === responseExpected) {
             done();
@@ -580,7 +580,7 @@ describe("base transmission", () => {
     // terrible hack to get our "are we running in node" check to return false
     process.env.LIBHONEY_TARGET = "browser";
 
-    let transmission = new Transmission({
+    const transmission = new Transmission({
       batchTimeTrigger: 10000, // larger than the mocha timeout
       batchSizeTrigger: 0
     });
@@ -630,7 +630,7 @@ describe("base transmission", () => {
       );
     });
     server.listen(6666, "localhost", () => {
-      let transmission = new Transmission({
+      const transmission = new Transmission({
         batchTimeTrigger: 10,
         timeout: 2000,
         responseCallback: function(respQueue) {

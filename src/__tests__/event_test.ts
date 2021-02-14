@@ -2,10 +2,10 @@
 import libhoney from "../libhoney";
 
 describe("libhoney events", () => {
-  let hny = new libhoney();
+  const hny = new libhoney();
 
   it("inherit fields and dyn_fields from builder", () => {
-    let b = hny.newBuilder(
+    const b = hny.newBuilder(
       { a: 5 },
       {
         b: function() {
@@ -14,30 +14,30 @@ describe("libhoney events", () => {
       }
     );
 
-    let ev = b.newEvent();
+    const ev = b.newEvent();
     expect(ev.data.a).toEqual(5);
     expect(ev.data.b).toEqual(3);
   });
 
   it("accepts dict-like arguments to .add()", () => {
-    let b = hny.newBuilder();
-    let ev = b.newEvent();
+    const b = hny.newBuilder();
+    const ev = b.newEvent();
 
     ev.add({ a: 5 });
     expect(ev.data.a).toEqual(5);
 
-    let ev2 = b.newEvent();
-    let map = new Map();
+    const ev2 = b.newEvent();
+    const map = new Map();
     map.set("a", 5);
     ev2.add(map);
     expect(ev2.data.a).toEqual(5);
   });
 
   it("it toString()'s keys from Maps in .add()", () => {
-    let b = hny.newBuilder();
-    let ev = b.newEvent();
+    const b = hny.newBuilder();
+    const ev = b.newEvent();
 
-    let map = new Map();
+    const map = new Map();
     map.set(
       {
         toString: function() {
@@ -52,9 +52,9 @@ describe("libhoney events", () => {
   });
 
   it("doesn't stringify object values", () => {
-    let postData = { c: { a: 1 } };
+    const postData = { c: { a: 1 } };
 
-    let ev = hny.newEvent();
+    const ev = hny.newEvent();
 
     ev.add(postData);
 
@@ -62,12 +62,9 @@ describe("libhoney events", () => {
   });
 
   it("converts all values to primitive types in .add/.addField", () => {
-    let b = hny.newBuilder();
-    let ev;
-    let map;
-
-    ev = b.newEvent();
-    map = new Map();
+    const b = hny.newBuilder();
+    const ev = b.newEvent();
+    const map = new Map();
 
     // Object, we pass it on through (and let Honeycomb serialize it if
     // necessary)
@@ -86,7 +83,7 @@ describe("libhoney events", () => {
     map.set("boolean", true);
 
     // Date does not convert
-    let d = new Date(1, 2, 3, 4, 5, 6, 7);
+    const d = new Date(1, 2, 3, 4, 5, 6, 7);
     map.set("Date", d);
 
     // Null/undefined both end up being null in the output

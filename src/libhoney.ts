@@ -239,7 +239,7 @@ export default class Libhoney extends EventEmitter {
    * @private
    */
   sendEvent(event) {
-    let transmitEvent = this.validateEvent(event);
+    const transmitEvent = this.validateEvent(event);
     if (!transmitEvent) {
       return;
     }
@@ -263,7 +263,7 @@ export default class Libhoney extends EventEmitter {
    * @private
    */
   sendPresampledEvent(event) {
-    let transmitEvent = this.validateEvent(event);
+    const transmitEvent = this.validateEvent(event);
     if (!transmitEvent) {
       return;
     }
@@ -297,31 +297,31 @@ export default class Libhoney extends EventEmitter {
       return null;
     }
 
-    let apiHost = event.apiHost;
+    const apiHost = event.apiHost;
     if (typeof apiHost !== "string" || apiHost === "") {
       console.error(".apiHost must be a non-empty string");
       return null;
     }
 
-    let writeKey = event.writeKey;
+    const writeKey = event.writeKey;
     if (typeof writeKey !== "string" || writeKey === "") {
       console.error(".writeKey must be a non-empty string");
       return null;
     }
 
-    let dataset = event.dataset;
+    const dataset = event.dataset;
     if (typeof dataset !== "string" || dataset === "") {
       console.error(".dataset must be a non-empty string");
       return null;
     }
 
-    let sampleRate = event.sampleRate;
+    const sampleRate = event.sampleRate;
     if (typeof sampleRate !== "number") {
       console.error(".sampleRate must be a number");
       return null;
     }
 
-    let metadata = event.metadata;
+    const metadata = event.metadata;
     return new ValidatedEvent({
       timestamp,
       apiHost,
@@ -518,7 +518,13 @@ function getAndInitTransmission(transmission, options) {
  *
  * Modifies and returns arr1.
  */
-function concatWithMaxLimit(arr1, arr2, limit) {
+function concatWithMaxLimit(
+  _arr1: string,
+  _arr2: string,
+  _limit: number
+): string;
+function concatWithMaxLimit<T>(_arr1: T[], _arr2: T[], _limit: number): T[];
+function concatWithMaxLimit(arr1: any, arr2: any, limit: number): any {
   // if queue is full or somehow over the max
   if (arr1.length >= limit) {
     //return up to the max length

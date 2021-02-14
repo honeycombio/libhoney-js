@@ -2,8 +2,9 @@
 import { MockTransmission } from "../transmission";
 import libhoney from "../libhoney";
 
-let superagent = require("superagent");
-let mock = require("superagent-mocker")(superagent);
+import superagent from "superagent";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const mock = require("superagent-mocker")(superagent);
 
 describe("libhoney", () => {
   describe("constructor options", () => {
@@ -34,14 +35,14 @@ describe("libhoney", () => {
 
   describe("event properties", () => {
     it("should ultimately fallback to hardcoded defaults", () => {
-      let honey = new libhoney({
+      const honey = new libhoney({
         // these two properties are required
         writeKey: "12345",
         dataset: "testing",
         transmission: "mock"
       });
-      let transmission = honey.transmission;
-      let postData = { a: 1, b: 2 };
+      const transmission = honey.transmission;
+      const postData = { a: 1, b: 2 };
       honey.sendNow(postData);
 
       expect(transmission.events).toHaveLength(1);
@@ -57,14 +58,14 @@ describe("libhoney", () => {
     });
 
     it("should come from libhoney options if not specified in event", () => {
-      let honey = new libhoney({
+      const honey = new libhoney({
         apiHost: "http://foo/bar",
         writeKey: "12345",
         dataset: "testing",
         transmission: "mock"
       });
-      let transmission = honey.transmission;
-      let postData = { a: 1, b: 2 };
+      const transmission = honey.transmission;
+      const postData = { a: 1, b: 2 };
       honey.sendNow(postData);
 
       expect(transmission.events).toHaveLength(1);
@@ -81,9 +82,9 @@ describe("libhoney", () => {
         return {};
       });
 
-      let queueSize = 50;
+      const queueSize = 50;
       let queueFullCount = 0;
-      let honey = new libhoney({
+      const honey = new libhoney({
         apiHost: "http://localhost:9999",
         writeKey: "12345",
         dataset: "testResponseQueue",
@@ -107,7 +108,7 @@ describe("libhoney", () => {
       });
 
       for (let i = 0; i < queueSize + 1; i++) {
-        let ev = honey.newEvent();
+        const ev = honey.newEvent();
         ev.add({ a: 1, b: 2 });
         ev.addMetadata(i);
         ev.send();
@@ -117,14 +118,14 @@ describe("libhoney", () => {
 
   describe("disabled = true", () => {
     it("should not hit transmission", () => {
-      let honey = new libhoney({
+      const honey = new libhoney({
         // these two properties are required
         writeKey: "12345",
         dataset: "testing",
         transmission: "mock",
         disabled: true
       });
-      let transmission = honey.transmission;
+      const transmission = honey.transmission;
 
       expect(transmission).toBe(null);
     });

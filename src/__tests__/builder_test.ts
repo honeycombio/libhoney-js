@@ -2,7 +2,7 @@
 import libhoney from "../libhoney";
 
 describe("libhoney builder", () => {
-  let hny = new libhoney();
+  const hny = new libhoney();
 
   it("takes fields and dynamic fields in ctor", () => {
     let b = hny.newBuilder(
@@ -29,7 +29,7 @@ describe("libhoney builder", () => {
     ev = b.newEvent();
     expect(ev.data.a).toEqual(5);
 
-    let map = new Map();
+    const map = new Map();
     map.set("a", 5);
     b = hny.newBuilder();
     b.add(map);
@@ -38,17 +38,17 @@ describe("libhoney builder", () => {
   });
 
   it("doesn't stringify object values", () => {
-    let honey = new libhoney({
+    const honey = new libhoney({
       apiHost: "http://foo/bar",
       writeKey: "12345",
       dataset: "testing",
       transmission: "mock"
     });
-    let transmission = honey.transmission;
+    const transmission = honey.transmission;
 
-    let postData = { a: { b: 1 }, c: { d: 2 } };
+    const postData = { a: { b: 1 }, c: { d: 2 } };
 
-    let builder = honey.newBuilder({ a: { b: 1 } });
+    const builder = honey.newBuilder({ a: { b: 1 } });
 
     builder.sendNow({ c: { d: 2 } });
 
@@ -57,13 +57,13 @@ describe("libhoney builder", () => {
   });
 
   it("includes snapshot of global fields/dynFields", () => {
-    let honey = new libhoney({
+    const honey = new libhoney({
       apiHost: "http://foo/bar",
       writeKey: "12345",
       dataset: "testing",
       transmission: "mock"
     });
-    let transmission = honey.transmission;
+    const transmission = honey.transmission;
 
     let postData: any = { b: 2, c: 3 };
 

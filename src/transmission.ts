@@ -32,6 +32,7 @@ const pendingWorkCapacity = 10000;
 // how long (in ms) to give a single POST before we timeout
 const deadlineTimeoutMs = 60000;
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 const emptyResponseCallback = function() {};
 
 const eachPromise = (arr, iteratorFn) =>
@@ -42,9 +43,9 @@ const eachPromise = (arr, iteratorFn) =>
   }, Promise.resolve());
 
 const partition = (arr, keyfn, createfn, addfn) => {
-  let result = Object.create(null);
+  const result = Object.create(null);
   arr.forEach(v => {
-    let key = keyfn(v);
+    const key = keyfn(v);
     if (!result[key]) {
       result[key] = createfn(v);
     } else {
@@ -76,11 +77,11 @@ class BatchEndpointAggregator {
   encodeBatchEvents(events) {
     let first = true;
     let numEncoded = 0;
-    let encodedEvents = events.reduce((acc, ev) => {
+    const encodedEvents = events.reduce((acc, ev) => {
       try {
-        let encodedEvent = JSON.stringify(ev);
+        const encodedEvent = JSON.stringify(ev);
         numEncoded++;
-        let newAcc = acc + (!first ? "," : "") + encodedEvent;
+        const newAcc = acc + (!first ? "," : "") + encodedEvent;
         first = false;
         return newAcc;
       } catch (e) {
@@ -89,7 +90,7 @@ class BatchEndpointAggregator {
       }
     }, "");
 
-    let encoded = "[" + encodedEvents + "]";
+    const encoded = "[" + encodedEvents + "]";
     return { encoded, numEncoded };
   }
 }
@@ -124,7 +125,7 @@ export class ValidatedEvent {
   }
 
   toJSON() {
-    let json: any = {};
+    const json: any = {};
     if (this.timestamp) {
       json.time = this.timestamp;
     }
@@ -139,7 +140,7 @@ export class ValidatedEvent {
 
   /** @deprecated Used by the deprecated WriterTransmission. Use ConsoleTransmission instead. */
   toBrokenJSON() {
-    let fields = [];
+    const fields = [];
     if (this.timestamp) {
       fields.push(`"time":${JSON.stringify(this.timestamp)}`);
     }
@@ -197,8 +198,10 @@ export class ConsoleTransmission {
 }
 
 export class NullTransmission {
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   sendEvent(_ev) {}
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   sendPresampledEvent(_ev) {}
 }
 
@@ -314,14 +317,14 @@ export class Transmission {
 
     this._batchCount++;
 
-    let batchAgg = new BatchEndpointAggregator(
+    const batchAgg = new BatchEndpointAggregator(
       this._eventQueue.splice(0, this._batchSizeTrigger)
     );
 
     const finishBatch = () => {
       this._batchCount--;
 
-      let queueLength = this._eventQueue.length;
+      const queueLength = this._eventQueue.length;
       if (queueLength > 0) {
         if (queueLength >= this._batchSizeTrigger) {
           this._sendBatch();
@@ -336,10 +339,10 @@ export class Transmission {
       }
     };
 
-    let batches = Object.keys(batchAgg.batches).map(k => batchAgg.batches[k]);
+    const batches = Object.keys(batchAgg.batches).map(k => batchAgg.batches[k]);
     eachPromise(batches, batch => {
-      let url = urljoin(batch.apiHost, "/1/batch", batch.dataset);
-      let postReq = superagent.post(url);
+      const url = urljoin(batch.apiHost, "/1/batch", batch.dataset);
+      const postReq = superagent.post(url);
 
       let reqPromise;
       if (process.env.LIBHONEY_TARGET === "browser") {
@@ -353,7 +356,7 @@ export class Transmission {
             : { req: postReq }
         );
       }
-      let { encoded, numEncoded } = batchAgg.encodeBatchEvents(batch.events);
+      const { encoded, numEncoded } = batchAgg.encodeBatchEvents(batch.events);
       return reqPromise.then(
         ({ req }) =>
           new Promise<void>(resolve => {
@@ -370,12 +373,12 @@ export class Transmission {
             }
 
             let userAgent = USER_AGENT;
-            let trimmedAddition = this._userAgentAddition.trim();
+            const trimmedAddition = this._userAgentAddition.trim();
             if (trimmedAddition) {
               userAgent = `${USER_AGENT} ${trimmedAddition}`;
             }
 
-            let start = Date.now();
+            const start = Date.now();
             req
               .set("X-Honeycomb-Team", batch.writeKey)
               .set(
@@ -388,7 +391,7 @@ export class Transmission {
               .timeout(this._timeout)
               .send(encoded)
               .end((err, res) => {
-                let end = Date.now();
+                const end = Date.now();
 
                 if (err) {
                   this._responseCallback(
@@ -401,7 +404,7 @@ export class Transmission {
                     }))
                   );
                 } else {
-                  let response = JSON.parse(res.text);
+                  const response = JSON.parse(res.text);
                   let respIdx = 0;
                   this._responseCallback(
                     batch.events.map(ev => {
@@ -412,7 +415,7 @@ export class Transmission {
                           error: ev.encodeError
                         };
                       } else {
-                        let nextResponse = response[respIdx++];
+                        const nextResponse = response[respIdx++];
                         return {
                           // eslint-disable-next-line camelcase
                           status_code: nextResponse.status,
@@ -436,7 +439,7 @@ export class Transmission {
   }
 
   _shouldSendEvent(ev) {
-    let { sampleRate } = ev;
+    const { sampleRate } = ev;
     if (sampleRate <= 1) {
       return true;
     }
