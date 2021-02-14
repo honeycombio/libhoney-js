@@ -2,7 +2,11 @@
 import libhoney from "../libhoney";
 
 describe("libhoney builder", () => {
-  const hny = new libhoney();
+  const hny = new libhoney({
+    writeKey: "test",
+    dataset: "none",
+    transmission: "null"
+  });
 
   it("takes fields and dynamic fields in ctor", () => {
     let b = hny.newBuilder(

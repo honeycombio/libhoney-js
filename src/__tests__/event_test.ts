@@ -2,7 +2,11 @@
 import libhoney from "../libhoney";
 
 describe("libhoney events", () => {
-  const hny = new libhoney();
+  const hny = new libhoney({
+    writeKey: "test",
+    dataset: "none",
+    transmission: "null"
+  });
 
   it("inherit fields and dyn_fields from builder", () => {
     const b = hny.newBuilder(

@@ -18,7 +18,39 @@ import Builder from "./builder";
 
 import { EventEmitter } from "events";
 
-const defaults = Object.freeze({
+export type LibhoneyOptions = {
+  /** Server host to receive Honeycomb events. */
+  apiHost?: string;
+  /** The proxy to send events through. */
+  proxy?: string;
+  /** Write key for your Honeycomb team. (Required) */
+  writeKey: string;
+  /** Name of the dataset that should contain this event. The dataset will be created for your team if it doesn't already exist.  */
+  dataset: string;
+  /** Sample rate of data. If set, causes us to send 1/sampleRate of events and drop the rest.*/
+  sampleRate?: number;
+  /** We send a batch to the API when this many outstanding events exist in our event queue. */
+  batchSizeTrigger?: number;
+  /** We send a batch to the API after this many milliseconds have passed. */
+  batchTimeTrigger?: number;
+  /** We process batches concurrently to increase parallelism while sending. */
+  maxConcurrentBatches?: number;
+  /** The maximum number of pending events we allow to accumulate in our sending queue before dropping them. */
+  pendingWorkCapacity?: number;
+  /** The maximum number of responses we enqueue before dropping them. */
+  maxResponseQueueSize?: number;
+  /** How long (in ms) to give a single POST before we timeout. */
+  timeout?: number;
+  /** Disable transmission of events to the specified `apiHost`, particularly useful for testing or development. */
+  disabled?: boolean;
+
+  /** transmission constructor, or a string to pick one of our builtin versions. */
+  transmission?: string /* TODO TransmissionBuiltin | TransmissionConstructor */;
+};
+
+const defaults: Required<
+  Omit<LibhoneyOptions, "writeKey" | "dataset">
+> = Object.freeze({
   apiHost: "https://api.honeycomb.io/",
 
   // http
@@ -70,7 +102,7 @@ const defaults = Object.freeze({
  * @class
  */
 export default class Libhoney extends EventEmitter {
-  _options: any;
+  _options: LibhoneyOptions;
   _transmission: any;
   _usable: boolean;
   _builder: Builder;
@@ -80,7 +112,7 @@ export default class Libhoney extends EventEmitter {
    * though each of its members (`apiHost`, `writeKey`, `dataset`, and
    * `sampleRate`) may in fact be overridden on a specific Builder or Event.
    *
-   * @param {Object} [opts] overrides for the defaults
+   * @param {LibhoneyOptions} [opts] overrides for the defaults
    * @param {string} [opts.apiHost=https://api.honeycomb.io] - Server host to receive Honeycomb events.
    * @param {string} [opts.proxy] - The proxy to send events through.
    * @param {string} opts.writeKey - Write key for your Honeycomb team. (Required)
@@ -102,7 +134,9 @@ export default class Libhoney extends EventEmitter {
    *   // disabled: true // uncomment when testing or in development
    * });
    */
-  constructor(opts = {}) {
+  // TODO: get a better grip on Transmission initialisation
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  constructor(opts: LibhoneyOptions & any) {
     super();
     this._options = Object.assign(
       { responseCallback: this._responseCallback.bind(this) },

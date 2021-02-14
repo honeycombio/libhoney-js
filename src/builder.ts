@@ -6,6 +6,7 @@
  * @module
  */
 import Event from "./event";
+import Libhoney from "./libhoney";
 import foreach from "./foreach";
 
 /**
@@ -13,7 +14,7 @@ import foreach from "./foreach";
  * @class
  */
 export default class Builder {
-  _libhoney: any;
+  _libhoney: Libhoney;
   _fields: any;
   _dynFields: any;
   apiHost: string;
@@ -24,7 +25,7 @@ export default class Builder {
    * @constructor
    * @private
    */
-  constructor(libhoney, fields = {}, dynFields = {}) {
+  constructor(libhoney: Libhoney, fields = {}, dynFields = {}) {
     this._libhoney = libhoney;
     this._fields = Object.create(null);
     this._dynFields = Object.create(null);

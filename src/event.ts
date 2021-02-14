@@ -5,6 +5,7 @@
 /**
  * @module
  */
+import Libhoney from "./libhoney";
 import foreach from "./foreach";
 
 /**
@@ -19,12 +20,12 @@ export default class Event {
   data: any;
   metadata: any;
   timestamp: any;
-  _libhoney: any;
+  _libhoney: Libhoney;
   /**
    * @constructor
    * private
    */
-  constructor(libhoney, fields, dynFields) {
+  constructor(libhoney: Libhoney, fields, dynFields) {
     this.data = Object.create(null);
     this.metadata = null;
 
