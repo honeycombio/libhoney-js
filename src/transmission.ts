@@ -154,7 +154,30 @@ export class ValidatedEvent {
   }
 }
 
-export class MockTransmission {
+/** Choose one of the builtin Transmission implementations */
+export type TransmissionBuiltin =
+  | "base"
+  | "worker"
+  | "mock"
+  | "writer"
+  | "console"
+  | "null";
+
+/** provide a constructor that will receive the LibhoneyOptions passed into the libhoney constructor */
+export type TransmissionConstructor = {
+  new (_options: any): TransmissionInterface;
+};
+
+/** all options to select a transmission implementation */
+export type TransmissionOption = TransmissionBuiltin | TransmissionConstructor;
+
+export interface TransmissionInterface {
+  sendEvent(_ev);
+  sendPresampledEvent(_ev);
+  flush();
+}
+
+export class MockTransmission implements TransmissionInterface {
   constructorArg: any;
   events: any[];
   constructor(options) {
@@ -174,10 +197,13 @@ export class MockTransmission {
     this.constructorArg = null;
     this.events = [];
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  flush() {}
 }
 
 /** @deprecated Use ConsoleTransmission instead. */
-export class WriterTransmission {
+export class WriterTransmission implements TransmissionInterface {
   sendEvent(ev) {
     console.log(JSON.stringify(ev.toBrokenJSON()));
   }
@@ -185,9 +211,12 @@ export class WriterTransmission {
   sendPresampledEvent(ev) {
     console.log(JSON.stringify(ev.toBrokenJSON()));
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  flush() {}
 }
 
-export class ConsoleTransmission {
+export class ConsoleTransmission implements TransmissionInterface {
   sendEvent(ev) {
     console.log(JSON.stringify(ev));
   }
@@ -195,20 +224,27 @@ export class ConsoleTransmission {
   sendPresampledEvent(ev) {
     console.log(JSON.stringify(ev));
   }
+
+  flush() {
+    // do nothing
+  }
 }
 
-export class NullTransmission {
+export class NullTransmission implements TransmissionInterface {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   sendEvent(_ev) {}
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   sendPresampledEvent(_ev) {}
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  flush() {}
 }
 
 /**
  * @private
  */
-export class Transmission {
+export class Transmission implements TransmissionInterface {
   _responseCallback: (() => void) | ((_d: any) => void);
   _batchSizeTrigger: number;
   _batchTimeTrigger: number;

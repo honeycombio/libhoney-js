@@ -22,7 +22,7 @@ describe("libhoney", () => {
 
           const honey = new libhoney(options);
 
-          const transmission = honey.transmission;
+          const transmission = honey.transmission as MockTransmission;
 
           expect(options.a).toEqual(transmission.constructorArg.a);
           expect(options.b).toEqual(transmission.constructorArg.b);
@@ -41,7 +41,7 @@ describe("libhoney", () => {
         dataset: "testing",
         transmission: "mock"
       });
-      const transmission = honey.transmission;
+      const transmission = honey.transmission as MockTransmission;
       const postData = { a: 1, b: 2 };
       honey.sendNow(postData);
 
@@ -64,7 +64,7 @@ describe("libhoney", () => {
         dataset: "testing",
         transmission: "mock"
       });
-      const transmission = honey.transmission;
+      const transmission = honey.transmission as MockTransmission;
       const postData = { a: 1, b: 2 };
       honey.sendNow(postData);
 

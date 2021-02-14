@@ -1,4 +1,5 @@
 /* eslint-env node, jest */
+import { MockTransmission } from "../transmission";
 import libhoney from "../libhoney";
 
 describe("libhoney builder", () => {
@@ -48,7 +49,7 @@ describe("libhoney builder", () => {
       dataset: "testing",
       transmission: "mock"
     });
-    const transmission = honey.transmission;
+    const transmission = honey.transmission as MockTransmission;
 
     const postData = { a: { b: 1 }, c: { d: 2 } };
 
@@ -67,7 +68,7 @@ describe("libhoney builder", () => {
       dataset: "testing",
       transmission: "mock"
     });
-    const transmission = honey.transmission;
+    const transmission = honey.transmission as MockTransmission;
 
     let postData: any = { b: 2, c: 3 };
 

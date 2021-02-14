@@ -11,6 +11,9 @@ import {
   MockTransmission,
   NullTransmission,
   Transmission,
+  TransmissionBuiltin,
+  TransmissionInterface,
+  TransmissionOption,
   ValidatedEvent,
   WriterTransmission
 } from "./transmission";
@@ -45,7 +48,7 @@ export type LibhoneyOptions = {
   disabled?: boolean;
 
   /** transmission constructor, or a string to pick one of our builtin versions. */
-  transmission?: string /* TODO TransmissionBuiltin | TransmissionConstructor */;
+  transmission?: TransmissionOption;
 };
 
 const defaults: Required<
@@ -103,7 +106,7 @@ const defaults: Required<
  */
 export default class Libhoney extends EventEmitter {
   _options: LibhoneyOptions;
-  _transmission: any;
+  _transmission: TransmissionInterface;
   _usable: boolean;
   _builder: Builder;
   _responseQueue: any[];
@@ -478,7 +481,7 @@ export default class Libhoney extends EventEmitter {
   }
 }
 
-const getTransmissionClass = transmissionClassName => {
+function getTransmissionClass(transmissionClassName: TransmissionBuiltin) {
   switch (transmissionClassName) {
     case "base":
       return Transmission;
@@ -503,9 +506,12 @@ const getTransmissionClass = transmissionClassName => {
         `unknown transmission implementation "${transmissionClassName}".`
       );
   }
-};
+}
 
-function getAndInitTransmission(transmission, options) {
+function getAndInitTransmission(
+  transmission: TransmissionOption,
+  options
+): TransmissionInterface {
   if (options.disabled) {
     return null;
   }
