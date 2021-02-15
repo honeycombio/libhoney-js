@@ -37,17 +37,6 @@ const emptyResponseCallback = function(
   // eslint-disable-next-line @typescript-eslint/no-empty-function
 ): void {};
 
-function eachPromise<T>(
-  arr: T[],
-  iteratorFn: (item: T) => Promise<void>
-): Promise<void> {
-  return arr.reduce((previous, item) => {
-    return previous.then(() => {
-      return iteratorFn(item);
-    });
-  }, Promise.resolve());
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function partition<Item, Key extends keyof any, Entry>(
   arr: Item[],
@@ -305,7 +294,7 @@ export interface TransmissionStatus {
   status_code?: unknown;
   duration?: number;
   metadata: unknown;
-  error: Error | ResponseError;
+  error: (Error | ResponseError) & { status?: number; timeout?: boolean };
 }
 
 export type TransmissionStatusCallback = (
@@ -361,7 +350,7 @@ export class Transmission implements TransmissionInterface {
       this._timeout = options.timeout;
     }
 
-    this._userAgentAddition = options.userAgentAddition || "";
+    this._userAgentAddition = (options.userAgentAddition || "").trim();
     this._proxy = options.proxy;
 
     // Included for testing; to stub out randomness and verify that an event
@@ -378,24 +367,24 @@ export class Transmission implements TransmissionInterface {
     ]);
   }
 
-  sendEvent(ev: ValidatedEvent): void {
+  sendEvent(ev: ValidatedEvent): Promise<void> {
     // bail early if we aren't sampling this event
     if (!this._shouldSendEvent(ev)) {
       this._droppedCallback(ev, "event dropped due to sampling");
       return;
     }
 
-    this.sendPresampledEvent(ev);
+    return this.sendPresampledEvent(ev);
   }
 
-  sendPresampledEvent(ev: ValidatedEvent): void {
+  sendPresampledEvent(ev: ValidatedEvent): Promise<void> {
     if (this._eventQueue.length >= this._pendingWorkCapacity) {
       this._droppedCallback(ev, "queue overflow");
       return;
     }
     this._eventQueue.push(ev);
     if (this._eventQueue.length >= this._batchSizeTrigger) {
-      this._sendBatch();
+      return this._sendBatch();
     } else {
       this._ensureSendTimeout();
     }
@@ -415,7 +404,7 @@ export class Transmission implements TransmissionInterface {
     });
   }
 
-  _sendBatch(): void {
+  async _sendBatch(): Promise<void> {
     if (this._batchCount === maxConcurrentBatches) {
       // don't start up another concurrent batch.  the next timeout/sendEvent or batch completion
       // will cause us to send another
@@ -430,119 +419,115 @@ export class Transmission implements TransmissionInterface {
       this._eventQueue.splice(0, this._batchSizeTrigger)
     );
 
-    const finishBatch = () => {
+    try {
+      const batches = Object.keys(batchAgg.batches).map(
+        k => batchAgg.batches[k]
+      );
+      const batchResults = batches.map(async batch => {
+        const url = urljoin(batch.apiHost, "/1/batch", batch.dataset);
+
+        const { encoded, numEncoded } = batchAgg.encodeBatchEvents(
+          batch.events
+        );
+        // if we failed to encode any of the events, no point in sending anything to honeycomb
+        if (numEncoded === 0) {
+          this._responseCallback(
+            batch.events.map(ev => ({
+              metadata: ev.metadata,
+              error: ev.encodeError
+            }))
+          );
+          return;
+        }
+
+        const postReq = superagent.post(url);
+        let req: SuperAgentRequest;
+        if (process.env.LIBHONEY_TARGET === "browser") {
+          req = postReq;
+        } else if (!this._proxy) {
+          req = postReq;
+        } else {
+          // dynamically load superagent-proxy, as it takes its sorry time to load and is rarely used/
+          // NOTE: superagent-proxy's @types are not helpful for these loading shenanigans and thus have not been added.
+          const foo = await import("superagent-proxy");
+          const setupFn = foo.default;
+          req = setupFn(postReq, this._proxy) as SuperAgentRequest;
+        }
+
+        let userAgent = USER_AGENT;
+        if (this._userAgentAddition) {
+          userAgent = `${USER_AGENT} ${this._userAgentAddition}`;
+        }
+
+        const start = Date.now();
+
+        try {
+          const res = await req
+            .set("X-Honeycomb-Team", batch.writeKey)
+            .set(
+              process.env.LIBHONEY_TARGET === "browser"
+                ? "X-Honeycomb-UserAgent"
+                : "User-Agent",
+              userAgent
+            )
+            .type("json")
+            .timeout(this._timeout)
+            .send(encoded);
+
+          const end = Date.now();
+
+          const response = JSON.parse(res.text);
+          let respIdx = 0;
+          this._responseCallback(
+            batch.events.map(ev => {
+              if (ev.encodeError) {
+                return {
+                  duration: end - start,
+                  metadata: ev.metadata,
+                  error: ev.encodeError
+                };
+              } else {
+                const nextResponse = response[respIdx++];
+                return {
+                  // eslint-disable-next-line camelcase
+                  status_code: nextResponse.status,
+                  duration: end - start,
+                  metadata: ev.metadata,
+                  error: nextResponse.err
+                };
+              }
+            })
+          );
+        } catch (err) {
+          const end = Date.now();
+
+          this._responseCallback(
+            batch.events.map(ev => ({
+              // eslint-disable-next-line camelcase
+              status_code: ev.encodeError ? undefined : err.status,
+              duration: end - start,
+              metadata: ev.metadata,
+              error: ev.encodeError || err
+            }))
+          );
+        }
+      });
+      await Promise.all(batchResults);
+    } finally {
       this._batchCount--;
 
       const queueLength = this._eventQueue.length;
       if (queueLength > 0) {
         if (queueLength >= this._batchSizeTrigger) {
-          this._sendBatch();
+          // there's still events in the queue, continue sending
+          await this._sendBatch();
         } else {
           this._ensureSendTimeout();
         }
-        return;
-      }
-
-      if (this._batchCount === 0 && this.flushCallback) {
+      } else if (this._batchCount === 0 && this.flushCallback) {
         this.flushCallback();
       }
-    };
-
-    const batches = Object.keys(batchAgg.batches).map(k => batchAgg.batches[k]);
-    eachPromise(batches, batch => {
-      const url = urljoin(batch.apiHost, "/1/batch", batch.dataset);
-      const postReq = superagent.post(url);
-
-      let reqPromise: Promise<{ req: SuperAgentRequest }>;
-      if (process.env.LIBHONEY_TARGET === "browser" || !this._proxy) {
-        reqPromise = Promise.resolve({ req: postReq });
-      } else {
-        // dynamically load superagent-proxy, as it takes its sorry time to load and is rarely used/
-        // NOTE: superagent-proxy's @types are not helpful for these loading shenanigans and thus have not been added.
-        import("superagent-proxy").then(({ default: proxy }) => ({
-          req: proxy(postReq, this._proxy)
-        }));
-      }
-      const { encoded, numEncoded } = batchAgg.encodeBatchEvents(batch.events);
-      return reqPromise.then(
-        ({ req }) =>
-          new Promise<void>(resolve => {
-            // if we failed to encode any of the events, no point in sending anything to honeycomb
-            if (numEncoded === 0) {
-              this._responseCallback(
-                batch.events.map(ev => ({
-                  metadata: ev.metadata,
-                  error: ev.encodeError
-                }))
-              );
-              resolve();
-              return;
-            }
-
-            let userAgent = USER_AGENT;
-            const trimmedAddition = this._userAgentAddition.trim();
-            if (trimmedAddition) {
-              userAgent = `${USER_AGENT} ${trimmedAddition}`;
-            }
-
-            const start = Date.now();
-            req
-              .set("X-Honeycomb-Team", batch.writeKey)
-              .set(
-                process.env.LIBHONEY_TARGET === "browser"
-                  ? "X-Honeycomb-UserAgent"
-                  : "User-Agent",
-                userAgent
-              )
-              .type("json")
-              .timeout(this._timeout)
-              .send(encoded)
-              .end((err, res) => {
-                const end = Date.now();
-
-                if (err) {
-                  this._responseCallback(
-                    batch.events.map(ev => ({
-                      // eslint-disable-next-line camelcase
-                      status_code: ev.encodeError ? undefined : err.status,
-                      duration: end - start,
-                      metadata: ev.metadata,
-                      error: ev.encodeError || err
-                    }))
-                  );
-                } else {
-                  const response = JSON.parse(res.text);
-                  let respIdx = 0;
-                  this._responseCallback(
-                    batch.events.map(ev => {
-                      if (ev.encodeError) {
-                        return {
-                          duration: end - start,
-                          metadata: ev.metadata,
-                          error: ev.encodeError
-                        };
-                      } else {
-                        const nextResponse = response[respIdx++];
-                        return {
-                          // eslint-disable-next-line camelcase
-                          status_code: nextResponse.status,
-                          duration: end - start,
-                          metadata: ev.metadata,
-                          error: nextResponse.err
-                        };
-                      }
-                    })
-                  );
-                }
-                // we resolve unconditionally to continue the iteration in eachSeries.  errors will cause
-                // the event to be re-enqueued/dropped.
-                resolve();
-              });
-          })
-      );
-    })
-      .then(finishBatch)
-      .catch(finishBatch);
+    }
   }
 
   _shouldSendEvent(ev: ValidatedEvent): boolean {
