@@ -6,69 +6,67 @@
  * @module
  */
 import Libhoney from "./libhoney";
+import { ValidatedEventData } from "./transmission";
 import foreach from "./foreach";
+
+/** Arbitrary data to add to an event. */
+export type EventData = Map<string, unknown> | Record<string, unknown>;
+
+/** Arbitrary dynamic data to add to an event. */
+export type DynamicEventData =
+  | Map<string, () => unknown>
+  | Record<string, () => unknown>;
 
 /**
  * Represents an individual event to send to Honeycomb.
  * @class
  */
-export default class Event {
-  apiHost: any;
-  writeKey: any;
-  dataset: any;
-  sampleRate: any;
-  data: any;
-  metadata: any;
-  timestamp: any;
-  _libhoney: Libhoney;
+export default class Event implements Omit<ValidatedEventData, "postData"> {
+  /**
+   * The hostname for the Honeycomb API server to which to send this event.  default:
+   * https://api.honeycomb.io/
+   */
+  apiHost = "";
+
+  /**
+   * The Honeycomb authentication token for this event.  Find your team write key at
+   * https://ui.honeycomb.io/account
+   */
+  writeKey = "";
+
+  /**
+   * The name of the Honeycomb dataset to which to send this event.
+   */
+  dataset = "";
+
+  /**
+   * The rate at which to sample this event.
+   */
+  sampleRate = 1;
+
+  /**
+   * If set, specifies the timestamp associated with this event. If unset,
+   * defaults to Date.now();
+   */
+  timestamp: Date = null;
+
+  data: Record<string, unknown> = Object.create(null);
+
+  metadata: unknown = null;
+
   /**
    * @constructor
    * private
+   * @todo if this is supposed to be private, split into public interface and private implementation?
    */
-  constructor(libhoney: Libhoney, fields, dynFields) {
-    this.data = Object.create(null);
-    this.metadata = null;
-
-    /**
-     * The hostname for the Honeycomb API server to which to send this event.  default:
-     * https://api.honeycomb.io/
-     *
-     * @type {string}
-     */
-    this.apiHost = "";
-    /**
-     * The Honeycomb authentication token for this event.  Find your team write key at
-     * https://ui.honeycomb.io/account
-     *
-     * @type {string}
-     */
-    this.writeKey = "";
-    /**
-     * The name of the Honeycomb dataset to which to send this event.
-     *
-     * @type {string}
-     */
-    this.dataset = "";
-    /**
-     * The rate at which to sample this event.
-     *
-     * @type {number}
-     */
-    this.sampleRate = 1;
-
-    /**
-     * If set, specifies the timestamp associated with this event. If unset,
-     * defaults to Date.now();
-     *
-     * @type {Date}
-     */
-    this.timestamp = null;
-
+  constructor(
+    // stash this away for .send()
+    private readonly _libhoney: Libhoney,
+    fields: EventData,
+    dynFields: DynamicEventData
+  ) {
     foreach(fields, (v, k) => this.addField(k, v));
     foreach(dynFields, (v, k) => this.addField(k, v()));
-
-    // stash this away for .send()
-    this._libhoney = libhoney;
   }
 
   /**
@@ -90,7 +88,7 @@ export default class Event {
    *   event.add (map);
    *   event.send();
    */
-  add(data) {
+  add(data: EventData): Event {
     foreach(data, (v, k) => this.addField(k, v));
     return this;
   }
@@ -105,7 +103,7 @@ export default class Event {
    *     .addField("responseTime_ms", 100)
    *     .send();
    */
-  addField(name, val) {
+  addField(name: string, val: unknown): Event {
     if (val === undefined) {
       this.data[name] = null;
       return this;
@@ -119,7 +117,7 @@ export default class Event {
    * @param {any} md
    * @returns {Event} this event.
    */
-  addMetadata(md) {
+  addMetadata(md: unknown): Event {
     this.metadata = md;
     return this;
   }
@@ -127,7 +125,7 @@ export default class Event {
   /**
    * Sends this event to honeycomb, sampling if necessary.
    */
-  send() {
+  send(): void {
     this._libhoney.sendEvent(this);
   }
 
@@ -135,7 +133,7 @@ export default class Event {
    * Dispatch an event to be sent to Honeycomb.  Assumes sampling has already happened,
    * and will send every event handed to it.
    */
-  sendPresampled() {
+  sendPresampled(): void {
     this._libhoney.sendPresampledEvent(this);
   }
 }

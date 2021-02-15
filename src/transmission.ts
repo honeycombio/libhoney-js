@@ -7,7 +7,7 @@
 /**
  * @module
  */
-import superagent from "superagent";
+import superagent, { ResponseError, SuperAgentRequest } from "superagent";
 import urljoin from "urljoin";
 
 const USER_AGENT = "libhoney-js/<@LIBHONEY_JS_VERSION@>";
@@ -32,17 +32,29 @@ const pendingWorkCapacity = 10000;
 // how long (in ms) to give a single POST before we timeout
 const deadlineTimeoutMs = 60000;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-const emptyResponseCallback = function() {};
+const emptyResponseCallback = function(
+  _transmissionStatus: TransmissionStatus | TransmissionStatus[]
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+): void {};
 
-const eachPromise = (arr, iteratorFn) =>
-  arr.reduce((p, item) => {
-    return p.then(() => {
+function eachPromise<T>(
+  arr: T[],
+  iteratorFn: (item: T) => Promise<void>
+): Promise<void> {
+  return arr.reduce((previous, item) => {
+    return previous.then(() => {
       return iteratorFn(item);
     });
   }, Promise.resolve());
+}
 
-const partition = (arr, keyfn, createfn, addfn) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function partition<Item, Key extends keyof any, Entry>(
+  arr: Item[],
+  keyfn: (item: Item) => Key,
+  createfn: (item: Item) => Entry,
+  addfn: (entry: Entry, item: Item) => void
+): Record<Key, Entry> {
   const result = Object.create(null);
   arr.forEach(v => {
     const key = keyfn(v);
@@ -53,11 +65,19 @@ const partition = (arr, keyfn, createfn, addfn) => {
     }
   });
   return result;
-};
+}
 
 class BatchEndpointAggregator {
-  batches: any;
-  constructor(events) {
+  batches: Record<
+    string,
+    {
+      apiHost: string;
+      writeKey: string;
+      dataset: string;
+      events: ValidatedEvent[];
+    }
+  >;
+  constructor(events: ValidatedEvent[]) {
     this.batches = partition(
       events,
       /* keyfn */
@@ -74,7 +94,7 @@ class BatchEndpointAggregator {
     );
   }
 
-  encodeBatchEvents(events) {
+  encodeBatchEvents(events: ValidatedEvent[]) {
     let first = true;
     let numEncoded = 0;
     const encodedEvents = events.reduce((acc, ev) => {
@@ -95,17 +115,32 @@ class BatchEndpointAggregator {
   }
 }
 
+export interface ValidatedEventData {
+  timestamp: Date;
+  apiHost: string;
+  postData: Record<string, unknown>;
+  writeKey: string;
+  dataset: string;
+  sampleRate: number;
+  metadata?: unknown;
+}
+
 /**
  * @private
  */
-export class ValidatedEvent {
-  timestamp: any;
-  apiHost: any;
-  postData: any;
-  writeKey: any;
-  dataset: any;
-  sampleRate: any;
-  metadata: any;
+export class ValidatedEvent implements ValidatedEventData {
+  timestamp: Date;
+  apiHost: string;
+  postData: Record<string, unknown>;
+  writeKey: string;
+  dataset: string;
+  sampleRate: number;
+  metadata?: unknown;
+  /**
+   * captures error information during preparation for transmission.
+   * @private
+   */
+  encodeError?: Error = null;
   constructor({
     timestamp,
     apiHost,
@@ -114,7 +149,7 @@ export class ValidatedEvent {
     dataset,
     sampleRate,
     metadata = undefined
-  }) {
+  }: ValidatedEventData) {
     this.timestamp = timestamp;
     this.apiHost = apiHost;
     this.postData = postData;
@@ -124,8 +159,8 @@ export class ValidatedEvent {
     this.metadata = metadata;
   }
 
-  toJSON() {
-    const json: any = {};
+  toJSON(): unknown {
+    const json: Record<string, unknown> = {};
     if (this.timestamp) {
       json.time = this.timestamp;
     }
@@ -139,7 +174,7 @@ export class ValidatedEvent {
   }
 
   /** @deprecated Used by the deprecated WriterTransmission. Use ConsoleTransmission instead. */
-  toBrokenJSON() {
+  toBrokenJSON(): string {
     const fields = [];
     if (this.timestamp) {
       fields.push(`"time":${JSON.stringify(this.timestamp)}`);
@@ -165,100 +200,138 @@ export type TransmissionBuiltin =
 
 /** provide a constructor that will receive the LibhoneyOptions passed into the libhoney constructor */
 export type TransmissionConstructor = {
-  new (_options: any): TransmissionInterface;
+  new (_options: Record<string, unknown>): TransmissionInterface;
 };
 
 /** all options to select a transmission implementation */
-export type TransmissionOption = TransmissionBuiltin | TransmissionConstructor;
+export type TransmissionImplementation =
+  | TransmissionBuiltin
+  | TransmissionConstructor;
 
 export interface TransmissionInterface {
-  sendEvent(_ev);
-  sendPresampledEvent(_ev);
-  flush();
+  sendEvent(_ev: ValidatedEvent): void;
+  sendPresampledEvent(_ev: ValidatedEvent): void;
+  flush(): Promise<void>;
 }
 
 export class MockTransmission implements TransmissionInterface {
-  constructorArg: any;
-  events: any[];
-  constructor(options) {
+  constructorArg: Record<string, unknown>;
+  events: ValidatedEvent[];
+  constructor(options: Record<string, unknown>) {
     this.constructorArg = options;
     this.events = [];
   }
 
-  sendEvent(ev) {
+  sendEvent(ev: ValidatedEvent): void {
     this.events.push(ev);
   }
 
-  sendPresampledEvent(ev) {
+  sendPresampledEvent(ev: ValidatedEvent): void {
     this.events.push(ev);
   }
 
-  reset() {
+  reset(): void {
     this.constructorArg = null;
     this.events = [];
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  flush() {}
+  flush(): Promise<void> {
+    return Promise.resolve();
+  }
 }
 
 /** @deprecated Use ConsoleTransmission instead. */
 export class WriterTransmission implements TransmissionInterface {
-  sendEvent(ev) {
+  sendEvent(ev: ValidatedEvent): void {
     console.log(JSON.stringify(ev.toBrokenJSON()));
   }
 
-  sendPresampledEvent(ev) {
+  sendPresampledEvent(ev: ValidatedEvent): void {
     console.log(JSON.stringify(ev.toBrokenJSON()));
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  flush() {}
+  flush(): Promise<void> {
+    return Promise.resolve();
+  }
 }
 
 export class ConsoleTransmission implements TransmissionInterface {
-  sendEvent(ev) {
+  sendEvent(ev: ValidatedEvent): void {
     console.log(JSON.stringify(ev));
   }
 
-  sendPresampledEvent(ev) {
+  sendPresampledEvent(ev: ValidatedEvent): void {
     console.log(JSON.stringify(ev));
   }
 
-  flush() {
-    // do nothing
+  flush(): Promise<void> {
+    return Promise.resolve();
   }
 }
 
 export class NullTransmission implements TransmissionInterface {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  sendEvent(_ev) {}
+  sendEvent(_ev: ValidatedEvent): void {}
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  sendPresampledEvent(_ev) {}
+  sendPresampledEvent(_ev: ValidatedEvent): void {}
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  flush() {}
+  flush(): Promise<void> {
+    return Promise.resolve();
+  }
 }
+
+export interface TransmissionOptions {
+  /** The proxy to send events through. */
+  proxy?: string;
+  /** We send a batch to the API when this many outstanding events exist in our event queue. */
+  batchSizeTrigger?: number;
+  /** We send a batch to the API after this many milliseconds have passed. */
+  batchTimeTrigger?: number;
+  /** callback with transmission status for failed events */
+  responseCallback?: TransmissionStatusCallback;
+  /** The maximum number of pending events we allow to accumulate in our sending queue before dropping them. */
+  pendingWorkCapacity?: number;
+  /** We process batches concurrently to increase parallelism while sending. */
+  maxConcurrentBatches?: number;
+  /** A short identifier to add to the user-agent header. */
+  userAgentAddition?: string;
+  /** How long (in ms) to give a single POST before we timeout. */
+  timeout?: number;
+}
+
+export interface TransmissionStatus {
+  // eslint-disable-next-line camelcase
+  status_code?: unknown;
+  duration?: number;
+  metadata: unknown;
+  error: Error | ResponseError;
+}
+
+export type TransmissionStatusCallback = (
+  transmissionStatus: TransmissionStatus[]
+) => void;
 
 /**
  * @private
  */
 export class Transmission implements TransmissionInterface {
-  _responseCallback: (() => void) | ((_d: any) => void);
+  _responseCallback: TransmissionStatusCallback;
   _batchSizeTrigger: number;
   _batchTimeTrigger: number;
   _maxConcurrentBatches: number;
   _pendingWorkCapacity: number;
   _timeout: number;
+  // hide runtime implementation details
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   _sendTimeoutId: any;
-  _eventQueue: any[];
+  _eventQueue: ValidatedEvent[];
   _batchCount: number;
-  _userAgentAddition: any;
-  _proxy: any;
+  _userAgentAddition: string;
+  _proxy: string;
   _randomFn: () => number;
   flushCallback: () => void;
-  constructor(options) {
+  constructor(options: TransmissionOptions) {
     this._responseCallback = emptyResponseCallback;
     this._batchSizeTrigger = batchSizeTrigger;
     this._batchTimeTrigger = batchTimeTrigger;
@@ -296,7 +369,7 @@ export class Transmission implements TransmissionInterface {
     this._randomFn = Math.random;
   }
 
-  _droppedCallback(ev, reason) {
+  _droppedCallback(ev: ValidatedEvent, reason?: string): void {
     this._responseCallback([
       {
         metadata: ev.metadata,
@@ -305,7 +378,7 @@ export class Transmission implements TransmissionInterface {
     ]);
   }
 
-  sendEvent(ev) {
+  sendEvent(ev: ValidatedEvent): void {
     // bail early if we aren't sampling this event
     if (!this._shouldSendEvent(ev)) {
       this._droppedCallback(ev, "event dropped due to sampling");
@@ -315,7 +388,7 @@ export class Transmission implements TransmissionInterface {
     this.sendPresampledEvent(ev);
   }
 
-  sendPresampledEvent(ev) {
+  sendPresampledEvent(ev: ValidatedEvent): void {
     if (this._eventQueue.length >= this._pendingWorkCapacity) {
       this._droppedCallback(ev, "queue overflow");
       return;
@@ -328,7 +401,7 @@ export class Transmission implements TransmissionInterface {
     }
   }
 
-  flush() {
+  flush(): Promise<void> {
     if (this._eventQueue.length === 0 && this._batchCount === 0) {
       // we're not currently waiting on anything, we're done!
       return Promise.resolve();
@@ -342,7 +415,7 @@ export class Transmission implements TransmissionInterface {
     });
   }
 
-  _sendBatch() {
+  _sendBatch(): void {
     if (this._batchCount === maxConcurrentBatches) {
       // don't start up another concurrent batch.  the next timeout/sendEvent or batch completion
       // will cause us to send another
@@ -380,17 +453,15 @@ export class Transmission implements TransmissionInterface {
       const url = urljoin(batch.apiHost, "/1/batch", batch.dataset);
       const postReq = superagent.post(url);
 
-      let reqPromise;
-      if (process.env.LIBHONEY_TARGET === "browser") {
+      let reqPromise: Promise<{ req: SuperAgentRequest }>;
+      if (process.env.LIBHONEY_TARGET === "browser" || !this._proxy) {
         reqPromise = Promise.resolve({ req: postReq });
       } else {
-        reqPromise = Promise.resolve(
-          this._proxy
-            ? import("superagent-proxy").then(({ default: proxy }) => ({
-                req: proxy(postReq, this._proxy)
-              }))
-            : { req: postReq }
-        );
+        // dynamically load superagent-proxy, as it takes its sorry time to load and is rarely used/
+        // NOTE: superagent-proxy's @types are not helpful for these loading shenanigans and thus have not been added.
+        import("superagent-proxy").then(({ default: proxy }) => ({
+          req: proxy(postReq, this._proxy)
+        }));
       }
       const { encoded, numEncoded } = batchAgg.encodeBatchEvents(batch.events);
       return reqPromise.then(
@@ -474,7 +545,7 @@ export class Transmission implements TransmissionInterface {
       .catch(finishBatch);
   }
 
-  _shouldSendEvent(ev) {
+  _shouldSendEvent(ev: ValidatedEvent): boolean {
     const { sampleRate } = ev;
     if (sampleRate <= 1) {
       return true;
@@ -482,7 +553,7 @@ export class Transmission implements TransmissionInterface {
     return this._randomFn() < 1 / sampleRate;
   }
 
-  _ensureSendTimeout() {
+  _ensureSendTimeout(): void {
     if (this._sendTimeoutId === -1) {
       this._sendTimeoutId = _global.setTimeout(
         () => this._sendBatch(),
@@ -491,7 +562,7 @@ export class Transmission implements TransmissionInterface {
     }
   }
 
-  _clearSendTimeout() {
+  _clearSendTimeout(): void {
     if (this._sendTimeoutId !== -1) {
       _global.clearTimeout(this._sendTimeoutId);
       this._sendTimeoutId = -1;

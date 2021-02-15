@@ -18,8 +18,8 @@ describe("libhoney builder", () => {
         }
       }
     );
-    expect(b._fields.a).toEqual(5);
-    expect(b._fields.b).toEqual(undefined);
+    expect(b._fields["a"]).toEqual(5);
+    expect(b._fields["b"]).toEqual(undefined);
     b = hny.newBuilder();
     expect(Object.getOwnPropertyNames(b._fields)).toHaveLength(0);
     expect(Object.getOwnPropertyNames(b._dynFields)).toHaveLength(0);
@@ -70,7 +70,7 @@ describe("libhoney builder", () => {
     });
     const transmission = honey.transmission as MockTransmission;
 
-    let postData: any = { b: 2, c: 3 };
+    let postData: unknown = { b: 2, c: 3 };
 
     let builder = honey.newBuilder({ b: 2 });
 

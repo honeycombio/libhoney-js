@@ -78,9 +78,7 @@ describe("libhoney", () => {
 
   describe("response queue", () => {
     it("should enqueue a maximum of maxResponseQueueSize, dropping new responses (not old)", done => {
-      mock.post("http://localhost:9999/1/events/testResponseQueue", _req => {
-        return {};
-      });
+      mock.post("http://localhost:9999/1/events/testResponseQueue", _req => ({}));
 
       const queueSize = 50;
       let queueFullCount = 0;

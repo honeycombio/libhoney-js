@@ -18,7 +18,11 @@
   "rules": {
     "no-console": "off",
     "semi": 2,
-    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "^_" }
+    ],
     "prefer-arrow-callback": "error",
     "no-var": "error",
     "eqeqeq": "error",
