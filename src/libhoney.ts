@@ -15,11 +15,12 @@ import {
   TransmissionImplementation,
   TransmissionInterface,
   TransmissionOptions,
+  TransmissionStatus,
   ValidatedEvent,
   WriterTransmission
 } from "./transmission";
+import Event, { DynamicEventData, EventData } from "./event";
 import Builder from "./builder";
-import Event from "./event";
 
 import { EventEmitter } from "events";
 
@@ -99,7 +100,7 @@ export default class Libhoney extends EventEmitter {
   _transmission: TransmissionInterface;
   _usable: boolean;
   _builder: Builder;
-  _responseQueue: any[];
+  _responseQueue: TransmissionStatus[];
   /**
    * Constructs a libhoney context in order to configure default behavior,
    * though each of its members (`apiHost`, `writeKey`, `dataset`, and
@@ -151,7 +152,7 @@ export default class Libhoney extends EventEmitter {
     this._responseQueue = [];
   }
 
-  _responseCallback(responses) {
+  _responseCallback(responses: TransmissionStatus[]): void {
     const [queue, limit] = [
       this._responseQueue,
       this._options.maxResponseQueueSize
@@ -375,7 +376,7 @@ export default class Libhoney extends EventEmitter {
    *   map.set("env", "staging");
    *   honey.add (map);
    */
-  add(data) {
+  add(data: Record<string, unknown>): Libhoney {
     this._builder.add(data);
     return this;
   }
@@ -388,7 +389,7 @@ export default class Libhoney extends EventEmitter {
    * @example
    *   honey.addField("build_id", "a6cc38a1");
    */
-  addField(name, val) {
+  addField(name: string, val: unknown): Libhoney {
     this._builder.addField(name, val);
     return this;
   }
@@ -401,7 +402,7 @@ export default class Libhoney extends EventEmitter {
    * @example
    *   honey.addDynamicField("process_heapUsed", () => process.memoryUsage().heapUsed);
    */
-  addDynamicField(name, fn) {
+  addDynamicField(name: string, fn: () => unknown): Libhoney {
     this._builder.addDynamicField(name, fn);
     return this;
   }
@@ -420,8 +421,8 @@ export default class Libhoney extends EventEmitter {
    *   map.set("httpStatusCode", 200);
    *   honey.sendNow (map);
    */
-  sendNow(data) {
-    return this._builder.sendNow(data);
+  sendNow(data: EventData): void {
+    this._builder.sendNow(data);
   }
 
   /**
@@ -432,7 +433,7 @@ export default class Libhoney extends EventEmitter {
    *   ev.addField("additionalField", value);
    *   ev.send();
    */
-  newEvent() {
+  newEvent(): Event {
     return this._builder.newEvent();
   }
 
@@ -449,7 +450,10 @@ export default class Libhoney extends EventEmitter {
    *                                    process_heapUsed: () => process.memoryUsage().heapUsed
    *                                  });
    */
-  newBuilder(fields = {}, dynFields = {}) {
+  newBuilder(
+    fields: EventData = {},
+    dynFields: DynamicEventData = {}
+  ): Builder {
     return this._builder.newBuilder(fields, dynFields);
   }
 
@@ -459,7 +463,7 @@ export default class Libhoney extends EventEmitter {
    * after a call to flush will not be waited on.
    * @returns {Promise} a promise that will resolve when all currently enqueued events/batches are sent.
    */
-  flush() {
+  flush(): Promise<void> {
     const transmission = this._transmission;
 
     this._transmission = getAndInitTransmission(
@@ -548,13 +552,7 @@ function getAndInitTransmission(
  *
  * Modifies and returns arr1.
  */
-function concatWithMaxLimit(
-  _arr1: string,
-  _arr2: string,
-  _limit: number
-): string;
-function concatWithMaxLimit<T>(_arr1: T[], _arr2: T[], _limit: number): T[];
-function concatWithMaxLimit(arr1: any, arr2: any, limit: number): any {
+function concatWithMaxLimit<T>(arr1: T[], arr2: T[], limit: number): T[] {
   // if queue is full or somehow over the max
   if (arr1.length >= limit) {
     //return up to the max length
