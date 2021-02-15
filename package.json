@@ -24,7 +24,7 @@
     "test-coverage": "jest --coverage",
     "format": "prettier --write \"src/**/*.js\" rollup.config.js rollup.browser.config.js",
     "check-format": "prettier \"src/**/*.js\" rollup.config.js rollup.browser.config.js",
-    "lint": "eslint \"src/**/*.ts\" rollup.config.js rollup.browser.config.js",
+    "lint": "eslint \"src/**/*.ts\"",
     "precommit": "lint-staged"
   },
   "author": "",
