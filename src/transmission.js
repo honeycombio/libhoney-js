@@ -129,6 +129,7 @@ export class ValidatedEvent {
     return json;
   }
 
+  /** @deprecated Used by the deprecated WriterTransmission. Use ConsoleTransmission instead. */
   toBrokenJSON() {
     let fields = [];
     if (this.timestamp) {
@@ -164,7 +165,7 @@ export class MockTransmission {
   }
 }
 
-// deprecated.  Use ConsoleTransmission instead.
+/** @deprecated Use ConsoleTransmission instead. */
 export class WriterTransmission {
   sendEvent(ev) {
     console.log(JSON.stringify(ev.toBrokenJSON()));
