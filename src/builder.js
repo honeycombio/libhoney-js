@@ -106,6 +106,7 @@ export default class Builder {
    */
   addDynamicField(name, fn) {
     this._dynFields[name] = fn;
+    return this;
   }
 
   /**
