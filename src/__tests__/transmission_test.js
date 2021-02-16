@@ -39,7 +39,7 @@ describe("base transmission", () => {
         dataset: "test-transmission",
         sampleRate: 1,
         timestamp: new Date(),
-        postData: JSON.stringify({ a: 1, b: 2 })
+        postData: { a: 1, b: 2 }
       })
     );
   });
@@ -66,7 +66,7 @@ describe("base transmission", () => {
         dataset: "test-transmission",
         sampleRate: 1,
         timestamp: new Date(),
-        postData: JSON.stringify({ a: 1, b: 2 })
+        postData: { a: 1, b: 2 }
       })
     );
   });
@@ -104,7 +104,7 @@ describe("base transmission", () => {
           dataset: "test-transmission",
           sampleRate: 1,
           timestamp: new Date(),
-          postData: JSON.stringify({ a: 1, b: 2 })
+          postData: { a: 1, b: 2 }
         })
       );
     }
@@ -134,7 +134,7 @@ describe("base transmission", () => {
         dataset: "test-transmission",
         sampleRate: 1,
         timestamp: new Date(),
-        postData: JSON.stringify({ a: 1, b: 2 })
+        postData: { a: 1, b: 2 }
       })
     );
   });
@@ -154,7 +154,7 @@ describe("base transmission", () => {
         dataset: "test-transmission",
         sampleRate: 1,
         timestamp: new Date(),
-        postData: JSON.stringify({ a: 1, b: 2 })
+        postData: { a: 1, b: 2 }
       })
     );
   });
@@ -177,7 +177,7 @@ describe("base transmission", () => {
         dataset: "test-transmission",
         sampleRate: 10,
         timestamp: new Date(),
-        postData: JSON.stringify({ a: 1, b: 2 })
+        postData: { a: 1, b: 2 }
       })
     );
   });
@@ -199,7 +199,7 @@ describe("base transmission", () => {
         dataset: "test-transmission",
         sampleRate: 10,
         timestamp: new Date(),
-        postData: JSON.stringify({ a: 1, b: 2 })
+        postData: { a: 1, b: 2 }
       })
     );
   });
@@ -241,7 +241,7 @@ describe("base transmission", () => {
           dataset: "test-transmission",
           sampleRate: 1,
           timestamp: new Date(),
-          postData: JSON.stringify({ a: 1, b: 2 })
+          postData: { a: 1, b: 2 }
         })
       );
     }
@@ -257,7 +257,7 @@ describe("base transmission", () => {
           dataset: "test-transmission",
           sampleRate: 1,
           timestamp: new Date(),
-          postData: JSON.stringify({ a: 1, b: 2 })
+          postData: { a: 1, b: 2 }
         })
       );
       expect(eventDropped).toBe(true);
@@ -295,7 +295,7 @@ describe("base transmission", () => {
           dataset: "test-transmission",
           sampleRate: 1,
           timestamp: new Date(),
-          postData: JSON.stringify({ a: 1, b: 2 })
+          postData: { a: 1, b: 2 }
         })
       );
     }
@@ -335,7 +335,7 @@ describe("base transmission", () => {
           dataset: "test-transmission",
           sampleRate: 1,
           timestamp: new Date(),
-          postData: JSON.stringify({ a: 1, b: 2 })
+          postData: { a: 1, b: 2 }
         })
       );
     }
@@ -372,7 +372,7 @@ describe("base transmission", () => {
           dataset: "test-transmission",
           sampleRate: 1,
           timestamp: new Date(),
-          postData: JSON.stringify({ a: 1, b: 2 })
+          postData: { a: 1, b: 2 }
         })
       );
     }
@@ -411,7 +411,7 @@ describe("base transmission", () => {
           dataset: "test-transmission",
           sampleRate: 10,
           timestamp: new Date(),
-          postData: JSON.stringify({ a: 1, b: 2 })
+          postData: { a: 1, b: 2 }
         })
       );
     }
@@ -439,8 +439,6 @@ describe("base transmission", () => {
       }
     });
 
-    let a = {};
-    a.a = a;
     for (let i = 0; i < 5; i++) {
       transmission.sendPresampledEvent(
         new ValidatedEvent({
@@ -449,7 +447,7 @@ describe("base transmission", () => {
           dataset: "test-transmission",
           sampleRate: 10,
           timestamp: new Date(),
-          postData: JSON.stringify({ a: 1, b: 2 })
+          postData: { a: 1, b: 2 }
         })
       );
     }
@@ -463,8 +461,8 @@ describe("base transmission", () => {
           writeKey: "123456789",
           dataset: "test-transmission",
           sampleRate: 10,
-          timestamp: b,
-          postData: JSON.stringify({ a: 1, b: 2 })
+          timestamp: new Date(),
+          postData: b
         })
       );
     }
@@ -476,7 +474,7 @@ describe("base transmission", () => {
           dataset: "test-transmission",
           sampleRate: 10,
           timestamp: new Date(),
-          postData: JSON.stringify({ a: 1, b: 2 })
+          postData: { a: 1, b: 2 }
         })
       );
     }
@@ -510,7 +508,7 @@ describe("base transmission", () => {
           dataset: "test-transmission",
           sampleRate: 1,
           timestamp: new Date(),
-          postData: JSON.stringify({ a: 1, b: 2 })
+          postData: { a: 1, b: 2 }
         })
       );
     }
@@ -572,7 +570,7 @@ describe("base transmission", () => {
           dataset: userAgent.dataset,
           sampleRate: 1,
           timestamp: new Date(),
-          postData: JSON.stringify({ a: 1, b: 2 })
+          postData: { a: 1, b: 2 }
         })
       );
     });
@@ -610,7 +608,7 @@ describe("base transmission", () => {
         dataset: "browser-test",
         sampleRate: 1,
         timestamp: new Date(),
-        postData: JSON.stringify({ a: 1, b: 2 })
+        postData: { a: 1, b: 2 }
       })
     );
   });
@@ -671,7 +669,7 @@ describe("base transmission", () => {
           dataset: "test-transmission",
           sampleRate: 1,
           timestamp: new Date(),
-          postData: JSON.stringify({ a: 1, b: 2 }),
+          postData: { a: 1, b: 2 },
           metadata: "my metadata"
         })
       );
