@@ -1,4 +1,5 @@
 /* eslint-env node, jest */
+import { MockTransmission } from "../transmission";
 import libhoney from "../libhoney";
 
 let superagent = require("superagent");
@@ -6,18 +7,29 @@ let mock = require("superagent-mocker")(superagent);
 
 describe("libhoney", () => {
   describe("constructor options", () => {
-    it("should be communicated to transmission constructor", () => {
-      let options = { a: 1, b: 2, c: 3, d: 4, transmission: "mock" };
+    describe.each(["mock", MockTransmission])(
+      "with %p transmission",
+      transmissionSpec => {
+        it("should be communicated to transmission constructor", () => {
+          const options = {
+            a: 1,
+            b: 2,
+            c: 3,
+            d: 4,
+            transmission: transmissionSpec
+          };
 
-      let honey = new libhoney(options);
+          const honey = new libhoney(options);
 
-      let transmission = honey.transmission;
+          const transmission = honey.transmission;
 
-      expect(options.a).toEqual(transmission.constructorArg.a);
-      expect(options.b).toEqual(transmission.constructorArg.b);
-      expect(options.c).toEqual(transmission.constructorArg.c);
-      expect(options.d).toEqual(transmission.constructorArg.d);
-    });
+          expect(options.a).toEqual(transmission.constructorArg.a);
+          expect(options.b).toEqual(transmission.constructorArg.b);
+          expect(options.c).toEqual(transmission.constructorArg.c);
+          expect(options.d).toEqual(transmission.constructorArg.d);
+        });
+      }
+    );
   });
 
   describe("event properties", () => {
