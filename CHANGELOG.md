@@ -1,6 +1,6 @@
 # libhoney-js changelog
 
-## 2.2.2
+## [2.2.2] - 2021-03-18
 
 ### Fixed
 
