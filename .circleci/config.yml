@@ -104,7 +104,8 @@ jobs:
           name: store npm auth token
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
       - run: yarn
-      - run: npm publish
+      - run: yarn build
+      - run: npm publish --dry-run
 
 workflows:
   nightly:
@@ -140,8 +141,8 @@ workflows:
           context: Honeycomb Secrets for Public Repos
           requires:
             - build_artifacts
-#      - publish_npm:
-#          <<: *filters_publish
-#          context: Honeycomb Secrets for Public Repos
-#          requires:
-#            - test
+      - publish_npm:
+          <<: *filters_always
+          context: Honeycomb Secrets for Public Repos
+          requires:
+            - test
