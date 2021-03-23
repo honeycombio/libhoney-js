@@ -105,7 +105,7 @@ jobs:
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
       - run: yarn
       - run: yarn build
-      - run: npm publish --dry-run
+      - run: npm publish
 
 workflows:
   nightly:
@@ -142,7 +142,7 @@ workflows:
           requires:
             - build_artifacts
       - publish_npm:
-          <<: *filters_always
+          <<: *filters_publish
           context: Honeycomb Secrets for Public Repos
           requires:
             - test
