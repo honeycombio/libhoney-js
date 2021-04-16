@@ -8,14 +8,15 @@
     "url": "https://github.com/honeycombio/libhoney-js.git"
   },
   "engines": {
-    "node": "8.* || >= 10.*"
+    "node": "8.* || >= 10.*",
+    "yarn": "YARN NO LONGER USED - use npm instead."
   },
   "browser": "dist/libhoney.browser.js",
   "module": "dist/libhoney.es.js",
   "main": "dist/libhoney.cjs.js",
   "files": ["dist", "README.md", "LICENSE"],
   "scripts": {
-    "build": "yarn build:node && yarn build:browser",
+    "build": "npm run build:node && npm run build:browser",
     "build:node": "rollup -c rollup.config.js",
     "build:browser": "rollup -c rollup.browser.config.js",
     "dev": "rollup -c -w",
