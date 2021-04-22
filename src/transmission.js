@@ -186,6 +186,16 @@ export class ConsoleTransmission {
   }
 }
 
+export class StdoutTransmission {
+  sendEvent(ev) {
+    process.stdout.write(JSON.stringify(ev) + "\n");
+  }
+
+  sendPresampledEvent(ev) {
+    process.stdout.write(JSON.stringify(ev) + "\n");
+  }
+}
+
 export class NullTransmission {
   sendEvent(_ev) {}
 

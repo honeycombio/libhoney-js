@@ -10,6 +10,7 @@ import {
   ConsoleTransmission,
   MockTransmission,
   NullTransmission,
+  StdoutTransmission,
   Transmission,
   ValidatedEvent,
   WriterTransmission
@@ -36,6 +37,7 @@ const defaults = Object.freeze({
   //  - "mock": an implementation that accumulates all events sent
   //  - "writer": an implementation that logs to the console all events sent (deprecated.  use "console" instead)
   //  - "console": an implementation that logs correct json objects to the console for all events sent.
+  //  - "stdout": an implementation that logs correct json objects to standard out, useful for environments where console.log is not ideal (e.g. AWS Lambda)
   //  - "null": an implementation that does nothing
   transmission: "base",
 
@@ -459,6 +461,8 @@ const getTransmissionClass = transmissionClassName => {
       return WriterTransmission;
     case "console":
       return ConsoleTransmission;
+    case "stdout":
+      return StdoutTransmission;
     default:
       throw new Error(
         `unknown transmission implementation "${transmissionClassName}".`
@@ -476,7 +480,7 @@ function getAndInitTransmission(transmission, options) {
     return new transmissionClass(options);
   } else if (typeof transmission !== "function") {
     throw new Error(
-      ".transmission must be one of 'base'/'worker'/'mock'/'writer'/'console'/'null' or a constructor."
+      ".transmission must be one of 'base'/'worker'/'mock'/'writer'/'console'/'stdout'/'null' or a constructor."
     );
   }
 
@@ -504,16 +508,16 @@ function getAndInitTransmission(transmission, options) {
   }
 }
 
-  /**
-   * Concatenates two arrays while keeping the length of the returned result 
-   * less than the limit. As many elements from arr2 will be appended onto the 
-   * end of arr1 as will remain under the limit. If arr1 is already too long it 
-   * will be truncated to match the limit. Order is preserved; arr2's contents 
-   * will appear after those already in arr1.
-   * 
-   * Modifies and returns arr1.
-   */
-   function concatWithMaxLimit(arr1, arr2, limit) {
+/**
+ * Concatenates two arrays while keeping the length of the returned result
+ * less than the limit. As many elements from arr2 will be appended onto the
+ * end of arr1 as will remain under the limit. If arr1 is already too long it
+ * will be truncated to match the limit. Order is preserved; arr2's contents
+ * will appear after those already in arr1.
+ *
+ * Modifies and returns arr1.
+ */
+function concatWithMaxLimit(arr1, arr2, limit) {
   // if queue is full or somehow over the max
   if (arr1.length >= limit) {
     //return up to the max length
