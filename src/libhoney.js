@@ -480,7 +480,7 @@ function getAndInitTransmission(transmission, options) {
     return new transmissionClass(options);
   } else if (typeof transmission !== "function") {
     throw new Error(
-      ".transmission must be one of 'base'/'worker'/'mock'/'writer'/'console'/'null' or a constructor."
+      ".transmission must be one of 'base'/'worker'/'mock'/'writer'/'console'/'stdout'/'null' or a constructor."
     );
   }
 
