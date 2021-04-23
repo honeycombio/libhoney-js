@@ -7,6 +7,7 @@
  * @module
  */
 import {
+  AWSExtensionTransmission,
   ConsoleTransmission,
   MockTransmission,
   NullTransmission,
@@ -32,6 +33,7 @@ const defaults = Object.freeze({
   // transmission constructor, or a string to pick one of our builtin versions.
   // we fall back to the base impl if worker or a custom implementation throws on init.
   // string options available are:
+  //  - "awsext": an implementation that formats a structured event for transmission via AWS Lambda extension
   //  - "base": the default transmission implementation
   //  - "worker": a web-worker based transmission (not currently available, see https://github.com/honeycombio/libhoney-js/issues/22)
   //  - "mock": an implementation that accumulates all events sent
@@ -443,6 +445,8 @@ export default class Libhoney extends EventEmitter {
 
 const getTransmissionClass = transmissionClassName => {
   switch (transmissionClassName) {
+    case "awsext":
+      return AWSExtenstionTransmission;
     case "base":
       return Transmission;
     case "mock":

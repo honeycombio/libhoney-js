@@ -196,6 +196,20 @@ export class StdoutTransmission {
   }
 }
 
+export class AWSExtensionTransmission {
+  sendEvent(ev) {
+    let hcEvent = ev.postData;
+    hcEvent["meta.samplerate"] = ev.sampleRate;
+    process.stdout.write(JSON.stringify(hcEvent) + '\n');
+  }
+
+  sendPresampledEvent(ev) {
+    let hcEvent = ev.postData;
+    hcEvent["meta.samplerate"] = ev.sampleRate;
+    process.stdout.write(JSON.stringify(hcEvent) + '\n');
+  }
+}
+
 export class NullTransmission {
   sendEvent(_ev) {}
 
