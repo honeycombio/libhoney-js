@@ -446,7 +446,7 @@ export default class Libhoney extends EventEmitter {
 const getTransmissionClass = transmissionClassName => {
   switch (transmissionClassName) {
     case "awsext":
-      return AWSExtenstionTransmission;
+      return AWSExtensionTransmission;
     case "base":
       return Transmission;
     case "mock":
