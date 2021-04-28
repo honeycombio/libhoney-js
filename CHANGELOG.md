@@ -8,7 +8,7 @@
 
 ### Fixed
 
--   fix npm publish (#110) | [@vreynolds](https://gihtub.com/vreynolds)
+-   fix npm publish (#110) | [@vreynolds](https://github.com/vreynolds)
 
 ### Maintenance
 
