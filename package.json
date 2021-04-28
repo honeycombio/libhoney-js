@@ -1,6 +1,6 @@
 {
   "name": "libhoney",
-  "version": "2.2.3",
+  "version": "2.3.0",
   "description": " Honeycomb.io Javascript library",
   "bugs": "https://github.com/honeycombio/libhoney-js/issues",
   "repository": {

@@ -1,5 +1,19 @@
 # libhoney-js changelog
 
+## [2.3.0] - 2021-04-28
+
+### Enhancements
+
+-   add "stdout" transmission implementation (#119) | [@jharley](https://github.com/jharley)
+
+### Fixed
+
+-   fix npm publish (#110) | [@vreynolds](https://gihtub.com/vreynolds)
+
+### Maintenance
+
+-   Bump y18n from 4.0.0 to 4.0.1 (#113)
+
 ## [2.2.2] - 2021-03-18
 
 ### Fixed
