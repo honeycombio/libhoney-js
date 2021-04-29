@@ -71,7 +71,7 @@ jobs:
     steps:
       - checkout
       - run: npm ci
-      - run: npm run test
+      - run: npm run test -- --verbose
       - run: npm run build
 
   build_artifacts:
