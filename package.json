@@ -48,7 +48,7 @@
     "jest-in-case": "^1.0.2",
     "lint-staged": "^7.2.0",
     "prettier": "^1.18.2",
-    "rollup": "^1.25.1",
+    "rollup": "^2.48.0",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
@@ -56,7 +56,7 @@
     "superagent-mocker": "^0.5.2"
   },
   "dependencies": {
-    "superagent": "^3.8.3",
+    "superagent": "^6.1.0",
     "superagent-proxy": "^2.0.0",
     "urljoin": "^0.1.5"
   },
