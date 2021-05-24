@@ -31,7 +31,7 @@ executors:
         type: string
         default: *default_nodeversion
     docker:
-      - image: circleci/node:<< parameters.nodeversion >>
+      - image: cimg/node:<< parameters.nodeversion >>
   github:
     docker:
       - image: cibuilds/github:0.13.0
