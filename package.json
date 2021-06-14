@@ -14,7 +14,11 @@
   "browser": "dist/libhoney.browser.js",
   "module": "dist/libhoney.es.js",
   "main": "dist/libhoney.cjs.js",
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "npm run build:node && npm run build:browser",
     "build:node": "rollup -c rollup.config.js",
@@ -25,16 +29,27 @@
     "format": "prettier --write \"src/**/*.js\" rollup.config.js rollup.browser.config.js",
     "check-format": "prettier \"src/**/*.js\" rollup.config.js rollup.browser.config.js",
     "lint": "eslint \"src/**/*.js\" rollup.config.js rollup.browser.config.js",
-    "precommit": "lint-staged"
+    "prepare": "husky install"
   },
   "author": "",
   "license": "Apache-2.0",
   "lint-staged": {
-    "*.{js,jsx}": ["prettier --parser flow --write", "eslint", "git add"],
-    "*.json": ["prettier --parser json --write", "git add"],
-    "*.{graphql,gql}": ["prettier --parser graphql --write", "git add"],
-    "*.{md,markdown}": ["prettier --parser markdown --write", "git add"],
-    "*.{css,scss}": ["prettier --parser css --write", "git add"]
+    "*.{js,jsx}": [
+      "prettier --write",
+      "eslint"
+    ],
+    "*.json": [
+      "prettier --write"
+    ],
+    "*.{graphql,gql}": [
+      "prettier --write"
+    ],
+    "*.{md,markdown}": [
+      "prettier --write"
+    ],
+    "*.{css,scss}": [
+      "prettier --write"
+    ]
   },
   "devDependencies": {
     "@babel/core": "^7.4.0",
@@ -43,7 +58,7 @@
     "babel-jest": "^24.5.0",
     "babel-polyfill": "^6.26.0",
     "eslint": "^7.25.0",
-    "husky": "^0.14.3",
+    "husky": "^6.0.0",
     "jest": "^24.5.0",
     "jest-in-case": "^1.0.2",
     "lint-staged": "^11.0.0",
@@ -64,6 +79,9 @@
     "https-proxy-agent": "^3.0.0"
   },
   "jest": {
-    "testPathIgnorePatterns": ["dist/", "/node_modules/"]
+    "testPathIgnorePatterns": [
+      "dist/",
+      "/node_modules/"
+    ]
   }
 }
