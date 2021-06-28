@@ -11,7 +11,7 @@ export default class Client extends ResourceClient {
       QueryResult,
       apiKey,
       disabled,
-      false /* not dataset scoped */,
+      true /* dataset scoped */,
       userAgentAddition
     );
   }
