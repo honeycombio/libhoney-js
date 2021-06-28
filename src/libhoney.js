@@ -6,6 +6,7 @@
  * @module
  */
 import BoardsClient from "./api/boards/client";
+import DatasetsClient from "./api/datasets/client";
 import EventsClient from "./api/events/client";
 import MarkersClient from "./api/markers/client";
 import TriggersClient from "./api/triggers/client";
@@ -103,6 +104,9 @@ export default class Libhoney {
     if (this._boards) {
       this._boards.apiHost = v;
     }
+    if (this._datasets) {
+      this._datasets.apiHost = v;
+    }
     if (this._events) {
       this._events.apiHost = v;
     }
@@ -137,6 +141,9 @@ export default class Libhoney {
     if (this._boards) {
       this._boards.apiKey = v;
     }
+    if (this._datasets) {
+      this._datasets.apiKey = v;
+    }
     if (this._events) {
       this._events.apiKey = v;
     }
@@ -164,6 +171,13 @@ export default class Libhoney {
       this._boards = new BoardsClient(this._options);
     }
     return this._boards;
+  }
+
+  get datasets() {
+    if (!this._datasets) {
+      this._datasets = new DatasetsClient(this._options);
+    }
+    return this._datasets;
   }
 
   get events() {
