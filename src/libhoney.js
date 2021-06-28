@@ -9,6 +9,7 @@ import BoardsClient from "./api/boards/client";
 import DatasetsClient from "./api/datasets/client";
 import EventsClient from "./api/events/client";
 import MarkersClient from "./api/markers/client";
+import QueryResultsClient from "./api/markers/queryResults";
 import TriggersClient from "./api/triggers/client";
 
 const defaults = Object.freeze({
@@ -113,6 +114,9 @@ export default class Libhoney {
     if (this._markers) {
       this._markers.apiHost = v;
     }
+    if (this._queryResults) {
+      this._queryResults.apiHost = v;
+    }
     if (this._triggers) {
       this._triggers.apiHost = v;
     }
@@ -149,6 +153,9 @@ export default class Libhoney {
     }
     if (this._markers) {
       this._markers.apiKey = v;
+    }
+    if (this._queryResults) {
+      this._queryResults.apiKey = v;
     }
     if (this._triggers) {
       this._triggers.apiKey = v;
@@ -192,6 +199,13 @@ export default class Libhoney {
       this._markers = new MarkersClient(this._options);
     }
     return this._markers;
+  }
+
+  get queryResults() {
+    if (!this._queryResults) {
+      this._queryResults = new QueryResultsClient(this._options);
+    }
+    return this._queryResults;
   }
 
   get triggers() {
