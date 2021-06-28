@@ -9,7 +9,7 @@ import BoardsClient from "./api/boards/client";
 import DatasetsClient from "./api/datasets/client";
 import EventsClient from "./api/events/client";
 import MarkersClient from "./api/markers/client";
-import QueryResultsClient from "./api/markers/queryResults";
+import QueryResultsClient from "./api/queryResults/client";
 import TriggersClient from "./api/triggers/client";
 
 const defaults = Object.freeze({
