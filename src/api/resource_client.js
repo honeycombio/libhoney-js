@@ -37,7 +37,7 @@ export default class ResourceClient {
     }
 
     return superagent[method](url)
-      .set("X-Hny-Team", this.apiKey)
+      .set("X-Honeycomb-Team", this.apiKey)
       .set("User-Agent", this.userAgent)
       .type("json");
   }
