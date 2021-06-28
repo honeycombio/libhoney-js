@@ -120,8 +120,10 @@ export class Query {
     startTime,
     endTime,
     timeRange,
-    granularity
+    granularity,
+    id
   ) {
+    this.id = id;
     this.breakdowns = breakdowns;
     this.calculations = calculations;
     this.filters = filters;
@@ -148,7 +150,8 @@ export class Query {
       q.startTime,
       q.endTime,
       q.timeRange,
-      q.granularity
+      q.granularity,
+      q.id
     );
   }
 }
@@ -163,7 +166,8 @@ export function query({
   startTime,
   endTime,
   timeRange,
-  granularity
+  granularity,
+  id
 }) {
   return new Query(
     breakdowns,
@@ -175,6 +179,7 @@ export function query({
     startTime,
     endTime,
     timeRange,
-    granularity
+    granularity,
+    id
   );
 }

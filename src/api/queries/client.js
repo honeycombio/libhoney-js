@@ -1,20 +1,18 @@
 import ResourceClient from "../resource_client";
-import { QueryResult } from ".";
+import { Query } from ".";
 
-const ENDPOINT = "/1/query_results";
+const ENDPOINT = "/1/queries";
 
 export default class Client extends ResourceClient {
   constructor({ apiHost, apiKey, disabled, userAgentAddition }) {
     super(
       apiHost,
       ENDPOINT,
-      QueryResult,
+      Query,
       apiKey,
       disabled,
-      false /* not dataset scoped */,
+      true /* dataset scoped */,
       userAgentAddition
     );
   }
-
-  // XXX(toshok) the only method available is .get()
 }
