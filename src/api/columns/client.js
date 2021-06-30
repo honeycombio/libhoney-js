@@ -1,14 +1,14 @@
 import ResourceClient from "../resource_client";
-import { QueryResult } from ".";
+import { Column } from ".";
 
-const ENDPOINT = "/1/query_results";
+const ENDPOINT = "/1/columns";
 
 export default class Client extends ResourceClient {
   constructor({ apiHost, apiKey, disabled, userAgentAddition }) {
     super(
       apiHost,
       ENDPOINT,
-      QueryResult,
+      Column,
       apiKey,
       disabled,
       true /* dataset scoped */,
