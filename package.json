@@ -58,7 +58,7 @@
     "babel-jest": "^24.5.0",
     "babel-polyfill": "^6.26.0",
     "eslint": "^7.25.0",
-    "husky": "^6.0.0",
+    "husky": "^7.0.0",
     "jest": "^24.5.0",
     "jest-in-case": "^1.0.2",
     "lint-staged": "^11.0.0",
