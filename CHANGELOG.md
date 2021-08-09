@@ -1,5 +1,32 @@
 # libhoney-js changelog
 
+## [2.3.1] - 2021-08-09
+
+### Maintenance
+
+- Add node 16 to test matrix (#135)
+- Include all the test names when testing in CI (#125)
+- Switch from yarn to npm (#117)
+- Bump eslint from 6.5.1 to 7.25.0 (#122)
+- Bump lint-staged from 11.0.0 to 11.1.2 (#165)
+- Bump @babel/preset-env from 7.14.5 to 7.15.0 (#167)
+- Bump @babel/core from 7.14.6 to 7.15.0 (#166)
+- Bump eslint from 7.29.0 to 7.32.0 (#164)
+- Bump husky from 6.0.0 to 7.0.1 (#157)
+- Bump prettier from 2.3.1 to 2.3.2 (#150)
+- Bump @babel/core from 7.14.5 to 7.14.6 (#149)
+- Bump @babel/preset-env from 7.13.15 to 7.14.5 (#145)
+- Bump eslint from 7.28.0 to 7.29.0 (#148)
+- Bump @babel/core from 7.14.2 to 7.14.5 (#146)
+- Bump prettier from 1.19.1 to 2.3.1 (#144)
+- Bump ws from 5.2.2 to 5.2.3 (#147)
+- Bump eslint from 7.26.0 to 7.28.0 (#142)
+- Bump lint-staged from 7.3.0 to 11.0.0 (#132)
+- Bump browserslist from 4.16.4 to 4.16.6 (#136)
+- Bump eslint from 7.25.0 to 7.26.0 (#129)
+- Bump @babel/core from 7.13.15 to 7.14.2 (#130)
+- Bump superagent from 3.8.3 to 6.1.0 (#105)
+
 ## [2.3.0] - 2021-04-28
 
 ### Enhancements
