@@ -1,5 +1,12 @@
 # libhoney-js changelog
 
+## [2.3.2] - 2021-08-10
+
+### Fixes
+
+- Remove yarn engine constraint introduced in v2.3.1 that prevented downstream
+  projects from using yarn. (#170) | [@markandrus](https://github.com/markandrus)
+
 ## [2.3.1] - 2021-08-09
 
 ### Maintenance
