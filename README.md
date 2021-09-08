@@ -8,7 +8,7 @@ A Node.js module for sending events to [Honeycomb](https://www.honeycomb.io), a 
 
 **NOTE** For use in browser-side JavaScript applications, generate an API key that has permission only to send events.
 
-Requires any current LTS release of Node.js. Currently v8, and >= v10.
+Requires any current LTS release of Node.js. Currently v8, and >= v10. [Node 8 support is being dropped](https://github.com/honeycombio/libhoney-js/issues/140)
 
 -   [Usage and Examples](https://docs.honeycomb.io/sdk/javascript/)
 -   [API Reference](https://doc.esdoc.org/github.com/honeycombio/libhoney-js/)
