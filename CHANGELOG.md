@@ -1,5 +1,20 @@
 # libhoney-js changelog
 
+## [2.3.3] - 2021-09-16
+
+### Maintenance
+
+- Bump prettier from 2.3.2 to 2.4.0 (#182)
+- Bump @babel/preset-env from 7.15.0 to 7.15.6 (#181)
+- Bump @babel/core from 7.15.0 to 7.15.5 (#179)
+- Bump husky from 7.0.1 to 7.0.2 (#176)
+- Bump superagent-proxy from 2.1.0 to 3.0.0 (#178)
+- Bump path-parse from 1.0.6 to 1.0.7 (#174)
+- Add note about dropping Node 8 in future (#177)
+- Add issue and PR templates (#175)
+- Add OSS lifecycle badge (#173)
+- Add community health files (#172)
+
 ## [2.3.2] - 2021-08-10
 
 ### Fixes
