@@ -8,7 +8,7 @@
     "url": "https://github.com/honeycombio/libhoney-js.git"
   },
   "engines": {
-    "node": "8.* || >= 10.*"
+    "node": ">= 10.*"
   },
   "browser": "dist/libhoney.browser.js",
   "module": "dist/libhoney.es.js",
@@ -53,20 +53,20 @@
   "devDependencies": {
     "@babel/core": "^7.4.0",
     "@babel/preset-env": "^7.4.2",
+    "@rollup/plugin-commonjs": "^21.0.0",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^13.0.5",
+    "@rollup/plugin-replace": "^3.0.0",
     "babel-eslint": "^10.0.3",
-    "babel-jest": "^24.5.0",
+    "babel-jest": "^27.2.4",
     "babel-polyfill": "^6.26.0",
     "eslint": "^7.25.0",
     "husky": "^7.0.1",
-    "jest": "^24.5.0",
+    "jest": "^27.2.4",
     "jest-in-case": "^1.0.2",
     "lint-staged": "^11.0.0",
     "prettier": "^2.3.1",
-    "rollup": "^1.25.1",
-    "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-json": "^4.0.0",
-    "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-replace": "^2.2.0",
+    "rollup": "^2.58.0",
     "superagent-mocker": "^0.5.2"
   },
   "dependencies": {
