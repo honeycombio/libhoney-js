@@ -1,5 +1,18 @@
 # libhoney-js changelog
 
+## [3.0.0] - 2021-10-18
+
+### !!! Breaking Changes !!!
+
+- drop node 8 (#188) | [@vreynolds](https://github.com/vreynolds)
+
+### Maintenance
+
+- Change maintenance badge to maintained (#186) | [@JamieDanielson](https://github.com/JamieDanielson)
+- Adds Stalebot (#187) | [@JamieDanielson](https://github.com/JamieDanielson)
+- Bump prettier from 2.4.0 to 2.4.1 (#184)
+- Bump tmpl from 1.0.4 to 1.0.5 (#185)
+
 ## [2.3.3] - 2021-09-16
 
 ### Maintenance
