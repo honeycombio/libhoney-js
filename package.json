@@ -70,7 +70,7 @@
     "superagent-mocker": "^0.5.2"
   },
   "dependencies": {
-    "superagent": "^6.1.0",
+    "superagent": "^7.0.2",
     "superagent-proxy": "^3.0.0",
     "urljoin": "^0.1.5"
   },
