@@ -13,7 +13,7 @@ import {
   StdoutTransmission,
   Transmission,
   ValidatedEvent,
-  WriterTransmission
+  WriterTransmission,
 } from "./transmission";
 import Builder from "./builder";
 
@@ -62,7 +62,7 @@ const defaults = Object.freeze({
   disabled: false,
 
   // If this is non-empty, append it to the end of the User-Agent header.
-  userAgentAddition: ""
+  userAgentAddition: "",
 });
 
 /**
@@ -124,7 +124,7 @@ export default class Libhoney extends EventEmitter {
   _responseCallback(responses) {
     const [queue, limit] = [
       this._responseQueue,
-      this._options.maxResponseQueueSize
+      this._options.maxResponseQueueSize,
     ];
 
     this._responseQueue = concatWithMaxLimit(queue, responses, limit);
@@ -269,6 +269,17 @@ export default class Libhoney extends EventEmitter {
   }
 
   /**
+   * isClassic takes a writeKey and returns true if it is a "classic" writeKey,
+   * namely, that its length is exactly 32 characters.
+   * @returns {boolean} whether the key is classic
+   *
+   * @private
+   */
+  isClassic(key) {
+    return key.length === 32;
+  }
+
+  /**
    * validateEvent takes an event and validates its structure and contents.
    *
    * @returns {Object} the validated libhoney Event. May return undefined if
@@ -307,9 +318,18 @@ export default class Libhoney extends EventEmitter {
     }
 
     let dataset = event.dataset;
-    if (typeof dataset !== "string" || dataset === "") {
-      console.error(".dataset must be a non-empty string");
+    if (typeof dataset !== "string") {
+      console.error(".dataset must be a string");
       return null;
+    }
+
+    if (dataset === "") {
+      if (this.isClassic(writeKey)) {
+        console.error(".dataset must be a non-empty string");
+        return null;
+      } else {
+        dataset = "unknown_dataset";
+      }
     }
 
     let sampleRate = event.sampleRate;
@@ -326,7 +346,7 @@ export default class Libhoney extends EventEmitter {
       writeKey,
       dataset,
       sampleRate,
-      metadata
+      metadata,
     });
   }
 
@@ -441,7 +461,7 @@ export default class Libhoney extends EventEmitter {
   }
 }
 
-const getTransmissionClass = transmissionClassName => {
+const getTransmissionClass = (transmissionClassName) => {
   switch (transmissionClassName) {
     case "base":
       return Transmission;
