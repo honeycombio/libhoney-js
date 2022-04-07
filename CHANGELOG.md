@@ -1,5 +1,28 @@
 # libhoney-js changelog
 
+## [3.1.0] - 2022-04-07
+
+### Enhancements
+
+- Add support for environments (#244) | [@kentquirk](https://github.com/kentquirk)
+- ci: add node 17 to test matrix (#195) | [@vreynolds](https://github.com/vreynolds)
+- empower apply-labels action to apply labels (#205) | [@robbkidd](https://github.com/robbkidd)
+
+### Maintenance
+
+- gh: add re-triage workflow (#215) | [@vreynolds](https://github.com/vreynolds)
+- Update dependabot.yml (#212) | [@vreynolds](https://github.com/vreynolds)
+- Bump @babel/core to 7.16.12 (#230)
+- Bump @babel/eslint-parser to 7.16.5 (#223)
+- Bump @babel/preset-env to 7.16.8 (#224)
+- Bump @rollup/plugin-commonjs to 21.0.1 (#197)
+- Bump @rollup/plugin-node-resolve to 13.1.3 (#225)
+- Bump @rollup/plugin-replace to 3.0.1 (#216)
+- Bump eslint to 8.6.0 (#227)
+- Bump minimist to 2.5.1 (#220)
+- Bump superagent from 6.1.0 to 7.0.2 (#226)
+- Bump vm2 to 3.9.7 (#234)
+
 ## [3.0.0] - 2021-10-18
 
 ### !!! Breaking Changes !!!
