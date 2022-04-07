@@ -90,7 +90,7 @@ describe("libhoney", () => {
 
       expect(transmission.events).toHaveLength(0);
       expect(console.error.mock.calls[0][0]).toBe(
-        ".dataset must be a non-empty string"
+        "dataset must be a non-empty string"
       );
     });
 
