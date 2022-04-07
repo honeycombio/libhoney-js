@@ -19,8 +19,6 @@
 -   Bump @rollup/plugin-node-resolve to 13.1.3 (#225)
 -   Bump @rollup/plugin-replace to 3.0.1 (#216)
 -   Bump eslint to 8.6.0 (#227)
--   Bump husky to 7.0.4 (#199)
--   Bump lint-staged to 12.1.7 (#222)
 -   Bump minimist to 2.5.1 (#220)
 -   Bump superagent from 6.1.0 to 7.0.2 (#226)
 -   Bump vm2 to 3.9.7 (#234)
