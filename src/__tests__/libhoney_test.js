@@ -9,14 +9,14 @@ describe("libhoney", () => {
   describe("constructor options", () => {
     describe.each(["mock", MockTransmission])(
       "with %p transmission",
-      transmissionSpec => {
+      (transmissionSpec) => {
         it("should be communicated to transmission constructor", () => {
           const options = {
             a: 1,
             b: 2,
             c: 3,
             d: 4,
-            transmission: transmissionSpec
+            transmission: transmissionSpec,
           };
 
           const honey = new libhoney(options);
@@ -38,7 +38,7 @@ describe("libhoney", () => {
         // these two properties are required
         writeKey: "12345",
         dataset: "testing",
-        transmission: "mock"
+        transmission: "mock",
       });
       let transmission = honey.transmission;
       let postData = { a: 1, b: 2 };
@@ -61,7 +61,7 @@ describe("libhoney", () => {
         apiHost: "http://foo/bar",
         writeKey: "12345",
         dataset: "testing",
-        transmission: "mock"
+        transmission: "mock",
       });
       let transmission = honey.transmission;
       let postData = { a: 1, b: 2 };
@@ -73,11 +73,49 @@ describe("libhoney", () => {
       expect(transmission.events[0].dataset).toEqual("testing");
       expect(transmission.events[0].postData).toEqual(postData);
     });
+
+    it("should reject a send from an empty dataset with a classic key", () => {
+      // mock out console.error
+      console.error = jest.fn();
+
+      let honey = new libhoney({
+        apiHost: "http://foo/bar",
+        writeKey: "12345678901234567890123456789012",
+        dataset: "",
+        transmission: "mock",
+      });
+      let transmission = honey.transmission;
+      let postData = { a: 1, b: 2 };
+      honey.sendNow(postData);
+
+      expect(transmission.events).toHaveLength(0);
+      expect(console.error.mock.calls[0][0]).toBe(
+        "dataset must be a non-empty string"
+      );
+    });
+
+    it("should set an empty dataset to unknown_dataset with a V2 key", () => {
+      let honey = new libhoney({
+        apiHost: "http://foo/bar",
+        writeKey: "aKeySimilarToOurV2Keys",
+        dataset: "",
+        transmission: "mock",
+      });
+      let transmission = honey.transmission;
+      let postData = { a: 1, b: 2 };
+      honey.sendNow(postData);
+
+      expect(transmission.events).toHaveLength(1);
+      expect(transmission.events[0].apiHost).toEqual("http://foo/bar");
+      expect(transmission.events[0].writeKey).toEqual("aKeySimilarToOurV2Keys");
+      expect(transmission.events[0].dataset).toEqual("unknown_dataset");
+      expect(transmission.events[0].postData).toEqual(postData);
+    });
   });
 
   describe("response queue", () => {
-    it("should enqueue a maximum of maxResponseQueueSize, dropping new responses (not old)", done => {
-      mock.post("http://localhost:9999/1/events/testResponseQueue", _req => {
+    it("should enqueue a maximum of maxResponseQueueSize, dropping new responses (not old)", (done) => {
+      mock.post("http://localhost:9999/1/events/testResponseQueue", (_req) => {
         return {};
       });
 
@@ -87,12 +125,12 @@ describe("libhoney", () => {
         apiHost: "http://localhost:9999",
         writeKey: "12345",
         dataset: "testResponseQueue",
-        maxResponseQueueSize: queueSize
+        maxResponseQueueSize: queueSize,
       });
 
       // we send queueSize+1 events, so we should see two response events
       // with queueSize as the length
-      honey.on("response", queue => {
+      honey.on("response", (queue) => {
         if (queue.length !== queueSize) {
           return;
         }
@@ -122,7 +160,7 @@ describe("libhoney", () => {
         writeKey: "12345",
         dataset: "testing",
         transmission: "mock",
-        disabled: true
+        disabled: true,
       });
       let transmission = honey.transmission;
 
