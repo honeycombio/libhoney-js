@@ -31,24 +31,6 @@
   },
   "author": "",
   "license": "Apache-2.0",
-  "lint-staged": {
-    "*.{js,jsx}": [
-      "prettier --write",
-      "eslint"
-    ],
-    "*.json": [
-      "prettier --write"
-    ],
-    "*.{graphql,gql}": [
-      "prettier --write"
-    ],
-    "*.{md,markdown}": [
-      "prettier --write"
-    ],
-    "*.{css,scss}": [
-      "prettier --write"
-    ]
-  },
   "devDependencies": {
     "@babel/core": "^7.4.0",
     "@babel/eslint-parser": "^7.15.8",
