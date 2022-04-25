@@ -45,6 +45,7 @@
     "jest": "^27.2.4",
     "jest-in-case": "^1.0.2",
     "prettier": "^2.3.1",
+    "regenerator-runtime": "^0.13.9",
     "rollup": "^2.58.0",
     "superagent-mocker": "^0.5.2"
   },
@@ -57,6 +58,9 @@
     "https-proxy-agent": "^3.0.0"
   },
   "jest": {
+    "setupFilesAfterEnv": [
+      "./setupTests.js"
+    ],
     "testPathIgnorePatterns": [
       "dist/",
       "/node_modules/"
