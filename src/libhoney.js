@@ -457,6 +457,10 @@ export default class Libhoney extends EventEmitter {
       this._options
     );
 
+    if (!transmission) {
+      return Promise.resolve();
+    }
+    
     return transmission.flush();
   }
 }
