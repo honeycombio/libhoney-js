@@ -621,6 +621,10 @@ describe("base transmission", () => {
     // we can't use superagent-mocker here, since we want the request to timeout,
     // and there's no async flow in -mocker :(
 
+    // This number needs to be less than the global test timeout of 5000 so that the server closes in time
+    // before jest starts complaining.
+    const serverTimeout = 2500; // milliseconds
+
     const server = http.createServer((req, res) => {
       setTimeout(
         () => {
@@ -628,17 +632,14 @@ describe("base transmission", () => {
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end("[{ status: 666 }]");
         },
-        // This number needs to be more than the `timeout: 2000` below,
-        // but less than the global test timeout of 5000 so that the server closes in time
-        // before jest starts complaining.
-        2500
+        serverTimeout
       );
     });
     server.listen(6666, "localhost", () => {
       let errResult;
       let transmission = new Transmission({
         batchTimeTrigger: 10,
-        timeout: 2000,
+        timeout: serverTimeout - 500,
         responseCallback: async function (respQueue) {
           if (respQueue.length !== 1) {
             errResult = new Error(`expected response queue length = 1, got ${respQueue.length}`);
