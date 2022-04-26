@@ -154,7 +154,7 @@ describe("libhoney", () => {
   });
 
   describe("disabled = true", () => {
-    it("should not hit transmission", () => {
+    it("should not hit transmission", async () => {
       let honey = new libhoney({
         // these two properties are required
         writeKey: "12345",
@@ -165,6 +165,7 @@ describe("libhoney", () => {
       let transmission = honey.transmission;
 
       expect(transmission).toBe(null);
+      await expect(honey.flush()).resolves.toBeUndefined();
     });
   });
 });
