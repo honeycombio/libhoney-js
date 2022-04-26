@@ -1,4 +1,6 @@
 /* eslint-env node, jest */
+import "babel-polyfill";
+
 import { Transmission, ValidatedEvent } from "../transmission";
 
 import http from "http";
@@ -633,35 +635,24 @@ describe("base transmission", () => {
       );
     });
     server.listen(6666, "localhost", () => {
+      let errResult;
       let transmission = new Transmission({
         batchTimeTrigger: 10,
         timeout: 2000,
-        responseCallback: function (respQueue) {
-          server.close();
-
+        responseCallback: async function (respQueue) {
           if (respQueue.length !== 1) {
-            done(
-              new Error(
-                `expected response queue length = 1, got ${respQueue.length}`
-              )
-            );
-            return;
+            errResult = new Error(`expected response queue length = 1, got ${respQueue.length}`);
           }
 
           const resp = respQueue[0];
 
-          if (resp.error && resp.error.timeout) {
-            done();
-            return;
+          if (!(resp.error && resp.error.timeout)) {
+            errResult = new Error(`expected a timeout error, instead got ${JSON.stringify(resp.error)}`);
           }
 
-          done(
-            new Error(
-              `expected a timeout error, instead got ${JSON.stringify(
-                resp.error
-              )}`
-            )
-          );
+          server.close(() => {
+            done(errResult);
+          });
         }
       });
 
