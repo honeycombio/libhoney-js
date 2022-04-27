@@ -17,11 +17,15 @@ describe("base transmission", () => {
     mock.unmock(superagent);
   });
 
+  // This checks that the code connects to a proxy
   it("will hit a proxy", done => {
     let server = net.createServer(socket => {
-      socket.end();
-      server.close();
-      done();
+      // if we get here, we got data, so the test passes -- otherwise,
+      // the test will never end and will timeout, which is a failure.
+      socket.destroy();
+      server.close(() => {
+        done();
+      });
     });
 
     server.listen(9998, "127.0.0.1");
@@ -90,9 +94,9 @@ describe("base transmission", () => {
         return responseCount === batchSize
           ? done()
           : done(
-              "The events dispatched over transmission does not align with batch size when the same number of " +
-                `events were enqueued as the batchSizeTrigger. Expected ${batchSize}, got ${responseCount}.`
-            );
+            "The events dispatched over transmission does not align with batch size when the same number of " +
+            `events were enqueued as the batchSizeTrigger. Expected ${batchSize}, got ${responseCount}.`
+          );
       }
     });
 
@@ -121,7 +125,7 @@ describe("base transmission", () => {
 
     let transmission = new Transmission({
       batchTimeTrigger: 0,
-      responseCallback: function(_resp) {
+      responseCallback: function (_resp) {
         expect(endpointHit).toBe(true);
         done();
       }
@@ -142,7 +146,7 @@ describe("base transmission", () => {
   it("should eventually send a single event (after the timeout)", done => {
     let transmission = new Transmission({
       batchTimeTrigger: 10,
-      responseCallback: function(_resp) {
+      responseCallback: function (_resp) {
         done();
       }
     });
@@ -162,12 +166,12 @@ describe("base transmission", () => {
   it("should respect sample rate and accept the event", done => {
     let transmission = new Transmission({
       batchTimeTrigger: 10,
-      responseCallback: function(_resp) {
+      responseCallback: function (_resp) {
         done();
       }
     });
 
-    transmission._randomFn = function() {
+    transmission._randomFn = function () {
       return 0.09;
     };
     transmission.sendEvent(
@@ -185,10 +189,10 @@ describe("base transmission", () => {
   it("should respect sample rate and drop the event", done => {
     let transmission = new Transmission({ batchTimeTrigger: 10 });
 
-    transmission._randomFn = function() {
+    transmission._randomFn = function () {
       return 0.11;
     };
-    transmission._droppedCallback = function() {
+    transmission._droppedCallback = function () {
       done();
     };
 
@@ -228,7 +232,7 @@ describe("base transmission", () => {
       }
     });
 
-    transmission._droppedCallback = function() {
+    transmission._droppedCallback = function () {
       eventDropped = true;
     };
 
@@ -432,10 +436,10 @@ describe("base transmission", () => {
         return responseCount === responseExpected
           ? done()
           : done(
-              Error(
-                "Incorrect queue length. Queue should equal length of all valid and invalid events enqueued."
-              )
-            );
+            Error(
+              "Incorrect queue length. Queue should equal length of all valid and invalid events enqueued."
+            )
+          );
       }
     });
 
@@ -617,6 +621,10 @@ describe("base transmission", () => {
     // we can't use superagent-mocker here, since we want the request to timeout,
     // and there's no async flow in -mocker :(
 
+    // This number needs to be less than the global test timeout of 5000 so that the server closes in time
+    // before jest starts complaining.
+    const serverTimeout = 2500; // milliseconds
+
     const server = http.createServer((req, res) => {
       setTimeout(
         () => {
@@ -624,41 +632,28 @@ describe("base transmission", () => {
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end("[{ status: 666 }]");
         },
-        // because this number is longer than our 5000 global test timeout, as well as (more importantly)
-        // the `timeout: 2000` below.
-        7500
+        serverTimeout
       );
     });
     server.listen(6666, "localhost", () => {
+      let errResult;
       let transmission = new Transmission({
         batchTimeTrigger: 10,
-        timeout: 2000,
-        responseCallback: function(respQueue) {
-          server.close();
-
+        timeout: serverTimeout - 500,
+        responseCallback: async function (respQueue) {
           if (respQueue.length !== 1) {
-            done(
-              new Error(
-                `expected response queue length = 1, got ${respQueue.length}`
-              )
-            );
-            return;
+            errResult = new Error(`expected response queue length = 1, got ${respQueue.length}`);
           }
 
           const resp = respQueue[0];
 
-          if (resp.error && resp.error.timeout) {
-            done();
-            return;
+          if (!(resp.error && resp.error.timeout)) {
+            errResult = new Error(`expected a timeout error, instead got ${JSON.stringify(resp.error)}`);
           }
 
-          done(
-            new Error(
-              `expected a timeout error, instead got ${JSON.stringify(
-                resp.error
-              )}`
-            )
-          );
+          server.close(() => {
+            done(errResult);
+          });
         }
       });
 
