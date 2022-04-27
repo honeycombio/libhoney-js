@@ -18,7 +18,6 @@
 - bf1a996 Bump eslint from 8.6.0 to 8.13.0 (#249)
 - e6aa53f Bump @rollup/plugin-replace from 3.0.1 to 4.0.0 (#247)
 
-
 ## [3.1.0] - 2022-04-07
 
 ### Enhancements
