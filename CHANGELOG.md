@@ -1,5 +1,23 @@
 # libhoney-js changelog
 
+## [3.1.1] - 2022-04-27
+
+### Bug fixes
+
+- Update tests to properly terminate (#255) | [@kentquirk](https://github.com/kentquirk)
+- Handle `null` transmission in `flush` (#253) | [@sjchmiela](https://github.com/sjchmiela)
+
+### Maintenance
+- maint: remove unused script (#252) | [@vreynolds](https://github.com/vreynolds)
+- Bump @rollup/plugin-commonjs from 21.0.1 to 21.0.3 (#248)
+- Bump @babel/preset-env from 7.16.8 to 7.16.11 (#229)
+- Bump superagent from 7.0.2 to 7.1.2 (#240)
+- Bump @babel/core from 7.16.12 to 7.17.9 (#245)
+- Bump @babel/eslint-parser from 7.16.5 to 7.17.0 (#251)
+- Bump prettier from 2.5.1 to 2.6.2 (#250)
+- Bump eslint from 8.6.0 to 8.13.0 (#249)
+- Bump @rollup/plugin-replace from 3.0.1 to 4.0.0 (#247)
+
 ## [3.1.0] - 2022-04-07
 
 ### Enhancements
