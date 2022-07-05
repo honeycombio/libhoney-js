@@ -13,6 +13,7 @@
   "browser": "dist/libhoney.browser.js",
   "module": "dist/libhoney.es.js",
   "main": "dist/libhoney.cjs.js",
+  "types": "src/types.d.ts",
   "files": [
     "dist",
     "README.md",
