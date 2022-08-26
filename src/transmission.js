@@ -378,7 +378,10 @@ export class Transmission {
                 let end = Date.now();
 
                 if (err) {
-                  this._responseCallback(
+                  this._responseCallback( 
+                    // this may be where we would retry once? track is_rety outside of this and toggle it
+                    // if sserver response status code from the POST is 500, 503, 504
+                    // try .send again 
                     batch.events.map(ev => ({
                       // eslint-disable-next-line camelcase
                       status_code: ev.encodeError ? undefined : err.status,

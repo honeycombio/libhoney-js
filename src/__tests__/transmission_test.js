@@ -670,4 +670,44 @@ describe("base transmission", () => {
       );
     });
   });
+
+  it("should retry to post once if the recipient returns a server timeout response", done => {
+      let timesTriedToPost = 0;
+
+      mock.post("http://localhost:9999/1/batch/test-timeout-resp", req => {
+        if (timesTriedToPost === 0){
+          timesTriedToPost++
+          let resp = {status_code: 503}
+          // console.log(timesTriedToPost)
+          return { resp };
+        } else {
+          timesTriedToPost++
+          let reqEvents = JSON.parse(req.body);
+          let resp = reqEvents.map(() => ({ status: 202 }));
+          // console.log(timesTriedToPost)
+          return { text: JSON.stringify(resp) };
+        }});
+
+      let transmission = new Transmission({
+          batchTimeTrigger: 0,
+          responseCallback: function (_resp) {
+
+          }
+        });
+
+      transmission.sendEvent(
+          new ValidatedEvent({
+            apiHost: "http://localhost:9999",
+            writeKey: "123456789",
+            dataset: "test-timeout-resp",
+            sampleRate: 1,
+            timestamp: new Date(),
+            postData: { a: 1, b: 2 },
+            metadata: "my metadata"
+          })
+      );
+    
+    expect(timesTriedToPost).toBe(1); // 2 with retry
+    done()
+  });
 });
