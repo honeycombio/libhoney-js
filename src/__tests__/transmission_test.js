@@ -678,15 +678,14 @@ describe("base transmission", () => {
         if (timesTriedToPost === 0){
           timesTriedToPost++
           let resp = {status_code: 503}
-          // console.log(timesTriedToPost)
           return { resp };
         } else {
           timesTriedToPost++
           let reqEvents = JSON.parse(req.body);
           let resp = reqEvents.map(() => ({ status: 202 }));
-          // console.log(timesTriedToPost)
           return { text: JSON.stringify(resp) };
-        }});
+        }
+      });
 
       let transmission = new Transmission({
           batchTimeTrigger: 0,
