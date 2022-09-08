@@ -8,7 +8,7 @@
     "url": "https://github.com/honeycombio/libhoney-js.git"
   },
   "engines": {
-    "node": ">= 10.*"
+    "node": ">= 14.*"
   },
   "browser": "dist/libhoney.browser.js",
   "module": "dist/libhoney.es.js",
