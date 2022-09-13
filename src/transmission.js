@@ -10,7 +10,8 @@
 import superagent from "superagent";
 import urljoin from "urljoin";
 
-const USER_AGENT = "libhoney-js/<@LIBHONEY_JS_VERSION@>";
+const LIBHONEY_VERSION = "libhoney-js/<@LIBHONEY_JS_VERSION@>";
+const NODE_VERSION = `node/${process.version}`;
 
 const _global =
   typeof window !== "undefined"
@@ -356,10 +357,10 @@ export class Transmission {
               return;
             }
 
-            let userAgent = USER_AGENT;
+            let userAgent = `${LIBHONEY_VERSION} ${NODE_VERSION}`;
             let trimmedAddition = this._userAgentAddition.trim();
             if (trimmedAddition) {
-              userAgent = `${USER_AGENT} ${trimmedAddition}`;
+              userAgent = `${LIBHONEY_VERSION} ${trimmedAddition} ${NODE_VERSION}`;
             }
 
             let start = Date.now();
