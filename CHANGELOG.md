@@ -1,7 +1,9 @@
 # libhoney-js changelog
+
 ## [3.1.2] - 2022-09-13
 
 ### Maintenance
+
 - Add node version to the user-agent header (#299) | [@emilyashley](https://github.com/emilyashley
 - Bump eslint from 8.17.0 to 8.23.1 (#300)
 - Bump @babel/core from 7.18.2 to 7.19.0 (#301)
