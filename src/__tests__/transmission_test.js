@@ -530,6 +530,7 @@ describe("base transmission", () => {
         dataset: "test-transmission1",
         addition: "",
         probe: userAgent =>
+         // user-agent order: libhoney, node, no addition present
           userAgent.indexOf("libhoney-js/<@LIBHONEY_JS_VERSION@>") === 0 &&
           userAgent.indexOf(`node/${process.version}`) > 1 &&
           userAgent.indexOf("addition") === -1
@@ -538,9 +539,9 @@ describe("base transmission", () => {
         dataset: "test-transmission2",
         addition: "user-agent addition",
         probe: userAgent =>
+        // user-agent order: libhoney, addition, node
           userAgent.indexOf("libhoney-js/<@LIBHONEY_JS_VERSION@>") === 0 &&
-          userAgent.indexOf(`node/${process.version}`) > 1 &&
-          userAgent.indexOf("addition") !== -1
+          userAgent.indexOf("addition") < userAgent.indexOf(`node/${process.version}`) 
       }
     ];
 
