@@ -39,7 +39,7 @@
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^14.1.0",
     "@rollup/plugin-replace": "^4.0.0",
-    "babel-jest": "^28.0.3",
+    "babel-jest": "^29.0.3",
     "babel-polyfill": "^6.26.0",
     "eslint": "^8.0.1",
     "jest": "^29.0.3",
