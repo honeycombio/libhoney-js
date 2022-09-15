@@ -5,7 +5,7 @@ const app = express();
 
 app.use(
   honey({
-    writeKey: process.env["HONEYCOMB_API_KEY"],
+    writeKey: process.env["HONEY_WRITE_KEY"],
     dataset: "express-example-dynamic-fields",
     sampleRate: 5 // log 1 out of every 5 events
   })

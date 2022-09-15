@@ -5,7 +5,7 @@ let app = express();
 
 app.use(
   honey({
-    writeKey: process.env["HONEYCOMB_API_KEY"],
+    writeKey: process.env["HONEY_WRITE_KEY"],
     dataset: "express-example"
   })
 );
