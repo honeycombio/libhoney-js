@@ -5,7 +5,7 @@ const responseTime = require("response-time");
 let app = express();
 
 let honey = new libhoney({
-  writeKey: process.env["HONEY_WRITE_KEY"],
+  writeKey: process.env["HONEYCOMB_API_KEY"],
   dataset: "express-example-response-time"
 });
 
