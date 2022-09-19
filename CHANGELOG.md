@@ -1,5 +1,16 @@
 # libhoney-js changelog
 
+
+## [4.0.0] - 2022-09-19
+
+### !!! Breaking Changes !!!
+
+- Drop Node v12, no longer security supported (#308) | [@emilyashley](https://github.com/emilyashley)
+
+### Maintenance
+
+- Set circleCI Node default to latest v16 (#310) | [@emilyashley](https://github.com/emilyashley)
+  
 ## [3.1.2] - 2022-09-13
 
 ### Maintenance
