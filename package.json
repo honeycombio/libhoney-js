@@ -52,7 +52,7 @@
   "dependencies": {
     "superagent": "^8.0.0",
     "superagent-proxy": "^3.0.0",
-    "urljoin": "^0.1.5"
+    "url-join": "^5.0.0"
   },
   "resolutions": {
     "https-proxy-agent": "^3.0.0"
@@ -61,6 +61,7 @@
     "setupFilesAfterEnv": [
       "./setupTests.js"
     ],
+    "transformIgnorePatterns": ["/node_modules/(?!url-join)"],
     "testPathIgnorePatterns": [
       "dist/",
       "/node_modules/"

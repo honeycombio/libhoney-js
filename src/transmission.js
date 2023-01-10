@@ -8,7 +8,7 @@
  * @module
  */
 import superagent from "superagent";
-import urljoin from "urljoin";
+import urlJoin from "url-join";
 
 const LIBHONEY_VERSION = "libhoney-js/<@LIBHONEY_JS_VERSION@>";
 const NODE_VERSION = `node/${process.version}`;
@@ -326,7 +326,7 @@ export class Transmission {
 
     let batches = Object.keys(batchAgg.batches).map(k => batchAgg.batches[k]);
     eachPromise(batches, batch => {
-      let url = urljoin(batch.apiHost, "/1/batch", batch.dataset);
+      let url = urlJoin(batch.apiHost, "/1/batch", batch.dataset);
       let postReq = superagent.post(url);
 
       let reqPromise;
