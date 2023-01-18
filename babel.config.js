@@ -1,5 +1,2 @@
-module.exports = {
-  "presets": [
-    "@babel/preset-env",
-  ]
-}
+/* eslint-env node */
+module.exports = { presets: ["@babel/preset-env"] };
