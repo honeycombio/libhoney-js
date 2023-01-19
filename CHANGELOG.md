@@ -1,5 +1,39 @@
 # libhoney-js changelog
 
+## [4.0.1] - 2023-01-19
+
+### Fixes
+
+- Use url-join instead of urljoin (#342) [@adamsmasher](https://github.com/adamsmasher)
+
+### Maintenance
+
+- Add new project workflow (#321) | [@vreynolds](https://github.com/vreynolds)
+- Delete workflows for old board (#323) | [@vreynolds](https://github.com/vreynolds)
+- Add release file (#322) | [@vreynolds](https://github.com/vreynolds)
+- Update dependabot title with semantic commit format (#336) | [@pkanal](https://github.com/pkanal)
+- Update validate PR title workflow (#330) | [@pkanal](https://github.com/pkanal)
+- Validate PR title (#329) | [@pkanal](https://github.com/pkanal)
+
+### Dependencies
+
+- Bump json5 from 2.2.1 to 2.2.3 (#341)
+- Bump qs and formidable (#335)
+- Bump babel-jest from 29.1.2 to 29.3.1 (#333)
+- Bump @rollup/plugin-json from 4.1.0 to 6.0.0 (#337)
+- Bump @rollup/plugin-replace from 4.0.0 to 5.0.2 (#338)
+- Bump @rollup/plugin-commonjs from 22.0.2 to 24.0.0 (#339)
+- Bump @babel/core from 7.19.3 to 7.20.12 (#343)
+- Bump @rollup/plugin-node-resolve from 14.1.0 to 15.0.1 (#325)
+- Bump eslint from 8.23.1 to 8.24.0 (#320)
+- Bump @babel/core from 7.19.0 to 7.19.3 (#319)
+- Bump superagent from 8.0.0 to 8.0.2 (#318)
+- Bump @babel/eslint-parser from 7.18.9 to 7.19.1 (#317)
+- Bump @babel/preset-env from 7.19.0 to 7.19.3 (#316)
+- Bump jest from 29.0.3 to 29.1.2 (#315)
+- Bump babel-jest from 29.0.3 to 29.1.2 (#313)
+- Bump vm2 from 3.9.7 to 3.9.11 (#312)
+
 
 ## [4.0.0] - 2022-09-19
 
@@ -10,7 +44,7 @@
 ### Maintenance
 
 - Set circleCI Node default to latest v16 (#310) | [@emilyashley](https://github.com/emilyashley)
-  
+
 ## [3.1.2] - 2022-09-13
 
 ### Maintenance
