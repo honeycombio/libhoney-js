@@ -74,6 +74,20 @@ jobs:
       - run: npm run test -- --verbose
       - run: npm run build
 
+  smoke_test:
+    machine:
+      image: ubuntu-2004:202107-02
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - run:
+          name: Spin up example app
+          command: make smoke
+      - run:
+          name: Spin down example app
+          command: make unsmoke
+
   build_artifacts:
     executor:
       name: node
@@ -133,6 +147,10 @@ workflows:
             - lint
           <<: *matrix_nodeversions
       - build_artifacts:
+          <<: *filters_always
+          requires:
+            - test
+      - smoke_test:
           <<: *filters_always
           requires:
             - test

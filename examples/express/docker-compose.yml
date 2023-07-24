@@ -1,0 +1,18 @@
+version: '3.0'
+
+x-env-base: &env_base
+  HONEYCOMB_API_ENDPOINT: test_endpoint
+  HONEYCOMB_API_KEY: test_key
+  HONEYCOMB_DATASET: test_dataset
+
+x-app-base: &app_base
+  build:
+    context: ../../
+    dockerfile: ./examples/express/ExpressDockerfile
+  image: hnyexample/express-example
+
+services:
+  express-example:
+    <<: *app_base
+    environment:
+      <<: *env_base
