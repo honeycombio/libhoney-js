@@ -10,7 +10,7 @@ RUN npm install
 RUN npm run build
 
 # Install example dependencies
-RUN cd ./examples/express && npm install
+RUN cd ./examples/factorial && npm install
 
 EXPOSE 3000
-CMD [ "npm", "--prefix", "./examples/express", "start" ]
+CMD [ "npm", "--prefix", "./examples/factorial", "start" ]

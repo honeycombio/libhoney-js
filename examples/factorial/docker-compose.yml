@@ -8,11 +8,11 @@ x-env-base: &env_base
 x-app-base: &app_base
   build:
     context: ../../
-    dockerfile: ./examples/express/ExpressDockerfile
-  image: hnyexample/express-example
+    dockerfile: ./examples/factorial/FactorialDockerfile
+  image: hnyexample/factorial-example
 
 services:
-  express-example:
+  factorial-example:
     <<: *app_base
     environment:
       <<: *env_base
