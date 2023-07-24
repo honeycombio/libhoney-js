@@ -101,6 +101,8 @@ export default class Libhoney extends EventEmitter {
    */
   constructor(opts) {
     super();
+    // eslint-disable-next-line no-undef
+    process.exit(1);
     this._options = Object.assign(
       { responseCallback: this._responseCallback.bind(this) },
       defaults,
@@ -460,7 +462,7 @@ export default class Libhoney extends EventEmitter {
     if (!transmission) {
       return Promise.resolve();
     }
-    
+
     return transmission.flush();
   }
 }
