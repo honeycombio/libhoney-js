@@ -1,0 +1,14 @@
+{
+  "name": "factorial-libhoney-example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "factorial.js",
+  "scripts": {
+    "start": "node factorial.js"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "libhoney": "file:../.."
+  }
+}

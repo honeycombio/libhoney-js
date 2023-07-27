@@ -1,0 +1,16 @@
+FROM node:16
+
+# Create app directory
+WORKDIR /app
+
+COPY . .
+
+# Install libhoney
+RUN npm install
+RUN npm run build
+
+# Install example dependencies
+RUN cd ./examples/factorial && npm install
+
+EXPOSE 3000
+CMD [ "npm", "--prefix", "./examples/factorial", "start" ]
