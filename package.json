@@ -50,8 +50,8 @@
     "superagent-mocker": "^0.5.2"
   },
   "dependencies": {
+    "https-proxy-agent": "^7.0.1",
     "superagent": "^8.0.0",
-    "superagent-proxy": "^3.0.0",
     "url-join": "^5.0.0"
   },
   "resolutions": {

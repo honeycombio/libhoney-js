@@ -239,10 +239,24 @@ export class Transmission {
 
     this._userAgentAddition = options.userAgentAddition || "";
     this._proxy = options.proxy;
+    this._proxyAgent = this._determineProxyAgent(this._proxy);
 
     // Included for testing; to stub out randomness and verify that an event
     // was dropped.
     this._randomFn = Math.random;
+  }
+
+  _determineProxyAgent(proxyUrl) {
+    if (!proxyUrl || process.env.LIBHONEY_TARGET === "browser") return undefined;
+
+    try {
+      const { HttpsProxyAgent } = require("https-proxy-agent");
+      return new HttpsProxyAgent(proxyUrl);
+    } catch(e) {
+      console.log(`Unable to configure for transmission through proxy provided: ${proxyUrl}`);
+      console.log(e);
+      return undefined;
+    }
   }
 
   _droppedCallback(ev, reason) {
@@ -333,13 +347,7 @@ export class Transmission {
       if (process.env.LIBHONEY_TARGET === "browser") {
         reqPromise = Promise.resolve({ req: postReq });
       } else {
-        reqPromise = Promise.resolve(
-          this._proxy
-            ? import("superagent-proxy").then(({ default: proxy }) => ({
-                req: proxy(postReq, this._proxy)
-              }))
-            : { req: postReq }
-        );
+        reqPromise = Promise.resolve({ req: postReq.agent(this._proxyAgent) });
       }
       let { encoded, numEncoded } = batchAgg.encodeBatchEvents(batch.events);
       return reqPromise.then(
