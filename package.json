@@ -50,13 +50,11 @@
     "superagent-mocker": "^0.5.2"
   },
   "dependencies": {
+    "proxy-agent": "^6.3.0",
     "superagent": "^8.0.0",
-    "superagent-proxy": "^3.0.0",
     "url-join": "^5.0.0"
   },
-  "resolutions": {
-    "https-proxy-agent": "^3.0.0"
-  },
+
   "jest": {
     "setupFilesAfterEnv": [
       "./setupTests.js"
