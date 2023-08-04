@@ -246,14 +246,28 @@ export class Transmission {
     this._randomFn = Math.random;
   }
 
-  _determineProxyAgent(proxyUrl) {
-    if (!proxyUrl || process.env.LIBHONEY_TARGET === "browser") return undefined;
+  _determineProxyAgent(proxy) {
+    if (!proxy || process.env.LIBHONEY_TARGET === "browser") return undefined;
 
     try {
-      const { HttpsProxyAgent } = require("https-proxy-agent");
-      return new HttpsProxyAgent(proxyUrl);
+      let proxyUrl = new URL(proxy);
+
+      if (["http:", "https:"].includes(proxyUrl.protocol)) {
+        // eslint-disable-next-line no-undef
+        const { HttpsProxyAgent } = require("https-proxy-agent");
+        return new HttpsProxyAgent(proxy);
+      }
+
+      if (["socks:", "socks4:", "socks5:"].includes(proxyUrl.protocol)) {
+        // eslint-disable-next-line no-undef
+        const { SocksProxyAgent } = require("socks-proxy-agent");
+        return new SocksProxyAgent(proxy);
+      }
+
+      console.log(`Unsupported proxy scheme ${proxyUrl.protocol} in proxy provided: ${proxy}`);
+      return undefined;
     } catch(e) {
-      console.log(`Unable to configure for transmission through proxy provided: ${proxyUrl}`);
+      console.log(`Unable to configure for transmission through proxy provided: ${proxy}`);
       console.log(e);
       return undefined;
     }

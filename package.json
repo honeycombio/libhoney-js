@@ -51,6 +51,7 @@
   },
   "dependencies": {
     "https-proxy-agent": "^7.0.1",
+    "socks-proxy-agent": "^8.0.1",
     "superagent": "^8.0.0",
     "url-join": "^5.0.0"
   },
