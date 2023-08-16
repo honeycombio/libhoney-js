@@ -7,7 +7,7 @@ const pkg = require("./package.json");
 
 module.exports = {
   input: "src/libhoney.js",
-  external: ["superagent", "events", "path", "url", "superagent-proxy"],
+  external: ["superagent", "events", "path", "url"],
 
   plugins: [
     nodeResolve(),

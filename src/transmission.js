@@ -239,10 +239,37 @@ export class Transmission {
 
     this._userAgentAddition = options.userAgentAddition || "";
     this._proxy = options.proxy;
+    this._proxyAgent = this._determineProxyAgent(this._proxy);
 
     // Included for testing; to stub out randomness and verify that an event
     // was dropped.
     this._randomFn = Math.random;
+  }
+
+  // current proxy config API is only through parameters in code, despite the proxy-agent
+  // module supporting configuration through the conventional environment variables
+  // TODO: add config via env vars; which should win over code config and which would need
+  //       to be evaluated per batch API endpoint (complicated)
+  _determineProxyAgent(proxy) {
+    // proxy config in code is not supported when running in browsers
+    if (process.env.LIBHONEY_TARGET === "browser") return undefined;
+    // no proxy to configure without a proxy URL provided
+    if (!proxy) return undefined;
+
+    let agentWithProxy = undefined;
+
+    try {
+      // only import the proxy-agent module after confirming it is needed (e.g. not in a browser)
+      // eslint-disable-next-line no-undef
+      const { ProxyAgent } = require("proxy-agent");
+      // use the configured proxy URL, regardless of the protocol of the batch API endpoint URL
+      agentWithProxy = new ProxyAgent({ getProxyForUrl: () => proxy });
+    } catch(e) {
+      console.log(`Unable to configure for transmission through proxy provided: ${proxy}`);
+      console.log(e);
+    }
+
+    return agentWithProxy;
   }
 
   _droppedCallback(ev, reason) {
@@ -333,13 +360,7 @@ export class Transmission {
       if (process.env.LIBHONEY_TARGET === "browser") {
         reqPromise = Promise.resolve({ req: postReq });
       } else {
-        reqPromise = Promise.resolve(
-          this._proxy
-            ? import("superagent-proxy").then(({ default: proxy }) => ({
-                req: proxy(postReq, this._proxy)
-              }))
-            : { req: postReq }
-        );
+        reqPromise = Promise.resolve({ req: postReq.agent(this._proxyAgent) });
       }
       let { encoded, numEncoded } = batchAgg.encodeBatchEvents(batch.events);
       return reqPromise.then(
