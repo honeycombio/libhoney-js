@@ -1,6 +1,6 @@
 {
   "name": "libhoney",
-  "version": "4.0.1",
+  "version": "4.1.0",
   "description": " Honeycomb.io Javascript library",
   "bugs": "https://github.com/honeycombio/libhoney-js/issues",
   "repository": {
@@ -54,12 +54,13 @@
     "superagent": "^8.0.0",
     "url-join": "^5.0.0"
   },
-
   "jest": {
     "setupFilesAfterEnv": [
       "./setupTests.js"
     ],
-    "transformIgnorePatterns": ["/node_modules/(?!url-join)"],
+    "transformIgnorePatterns": [
+      "/node_modules/(?!url-join)"
+    ],
     "testPathIgnorePatterns": [
       "dist/",
       "/node_modules/"
