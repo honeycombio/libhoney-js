@@ -56,7 +56,7 @@ describe("base transmission", () => {
       expect(req.method).toBe("POST");
       expect(req.headers["x-honeycomb-team"]).toBe("123456789");
       proxyServer.close(() => {
-        proxyServer.removeAllListeners()
+        proxyServer.removeAllListeners();
         done();
       });
     });
@@ -575,7 +575,7 @@ describe("base transmission", () => {
         probe: userAgent =>
         // user-agent order: libhoney, addition, node
           userAgent.indexOf("libhoney-js/<@LIBHONEY_JS_VERSION@>") === 0 &&
-          userAgent.indexOf("addition") < userAgent.indexOf(`node/${process.version}`) 
+          userAgent.indexOf("addition") < userAgent.indexOf(`node/${process.version}`)
       }
     ];
 
