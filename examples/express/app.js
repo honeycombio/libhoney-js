@@ -6,6 +6,7 @@ let app = express();
 app.use(
   honey({
     writeKey: process.env["HONEYCOMB_API_KEY"],
+    // proxy: "http://localhost:3128",
     dataset: "express-example"
   })
 );
