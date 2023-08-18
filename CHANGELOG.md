@@ -1,5 +1,42 @@
 # libhoney-js changelog
 
+## [4.1.0] - 2023-08-17
+
+### Fixes
+
+- fix: replace superagent-proxy with direct use of proxy-agent (#389) | [@robbkidd](https://github.com/robbkidd)
+  - Note: This resolves a security vulnerability in transitive dependency vm2 (CVE-2023-37466)
+
+### Maintenance
+
+- maint: extra test to check for http info from proxy (#390) | [@JamieDanielson](https://github.com/JamieDanielson)
+- docs: add development.md (#374) | [@vreynolds](https://github.com/vreynolds)
+- maint: add smoke test (#383) | [@vreynolds](https://github.com/vreynolds)
+- maint(deps-dev): bump eslint from 8.24.0 to 8.46.0 (#387)
+- maint(deps-dev): bump @rollup/plugin-commonjs from 25.0.2 to 25.0.3 (#385)
+- maint(deps-dev): bump @babel/preset-env from 7.22.5 to 7.22.9 (#386)
+- maint(deps-dev): bump babel-jest from 29.5.0 to 29.6.2 (#384)
+- maint(deps-dev): bump prettier from 2.8.7 to 3.0.0 (#388)
+- maint(deps-dev): bump @babel/core from 7.20.12 to 7.22.9 (#382)
+- maint(deps-dev): bump @rollup/plugin-node-resolve from 15.0.1 to 15.1.0 (#376)
+- maint(deps-dev): bump @rollup/plugin-commonjs from 24.0.1 to 25.0.2 (#377)
+- maint(deps-dev): bump @babel/preset-env from 7.21.4 to 7.22.5 (#378)
+- maint(deps): bump word-wrap from 1.2.3 to 1.2.4 (#381)
+- maint(deps): bump superagent from 8.0.2 to 8.0.9 (#365)
+- maint(deps): bump semver from 6.3.0 to 6.3.1 (#379)
+- maint(deps-dev): bump @babel/eslint-parser from 7.19.1 to 7.21.8 (#370)
+- maint(deps): bump vm2 from 3.9.17 to 3.9.18 (#369)
+- maint(deps-dev): bump jest from 29.1.2 to 29.5.0 (#366)
+- maint(deps-dev): bump rollup from 2.79.0 to 3.20.2 (#358)
+- maint(deps-dev): bump @babel/preset-env from 7.19.3 to 7.21.4 (#357)
+- maint(deps): bump vm2 from 3.9.16 to 3.9.17 (#361)
+- maint(deps-dev): bump prettier from 2.7.1 to 2.8.7 (#355)
+- maint(deps-dev): bump babel-jest from 29.3.1 to 29.5.0 (#356)
+- maint(deps-dev): bump @rollup/plugin-commonjs from 24.0.0 to 24.0.1 (#348)
+- maint(deps): bump vm2 from 3.9.15 to 3.9.16 (#360)
+- maint(deps): bump vm2 from 3.9.11 to 3.9.15 (#359)
+- maint(deps): bump cookiejar from 2.1.3 to 2.1.4 (#345)
+
 ## [4.0.1] - 2023-01-19
 
 ### Fixes
