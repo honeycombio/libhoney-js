@@ -48,6 +48,40 @@ describe("base transmission", () => {
     );
   });
 
+  it("will share its http info with a proxy", done => {
+    const proxyServer = http.createServer((req, res) => {
+      res.writeHead(418, { "Content-Type": "application/json" });
+      res.end("[{ status: 418 }]");
+      expect(req.headers.host).toBe("localhost:1234");
+      expect(req.method).toBe("POST");
+      expect(req.headers["x-honeycomb-team"]).toBe("123456789");
+      proxyServer.close(() => {
+        proxyServer.removeAllListeners();
+        done();
+      });
+    });
+
+    proxyServer.listen(9998, "127.0.0.1");
+
+    let transmission = new Transmission({
+      proxy: "http://127.0.0.1:9998",
+      batchTimeTrigger: 10000, // larger than the mocha timeout
+      batchSizeTrigger: 0,
+    });
+
+
+    transmission.sendEvent(
+      new ValidatedEvent({
+        apiHost: "http://localhost:1234",
+        writeKey: "123456789",
+        dataset: "test-transmission",
+        sampleRate: 1,
+        timestamp: new Date(),
+        postData: { a: 1, b: 2 }
+      })
+    );
+  });
+
   it("should handle batchSizeTrigger of 0", done => {
     mock.post("http://localhost:9999/1/events/test-transmission", req => {
       let reqEvents = JSON.parse(req.body);
@@ -541,7 +575,7 @@ describe("base transmission", () => {
         probe: userAgent =>
         // user-agent order: libhoney, addition, node
           userAgent.indexOf("libhoney-js/<@LIBHONEY_JS_VERSION@>") === 0 &&
-          userAgent.indexOf("addition") < userAgent.indexOf(`node/${process.version}`) 
+          userAgent.indexOf("addition") < userAgent.indexOf(`node/${process.version}`)
       }
     ];
 

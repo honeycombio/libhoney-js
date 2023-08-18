@@ -27,7 +27,9 @@ module.exports = function(options) {
       query: req.query,
       route: req.route,
       secure: req.secure,
-      xhr: req.xhr
+      xhr: req.xhr,
+      dataset: honey._options.dataset || "express-example",
+      proxy: honey._options.proxy || "none",
     });
     next();
   };
