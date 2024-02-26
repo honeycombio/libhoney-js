@@ -94,6 +94,28 @@ describe("libhoney", () => {
       );
     });
 
+    it("should reject a send from an empty dataset with a classic v3 key", () => {
+      // mock out console.error
+      console.error = jest.fn();
+
+      const classicv3IngestKey = "hcaic_1234567890123456789012345678901234567890123456789012345678";
+
+      let honey = new libhoney({
+        apiHost: "http://foo/bar",
+        writeKey: classicv3IngestKey,
+        dataset: "",
+        transmission: "mock",
+      });
+      let transmission = honey.transmission;
+      let postData = { a: 1, b: 2 };
+      honey.sendNow(postData);
+
+      expect(transmission.events).toHaveLength(0);
+      expect(console.error.mock.calls[0][0]).toBe(
+        "dataset must be a non-empty string"
+      );
+    });
+
     it("should set an empty dataset to unknown_dataset with a V2 key", () => {
       let honey = new libhoney({
         apiHost: "http://foo/bar",

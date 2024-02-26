@@ -273,10 +273,11 @@ export default class Libhoney extends EventEmitter {
    * namely, that its length is exactly 32 characters.
    * @returns {boolean} whether the key is classic
    *
-   * @private
    */
+  // todo: add example? and/or move to a different export
   isClassic(key) {
-    return key.length === 32;
+    const keyRegex = /^hc[a-z]ic_/;
+    return key.length === 32 || keyRegex.test(key);
   }
 
   /**
@@ -460,7 +461,7 @@ export default class Libhoney extends EventEmitter {
     if (!transmission) {
       return Promise.resolve();
     }
-    
+
     return transmission.flush();
   }
 }
