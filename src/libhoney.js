@@ -563,19 +563,17 @@ function concatWithMaxLimit(arr1, arr2, limit) {
 
 
 /**
- * isClassic takes an API key and returns true if it is a "classic" APIKey,
- * namely, that its length is exactly 32 characters.
+ * isClassic takes an API key and returns true if it is a "classic" Configuration API Key or Ingest API Key.
  * @returns {boolean} whether the key is classic
  *
+ * @example
+ *   if(isClassic(apiKey)) {
+ *     // special case for classic environments
+ *   }
  */
-// todo: add example? and/or move to a different export
 
-const ingestKeyRegex = /^hc[a-z]i._/;
-const classicKeyRegex = /^hc[a-z]ic_/;
+const classicKeyRegex = /^[a-z0-9]{32}$/;
+const ingestClassicKeyRegex = /^hc[a-z]ic_[a-z0-9]{58}/;
 export function isClassic(key) {
-  if (key.length === 32) {
-    return !ingestKeyRegex.test(key);
-  } else {
-    return classicKeyRegex.test(key);
-  }
+  return classicKeyRegex.test(key) || ingestClassicKeyRegex.test(key);
 }
