@@ -1,6 +1,6 @@
 /* eslint-env node, jest */
-import libhoney, {isClassic} from "../libhoney";
-import {MockTransmission} from "../transmission";
+import { MockTransmission } from "../transmission";
+import libhoney from "../libhoney";
 
 let superagent = require("superagent");
 let mock = require("superagent-mocker")(superagent);
@@ -41,7 +41,7 @@ describe("libhoney", () => {
         transmission: "mock",
       });
       let transmission = honey.transmission;
-      let postData = {a: 1, b: 2};
+      let postData = { a: 1, b: 2 };
       honey.sendNow(postData);
 
       expect(transmission.events).toHaveLength(1);
@@ -64,7 +64,7 @@ describe("libhoney", () => {
         transmission: "mock",
       });
       let transmission = honey.transmission;
-      let postData = {a: 1, b: 2};
+      let postData = { a: 1, b: 2 };
       honey.sendNow(postData);
 
       expect(transmission.events).toHaveLength(1);
@@ -85,7 +85,7 @@ describe("libhoney", () => {
         transmission: "mock",
       });
       let transmission = honey.transmission;
-      let postData = {a: 1, b: 2};
+      let postData = { a: 1, b: 2 };
       honey.sendNow(postData);
 
       expect(transmission.events).toHaveLength(0);
@@ -107,7 +107,7 @@ describe("libhoney", () => {
         transmission: "mock",
       });
       let transmission = honey.transmission;
-      let postData = {a: 1, b: 2};
+      let postData = { a: 1, b: 2 };
       honey.sendNow(postData);
 
       expect(transmission.events).toHaveLength(0);
@@ -124,7 +124,7 @@ describe("libhoney", () => {
         transmission: "mock",
       });
       let transmission = honey.transmission;
-      let postData = {a: 1, b: 2};
+      let postData = { a: 1, b: 2 };
       honey.sendNow(postData);
 
       expect(transmission.events).toHaveLength(1);
@@ -168,7 +168,7 @@ describe("libhoney", () => {
 
       for (let i = 0; i < queueSize + 1; i++) {
         let ev = honey.newEvent();
-        ev.add({a: 1, b: 2});
+        ev.add({ a: 1, b: 2 });
         ev.addMetadata(i);
         ev.send();
       }
@@ -226,6 +226,6 @@ describe("isClassic check", () => {
     },
 
   ])("test case $name", (testCase) => {
-    expect(isClassic(testCase.testString)).toEqual(testCase.expected);
+    expect(libhoney.isClassic(testCase.testString)).toEqual(testCase.expected);
   });
 });

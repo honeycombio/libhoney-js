@@ -19,6 +19,9 @@ import Builder from "./builder";
 
 import { EventEmitter } from "events";
 
+const classicKeyRegex = /^[a-z0-9]{32}$/;
+const ingestClassicKeyRegex = /^hc[a-z]ic_[a-z0-9]{58}/;
+
 const defaults = Object.freeze({
   apiHost: "https://api.honeycomb.io/",
 
@@ -269,14 +272,16 @@ export default class Libhoney extends EventEmitter {
   }
 
   /**
-   * isClassic takes a writeKey and returns true if it is a "classic" writeKey,
-   * namely, that its length is exactly 32 characters.
+   * isClassic takes an API key and returns true if it is a "classic" Configuration API Key or Ingest API Key.
    * @returns {boolean} whether the key is classic
    *
+   * @example
+   *   if(libhoney.isClassic(apiKey)) {
+   *     // special case for classic environments
+   *   }
    */
-  // todo: add example? and/or move to a different export
-  isClassic(key) {
-    return isClassic(key);
+  static isClassic(key) {
+    return classicKeyRegex.test(key) || ingestClassicKeyRegex.test(key);
   }
 
   /**
@@ -324,7 +329,7 @@ export default class Libhoney extends EventEmitter {
     }
 
     if (dataset === "") {
-      if (this.isClassic(writeKey)) {
+      if (Libhoney.isClassic(writeKey)) {
         console.error("dataset must be a non-empty string");
         return null;
       } else {
@@ -559,21 +564,4 @@ function concatWithMaxLimit(arr1, arr2, limit) {
 
   // otherwise assume it'll all fit, combine the responses with the queue
   return arr1.concat(arr2);
-}
-
-
-/**
- * isClassic takes an API key and returns true if it is a "classic" Configuration API Key or Ingest API Key.
- * @returns {boolean} whether the key is classic
- *
- * @example
- *   if(isClassic(apiKey)) {
- *     // special case for classic environments
- *   }
- */
-
-const classicKeyRegex = /^[a-z0-9]{32}$/;
-const ingestClassicKeyRegex = /^hc[a-z]ic_[a-z0-9]{58}/;
-export function isClassic(key) {
-  return classicKeyRegex.test(key) || ingestClassicKeyRegex.test(key);
 }
