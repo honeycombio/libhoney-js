@@ -276,8 +276,7 @@ export default class Libhoney extends EventEmitter {
    */
   // todo: add example? and/or move to a different export
   isClassic(key) {
-    const keyRegex = /^hc[a-z]ic_/;
-    return key.length === 32 || keyRegex.test(key);
+    return isClassic(key);
   }
 
   /**
@@ -560,4 +559,23 @@ function concatWithMaxLimit(arr1, arr2, limit) {
 
   // otherwise assume it'll all fit, combine the responses with the queue
   return arr1.concat(arr2);
+}
+
+
+/**
+ * isClassic takes an API key and returns true if it is a "classic" APIKey,
+ * namely, that its length is exactly 32 characters.
+ * @returns {boolean} whether the key is classic
+ *
+ */
+// todo: add example? and/or move to a different export
+
+const ingestKeyRegex = /^hc[a-z]i._/;
+const classicKeyRegex = /^hc[a-z]ic_/;
+export function isClassic(key) {
+  if (key.length === 32) {
+    return !ingestKeyRegex.test(key);
+  } else {
+    return classicKeyRegex.test(key);
+  }
 }

@@ -1,6 +1,6 @@
 /* eslint-env node, jest */
-import { MockTransmission } from "../transmission";
-import libhoney from "../libhoney";
+import libhoney, {isClassic} from "../libhoney";
+import {MockTransmission} from "../transmission";
 
 let superagent = require("superagent");
 let mock = require("superagent-mocker")(superagent);
@@ -41,7 +41,7 @@ describe("libhoney", () => {
         transmission: "mock",
       });
       let transmission = honey.transmission;
-      let postData = { a: 1, b: 2 };
+      let postData = {a: 1, b: 2};
       honey.sendNow(postData);
 
       expect(transmission.events).toHaveLength(1);
@@ -64,7 +64,7 @@ describe("libhoney", () => {
         transmission: "mock",
       });
       let transmission = honey.transmission;
-      let postData = { a: 1, b: 2 };
+      let postData = {a: 1, b: 2};
       honey.sendNow(postData);
 
       expect(transmission.events).toHaveLength(1);
@@ -85,7 +85,7 @@ describe("libhoney", () => {
         transmission: "mock",
       });
       let transmission = honey.transmission;
-      let postData = { a: 1, b: 2 };
+      let postData = {a: 1, b: 2};
       honey.sendNow(postData);
 
       expect(transmission.events).toHaveLength(0);
@@ -107,7 +107,7 @@ describe("libhoney", () => {
         transmission: "mock",
       });
       let transmission = honey.transmission;
-      let postData = { a: 1, b: 2 };
+      let postData = {a: 1, b: 2};
       honey.sendNow(postData);
 
       expect(transmission.events).toHaveLength(0);
@@ -124,7 +124,7 @@ describe("libhoney", () => {
         transmission: "mock",
       });
       let transmission = honey.transmission;
-      let postData = { a: 1, b: 2 };
+      let postData = {a: 1, b: 2};
       honey.sendNow(postData);
 
       expect(transmission.events).toHaveLength(1);
@@ -168,7 +168,7 @@ describe("libhoney", () => {
 
       for (let i = 0; i < queueSize + 1; i++) {
         let ev = honey.newEvent();
-        ev.add({ a: 1, b: 2 });
+        ev.add({a: 1, b: 2});
         ev.addMetadata(i);
         ev.send();
       }
@@ -189,5 +189,43 @@ describe("libhoney", () => {
       expect(transmission).toBe(null);
       await expect(honey.flush()).resolves.toBeUndefined();
     });
+  });
+});
+
+describe("isClassic check", () => {
+  it.each([
+    {
+      testString: "hcxik_01hqk4k20cjeh63wca8vva5stw70nft6m5n8wr8f5mjx3762s8269j50wc",
+      name: "full ingest key string, non classic",
+      expected: false
+    },
+    {
+      testString: "hcxik_01hqk4k20cjeh63wca8vva5stw",
+      name: "ingest key id, non classic",
+      expected: false
+    },
+    {
+      testString: "hcaic_1234567890123456789012345678901234567890123456789012345678",
+      name: "full ingest key string, classic",
+      expected: true
+    },
+    {
+      testString: "hcaic_12345678901234567890123456",
+      name: "ingest key id, classic",
+      expected: false
+    },
+    {
+      testString: "kgvSpPwegJshQkuowXReLD",
+      name: "v2 configuration key",
+      expected: false
+    },
+    {
+      testString: "12345678901234567890123456789012",
+      name: "classic key",
+      expected: true
+    },
+
+  ])("test case $name", (testCase) => {
+    expect(isClassic(testCase.testString)).toEqual(testCase.expected);
   });
 });
