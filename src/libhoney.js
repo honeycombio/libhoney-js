@@ -19,8 +19,8 @@ import Builder from "./builder";
 
 import { EventEmitter } from "events";
 
-const classicKeyRegex = /^[a-z0-9]{32}$/;
-const ingestClassicKeyRegex = /^hc[a-z]ic_[a-z0-9]{58}/;
+const classicKeyRegex = /^[a-f0-9]*$/;
+const ingestClassicKeyRegex = /^hc[a-z]ic_[a-z0-9]*$/;
 
 const defaults = Object.freeze({
   apiHost: "https://api.honeycomb.io/",
@@ -281,7 +281,15 @@ export default class Libhoney extends EventEmitter {
    *   }
    */
   static isClassic(key) {
-    return classicKeyRegex.test(key) || ingestClassicKeyRegex.test(key);
+    if (key === null || key === undefined || key.length === 0) {
+      return true;
+    }
+    else if(key.length === 32) {
+      return classicKeyRegex.test(key);
+    } else if(key.length === 64) {
+      return ingestClassicKeyRegex.test(key);
+    }
+    return false;
   }
 
   /**

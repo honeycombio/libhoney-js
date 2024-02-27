@@ -224,6 +224,11 @@ describe("isClassic check", () => {
       name: "classic key",
       expected: true
     },
+    {
+      testString: "",
+      name: "no key",
+      expected: true
+    }
 
   ])("test case $name", (testCase) => {
     expect(libhoney.isClassic(testCase.testString)).toEqual(testCase.expected);
