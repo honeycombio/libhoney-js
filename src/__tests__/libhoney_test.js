@@ -94,6 +94,28 @@ describe("libhoney", () => {
       );
     });
 
+    it("should reject a send from an empty dataset with a classic v3 key", () => {
+      // mock out console.error
+      console.error = jest.fn();
+
+      const classicv3IngestKey = "hcaic_1234567890123456789012345678901234567890123456789012345678";
+
+      let honey = new libhoney({
+        apiHost: "http://foo/bar",
+        writeKey: classicv3IngestKey,
+        dataset: "",
+        transmission: "mock",
+      });
+      let transmission = honey.transmission;
+      let postData = { a: 1, b: 2 };
+      honey.sendNow(postData);
+
+      expect(transmission.events).toHaveLength(0);
+      expect(console.error.mock.calls[0][0]).toBe(
+        "dataset must be a non-empty string"
+      );
+    });
+
     it("should set an empty dataset to unknown_dataset with a V2 key", () => {
       let honey = new libhoney({
         apiHost: "http://foo/bar",
@@ -167,5 +189,48 @@ describe("libhoney", () => {
       expect(transmission).toBe(null);
       await expect(honey.flush()).resolves.toBeUndefined();
     });
+  });
+});
+
+describe("isClassic check", () => {
+  it.each([
+    {
+      testString: "hcxik_01hqk4k20cjeh63wca8vva5stw70nft6m5n8wr8f5mjx3762s8269j50wc",
+      name: "full ingest key string, non classic",
+      expected: false
+    },
+    {
+      testString: "hcxik_01hqk4k20cjeh63wca8vva5stw",
+      name: "ingest key id, non classic",
+      expected: false
+    },
+    {
+      testString: "hcaic_1234567890123456789012345678901234567890123456789012345678",
+      name: "full ingest key string, classic",
+      expected: true
+    },
+    {
+      testString: "hcaic_12345678901234567890123456",
+      name: "ingest key id, classic",
+      expected: false
+    },
+    {
+      testString: "kgvSpPwegJshQkuowXReLD",
+      name: "v2 configuration key",
+      expected: false
+    },
+    {
+      testString: "12345678901234567890123456789012",
+      name: "classic key",
+      expected: true
+    },
+    {
+      testString: "",
+      name: "no key",
+      expected: true
+    }
+
+  ])("test case $name", (testCase) => {
+    expect(libhoney.isClassic(testCase.testString)).toEqual(testCase.expected);
   });
 });

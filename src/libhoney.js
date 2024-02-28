@@ -19,6 +19,9 @@ import Builder from "./builder";
 
 import { EventEmitter } from "events";
 
+const classicKeyRegex = /^[a-f0-9]*$/;
+const ingestClassicKeyRegex = /^hc[a-z]ic_[a-z0-9]*$/;
+
 const defaults = Object.freeze({
   apiHost: "https://api.honeycomb.io/",
 
@@ -269,14 +272,24 @@ export default class Libhoney extends EventEmitter {
   }
 
   /**
-   * isClassic takes a writeKey and returns true if it is a "classic" writeKey,
-   * namely, that its length is exactly 32 characters.
+   * isClassic takes an API key and returns true if it is a "classic" Configuration API Key or Ingest API Key.
    * @returns {boolean} whether the key is classic
    *
-   * @private
+   * @example
+   *   if(libhoney.isClassic(apiKey)) {
+   *     // special case for classic environments
+   *   }
    */
-  isClassic(key) {
-    return key.length === 32;
+  static isClassic(key) {
+    if (key === null || key === undefined || key.length === 0) {
+      return true;
+    }
+    else if(key.length === 32) {
+      return classicKeyRegex.test(key);
+    } else if(key.length === 64) {
+      return ingestClassicKeyRegex.test(key);
+    }
+    return false;
   }
 
   /**
@@ -324,7 +337,7 @@ export default class Libhoney extends EventEmitter {
     }
 
     if (dataset === "") {
-      if (this.isClassic(writeKey)) {
+      if (Libhoney.isClassic(writeKey)) {
         console.error("dataset must be a non-empty string");
         return null;
       } else {
@@ -460,7 +473,7 @@ export default class Libhoney extends EventEmitter {
     if (!transmission) {
       return Promise.resolve();
     }
-    
+
     return transmission.flush();
   }
 }
