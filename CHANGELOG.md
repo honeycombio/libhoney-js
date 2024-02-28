@@ -1,5 +1,16 @@
 # libhoney-js changelog
 
+## [4.2.0] - 2024-02-28
+
+### Enhancements
+
+- feat: support classic ingest keys (#406) | [@cewkrupa](https://github.com/cewkrupa)
+
+### Maintenance
+
+- maint: update codeowners to pipeline-team (#405) | [@JamieDanielson](https://github.com/JamieDanielson)
+- maint: update codeowners to pipeline (#404) | [@JamieDanielson](https://github.com/JamieDanielson)
+
 ## [4.1.0] - 2023-08-17
 
 ### Fixes
