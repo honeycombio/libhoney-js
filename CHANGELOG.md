@@ -1,5 +1,20 @@
 # libhoney-js changelog
 
+## [4.3.0] - 2024-04-25
+
+### Maintenance
+
+- maint: Update ubuntu image in workflows to latest (#409) | @MikeGoldsmith
+- maint: Add labels to release.yml for auto-generated grouping (#408) | @JamieDanielson
+- maint(deps): bump formidable and superagent (#414) | @dependabot
+- maint(deps): bump ip from 1.1.8 to 1.1.9 (#413) | @dependabot
+- maint(deps-dev): bump @babel/preset-env from 7.22.9 to 7.24.4 (#415) | @dependabot
+- maint(deps-dev): bump @babel/traverse from 7.22.8 to 7.24.1 (#412) | @dependabot
+- maint(deps-dev): bump @rollup/plugin-node-resolve from 15.1.0 to 15.2.3 (#402) | @dependabot
+- maint(deps-dev): bump @rollup/plugin-commonjs from 25.0.3 to 25.0.7 (#401) | @dependabot
+- maint(deps-dev): bump babel-jest from 29.6.2 to 29.7.0 (#398) | @dependabot
+- maint(deps-dev): bump jest from 29.5.0 to 29.7.0 (#399) | @dependabot
+
 ## [4.2.0] - 2024-02-28
 
 ### Enhancements
