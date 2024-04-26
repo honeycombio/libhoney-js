@@ -13,7 +13,7 @@ For tracing support and automatic instrumentation of Express and other common li
 
 ## Dependencies
 
-**Node 14+**
+**Node 14.18+**
 
 ## Contributions
 

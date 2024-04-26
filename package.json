@@ -1,6 +1,6 @@
 {
   "name": "libhoney",
-  "version": "4.2.0",
+  "version": "4.3.0",
   "description": " Honeycomb.io Javascript library",
   "bugs": "https://github.com/honeycombio/libhoney-js/issues",
   "repository": {
@@ -8,7 +8,7 @@
     "url": "https://github.com/honeycombio/libhoney-js.git"
   },
   "engines": {
-    "node": ">= 14.*"
+    "node": ">= 14.18"
   },
   "browser": "dist/libhoney.browser.js",
   "module": "dist/libhoney.es.js",
