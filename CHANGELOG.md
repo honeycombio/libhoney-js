@@ -2,6 +2,10 @@
 
 ## [4.3.0] - 2024-04-25
 
+### !!! Breaking Changes !!!
+
+Minimum Node version is now 14.18.
+
 ### Maintenance
 
 - maint: Update ubuntu image in workflows to latest (#409) | @MikeGoldsmith
