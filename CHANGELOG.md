@@ -1,5 +1,19 @@
 # libhoney-js changelog
 
+## [4.3.1] - 2024-12-20
+
+### Maintenance
+
+- maint: update superagent to pull in updated hexoid (#447) | [@codeboten](https://github.com/codeboten)
+- maint(deps-dev): bump @babel/preset-env from 7.24.4 to 7.26.0 (#439)
+- maint(deps-dev): bump @rollup/plugin-commonjs from 25.0.7 to 28.0.1 (#440)
+- maint(deps-dev): bump braces from 3.0.2 to 3.0.3 (#425)
+- maint(deps-dev): bump rollup from 3.20.2 to 3.29.5 (#433)
+- maint(deps-dev): bump @babel/core from 7.24.4 to 7.26.0 (#435)
+- maint: update dependabot.yml to remove review team, use codeowners instead (#434) | [@codeboten](https://github.com/codeboten)
+- maint(deps-dev): bump prettier from 3.0.0 to 3.3.2 (#427)
+- docs: update vulnerability reporting process (#431) | [@robbkidd](https://github.com/robbkidd)
+
 ## [4.3.0] - 2024-04-25
 
 ### !!! Breaking Changes !!!
