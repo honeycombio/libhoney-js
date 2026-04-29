@@ -114,12 +114,11 @@ jobs:
       name: node
     steps:
       - checkout
-      - run:
-          name: store npm auth token
-          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
       - run: npm ci
       - run: npm run build
-      - run: npm publish
+      - run: |
+          export NPM_ID_TOKEN=$(circleci run oidc get --claims '{"aud": "npm:registry.npmjs.org"}')
+          npm publish
 
 workflows:
   nightly:
