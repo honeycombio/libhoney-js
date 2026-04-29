@@ -1,7 +1,7 @@
 # libhoney
 
 [![OSS Lifecycle](https://img.shields.io/osslifecycle/honeycombio/libhoney-js?color=success)](https://github.com/honeycombio/home/blob/main/honeycomb-oss-lifecycle-and-practices.md)
-[![CircleCI](https://circleci.com/gh/honeycombio/libhoney-js.svg?style=svg&circle-token=c7056d820eeaa624756e03c3da01deab9d647663)](https://circleci.com/gh/honeycombio/libhoney-js)
+[![CircleCI](https://circleci.com/gh/honeycombio/libhoney-js.svg?style=svg)](https://circleci.com/gh/honeycombio/libhoney-js)
 [![npm version](https://badge.fury.io/js/libhoney.svg)](https://badge.fury.io/js/libhoney)
 
 A Node.js module for sending events to [Honeycomb](https://www.honeycomb.io), a service for debugging your software in production.
