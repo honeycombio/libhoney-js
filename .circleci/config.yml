@@ -118,7 +118,8 @@ jobs:
       - run: npm run build
       - run: |
           export NPM_ID_TOKEN=$(circleci run oidc get --claims '{"aud": "npm:registry.npmjs.org"}')
-          npm publish
+          [[ "${CIRCLE_TAG#v}" == *-* ]] && DIST_TAG="next" || DIST_TAG="latest"
+          npm publish --tag "$DIST_TAG"
 
 workflows:
   nightly:
