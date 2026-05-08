@@ -6,6 +6,7 @@
 /**
  * @module
  */
+/* eslint-disable sort-imports */
 import {
   ConsoleTransmission,
   MockTransmission,
@@ -16,8 +17,11 @@ import {
   WriterTransmission,
 } from "./transmission";
 import Builder from "./builder";
+import superagent from "superagent";
+import urlJoin from "url-join";
 
 import { EventEmitter } from "events";
+/* eslint-enable sort-imports */
 
 const classicKeyRegex = /^[a-f0-9]*$/;
 const ingestClassicKeyRegex = /^hc[a-z]ic_[a-z0-9]*$/;
@@ -428,6 +432,66 @@ export default class Libhoney extends EventEmitter {
   }
 
   /**
+   * creates a Marker for a dataset.
+   * @param {string} dataset the dataset where the marker should appear.
+   * @param {string} message the marker message.
+   * @param {string} type the marker type.
+   * @returns {Promise} a promise that resolves when Honeycomb responds to the marker creation request.
+   */
+  createMarker(dataset, message, type) {
+    if (this._options.disabled) {
+      return Promise.resolve();
+    }
+
+    let validationError = validateMarkerOptions(
+      this._builder.apiHost,
+      this._builder.writeKey,
+      dataset,
+      message,
+      type
+    );
+    if (validationError) {
+      return Promise.reject(validationError);
+    }
+
+    let url = urlJoin(this._builder.apiHost, "/1/markers", dataset);
+    return superagent
+      .post(url)
+      .set("X-Honeycomb-Team", this._builder.writeKey)
+      .type("json")
+      .timeout(this._options.timeout)
+      .send({ message, type });
+  }
+
+  /**
+   * deletes a Marker from a dataset.
+   * @param {string} dataset the dataset containing the marker.
+   * @param {string} markerId the id of the marker to delete.
+   * @returns {Promise} a promise that resolves when Honeycomb responds to the marker deletion request.
+   */
+  deleteMarker(dataset, markerId) {
+    if (this._options.disabled) {
+      return Promise.resolve();
+    }
+
+    let validationError = validateDeleteMarkerOptions(
+      this._builder.apiHost,
+      this._builder.writeKey,
+      dataset,
+      markerId
+    );
+    if (validationError) {
+      return Promise.reject(validationError);
+    }
+
+    let url = urlJoin(this._builder.apiHost, "/1/markers", dataset, markerId);
+    return superagent
+      .del(url)
+      .set("X-Honeycomb-Team", this._builder.writeKey)
+      .timeout(this._options.timeout);
+  }
+
+  /**
    * creates and returns a new Event containing all fields/dynFields from the global Builder, that can be further fleshed out and sent on its own.
    * @returns {Event} an Event instance
    * @example <caption>adding data at send-time</caption>
@@ -543,6 +607,49 @@ function getAndInitTransmission(transmission, options) {
       );
     }
   }
+}
+
+function validateMarkerOptions(apiHost, writeKey, dataset, message, type) {
+  let baseValidationError = validateMarkerRequestOptions(
+    apiHost,
+    writeKey,
+    dataset
+  );
+  if (baseValidationError) return baseValidationError;
+  if (typeof message !== "string" || message === "") {
+    return new Error("message must be a non-empty string");
+  }
+  if (typeof type !== "string" || type === "") {
+    return new Error("type must be a non-empty string");
+  }
+  return null;
+}
+
+function validateDeleteMarkerOptions(apiHost, writeKey, dataset, markerId) {
+  let baseValidationError = validateMarkerRequestOptions(
+    apiHost,
+    writeKey,
+    dataset
+  );
+  if (baseValidationError) return baseValidationError;
+  if (typeof markerId !== "string" || markerId === "") {
+    return new Error("markerId must be a non-empty string");
+  }
+  return null;
+}
+
+function validateMarkerRequestOptions(apiHost, writeKey, dataset) {
+  if (typeof apiHost !== "string" || apiHost === "") {
+    return new Error("apiHost must be a non-empty string");
+  }
+  if (typeof writeKey !== "string" || writeKey === "") {
+    return new Error("writeKey must be a non-empty string");
+  }
+  // Unlike event sends, marker creation/deletion requires a real dataset slug.
+  if (typeof dataset !== "string" || dataset === "") {
+    return new Error("dataset must be a non-empty string");
+  }
+  return null;
 }
 
 /**

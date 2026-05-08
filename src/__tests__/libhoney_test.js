@@ -190,6 +190,138 @@ describe("libhoney", () => {
       await expect(honey.flush()).resolves.toBeUndefined();
     });
   });
+
+  describe("createMarker", () => {
+    it("should post a marker to the configured apiHost and dataset", async () => {
+      expect.assertions(5);
+
+      mock.post("http://localhost:9999/1/markers/test-markers", (req) => {
+        expect(req.headers["x-honeycomb-team"]).toBe("12345");
+        expect(req.headers["content-type"]).toBe("application/json");
+        expect(req.body).toEqual({
+          message: "backend deploy #123",
+          type: "deploy"
+        });
+        return {
+          body: {
+            id: "marker-id",
+            message: "backend deploy #123",
+            type: "deploy",
+          }
+        };
+      });
+
+      let honey = new libhoney({
+        apiHost: "http://localhost:9999",
+        writeKey: "12345",
+        dataset: "events-dataset",
+        transmission: "mock",
+      });
+
+      let res = await honey.createMarker(
+        "test-markers",
+        "backend deploy #123",
+        "deploy"
+      );
+
+      expect(res.body.id).toBe("marker-id");
+      expect(res.body.type).toBe("deploy");
+    });
+
+    it("should reject an empty marker dataset without making a request", async () => {
+      let honey = new libhoney({
+        apiHost: "http://localhost:9999",
+        writeKey: "aKeySimilarToOurV2Keys",
+        dataset: "events-dataset",
+        transmission: "mock",
+      });
+
+      await expect(
+        honey.createMarker("", "backend deploy #123", "deploy")
+      ).rejects.toThrow("dataset must be a non-empty string");
+    });
+
+    it("should reject invalid marker values without making a request", async () => {
+      let honey = new libhoney({
+        apiHost: "http://localhost:9999",
+        writeKey: "12345",
+        dataset: "events-dataset",
+        transmission: "mock",
+      });
+
+      await expect(
+        honey.createMarker("test-markers", "", "deploy")
+      ).rejects.toThrow("message must be a non-empty string");
+    });
+
+    it("should not post a marker when disabled", async () => {
+      let honey = new libhoney({
+        apiHost: "http://localhost:9999",
+        writeKey: "12345",
+        dataset: "events-dataset",
+        transmission: "mock",
+        disabled: true,
+      });
+
+      await expect(
+        honey.createMarker("test-markers", "backend deploy #123", "deploy")
+      ).resolves.toBeUndefined();
+    });
+
+    it("should delete a marker from the configured apiHost and dataset", async () => {
+      expect.assertions(3);
+
+      mock.del("http://localhost:9999/1/markers/test-markers/marker-id", (req) => {
+        expect(req.headers["x-honeycomb-team"]).toBe("12345");
+        return {
+          body: {
+            id: "marker-id",
+            message: "backend deploy #123",
+            type: "deploy",
+          }
+        };
+      });
+
+      let honey = new libhoney({
+        apiHost: "http://localhost:9999",
+        writeKey: "12345",
+        dataset: "events-dataset",
+        transmission: "mock",
+      });
+
+      let res = await honey.deleteMarker("test-markers", "marker-id");
+
+      expect(res.body.id).toBe("marker-id");
+      expect(res.body.type).toBe("deploy");
+    });
+
+    it("should reject invalid marker ids without making a request", async () => {
+      let honey = new libhoney({
+        apiHost: "http://localhost:9999",
+        writeKey: "12345",
+        dataset: "events-dataset",
+        transmission: "mock",
+      });
+
+      await expect(
+        honey.deleteMarker("test-markers", "")
+      ).rejects.toThrow("markerId must be a non-empty string");
+    });
+
+    it("should not delete a marker when disabled", async () => {
+      let honey = new libhoney({
+        apiHost: "http://localhost:9999",
+        writeKey: "12345",
+        dataset: "events-dataset",
+        transmission: "mock",
+        disabled: true,
+      });
+
+      await expect(
+        honey.deleteMarker("test-markers", "marker-id")
+      ).resolves.toBeUndefined();
+    });
+  });
 });
 
 describe("isClassic check", () => {
