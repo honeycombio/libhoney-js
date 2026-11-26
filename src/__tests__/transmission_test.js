@@ -660,7 +660,7 @@ describe("base transmission", () => {
 
     // This number needs to be less than the global test timeout of 5000 so that the server closes in time
     // before jest starts complaining.
-    const serverTimeout = 2500; // milliseconds
+    const serverTimeout = 1500; // milliseconds
 
     const server = http.createServer((req, res) => {
       setTimeout(
@@ -676,7 +676,7 @@ describe("base transmission", () => {
       let errResult;
       let transmission = new Transmission({
         batchTimeTrigger: 10,
-        timeout: serverTimeout - 500,
+        timeout: serverTimeout - 1000,
         responseCallback: async function (respQueue) {
           if (respQueue.length !== 1) {
             errResult = new Error(`expected response queue length = 1, got ${respQueue.length}`);
@@ -705,6 +705,113 @@ describe("base transmission", () => {
           metadata: "my metadata"
         })
       );
+    });
+  });
+  describe("when a send times out", () => {
+    // Starts a server that answers each request using the matching entry in
+    // `behaviours`: "hang" never answers, "ok" answers with a 202 for the
+    // single event, "error" answers with a 500. Requests beyond the list hang.
+    const startServer = (behaviours, onListening) => {
+      let hits = 0;
+      const sockets = new Set();
+      const server = http.createServer((req, res) => {
+        const behaviour = behaviours[hits++] || "hang";
+        req.resume();
+        if (behaviour === "ok") {
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify([{ status: 202 }]));
+        } else if (behaviour === "error") {
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end("{}");
+        }
+      });
+      server.on("connection", socket => {
+        sockets.add(socket);
+        socket.on("close", () => sockets.delete(socket));
+      });
+      server.listen(0, "localhost", () =>
+        onListening({
+          port: server.address().port,
+          hits: () => hits,
+          close: cb => {
+            sockets.forEach(socket => socket.destroy());
+            server.close(cb);
+          }
+        })
+      );
+    };
+
+    const sendOne = (port, responseCallback) => {
+      const transmission = new Transmission({
+        batchTimeTrigger: 10,
+        timeout: 200,
+        responseCallback
+      });
+      transmission.sendEvent(
+        new ValidatedEvent({
+          apiHost: `http://localhost:${port}`,
+          writeKey: "123456789",
+          dataset: "test-transmission",
+          sampleRate: 1,
+          timestamp: new Date(),
+          postData: { a: 1, b: 2 },
+          metadata: "my metadata"
+        })
+      );
+    };
+
+    it("should retry once and report the result of the retry", done => {
+      startServer(["hang", "ok"], server => {
+        sendOne(server.port, respQueue => {
+          server.close(() => {
+            try {
+              expect(server.hits()).toBe(2);
+              expect(respQueue).toHaveLength(1);
+              expect(respQueue[0].error).toBeUndefined();
+              expect(respQueue[0].status_code).toBe(202);
+              expect(respQueue[0].metadata).toBe("my metadata");
+              done();
+            } catch (e) {
+              done(e);
+            }
+          });
+        });
+      });
+    });
+
+    it("should report the timeout after the retry times out too", done => {
+      startServer(["hang", "hang"], server => {
+        sendOne(server.port, respQueue => {
+          server.close(() => {
+            try {
+              expect(server.hits()).toBe(2);
+              expect(respQueue).toHaveLength(1);
+              expect(respQueue[0].error.timeout).toBeTruthy();
+              expect(respQueue[0].metadata).toBe("my metadata");
+              done();
+            } catch (e) {
+              done(e);
+            }
+          });
+        });
+      });
+    });
+
+    it("should not retry when the server answers with an error", done => {
+      startServer(["error", "ok"], server => {
+        sendOne(server.port, respQueue => {
+          server.close(() => {
+            try {
+              expect(server.hits()).toBe(1);
+              expect(respQueue).toHaveLength(1);
+              expect(respQueue[0].status_code).toBe(500);
+              done();
+            } catch (e) {
+              done(e);
+            }
+          });
+        });
+      });
     });
   });
 });

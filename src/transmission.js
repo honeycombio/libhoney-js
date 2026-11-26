@@ -354,94 +354,118 @@ export class Transmission {
     let batches = Object.keys(batchAgg.batches).map(k => batchAgg.batches[k]);
     eachPromise(batches, batch => {
       let url = urlJoin(batch.apiHost, "/1/batch", batch.dataset);
-      let postReq = superagent.post(url);
-
-      let reqPromise;
-      if (process.env.LIBHONEY_TARGET === "browser") {
-        reqPromise = Promise.resolve({ req: postReq });
-      } else {
-        reqPromise = Promise.resolve({ req: postReq.agent(this._proxyAgent) });
-      }
       let { encoded, numEncoded } = batchAgg.encodeBatchEvents(batch.events);
-      return reqPromise.then(
-        ({ req }) =>
-          new Promise(resolve => {
-            // if we failed to encode any of the events, no point in sending anything to honeycomb
-            if (numEncoded === 0) {
+      return new Promise(resolve => {
+        // if we failed to encode any of the events, no point in sending anything to honeycomb
+        if (numEncoded === 0) {
+          this._responseCallback(
+            batch.events.map(ev => ({
+              metadata: ev.metadata,
+              error: ev.encodeError
+            }))
+          );
+          resolve();
+          return;
+        }
+
+        let userAgent = `${LIBHONEY_VERSION} ${NODE_VERSION}`;
+        let trimmedAddition = this._userAgentAddition.trim();
+        if (trimmedAddition) {
+          userAgent = `${LIBHONEY_VERSION} ${trimmedAddition} ${NODE_VERSION}`;
+        }
+
+        let start = Date.now();
+        this._post(url, batch.writeKey, userAgent, encoded)
+          .then(result =>
+            // a connection that went stale while idle (a load balancer closing
+            // it, for example) shows up as a timeout, so give it one more go
+            result.err && result.err.timeout
+              ? this._post(url, batch.writeKey, userAgent, encoded)
+              : result
+          )
+          .then(({ err, res }) => {
+            let end = Date.now();
+
+            if (err) {
               this._responseCallback(
                 batch.events.map(ev => ({
+                  // eslint-disable-next-line camelcase
+                  status_code: ev.encodeError ? undefined : err.status,
+                  duration: end - start,
                   metadata: ev.metadata,
-                  error: ev.encodeError
+                  error: ev.encodeError || err
                 }))
               );
-              resolve();
-              return;
-            }
-
-            let userAgent = `${LIBHONEY_VERSION} ${NODE_VERSION}`;
-            let trimmedAddition = this._userAgentAddition.trim();
-            if (trimmedAddition) {
-              userAgent = `${LIBHONEY_VERSION} ${trimmedAddition} ${NODE_VERSION}`;
-            }
-
-            let start = Date.now();
-            req
-              .set("X-Honeycomb-Team", batch.writeKey)
-              .set(
-                process.env.LIBHONEY_TARGET === "browser"
-                  ? "X-Honeycomb-UserAgent"
-                  : "User-Agent",
-                userAgent
-              )
-              .type("json")
-              .timeout(this._timeout)
-              .send(encoded)
-              .end((err, res) => {
-                let end = Date.now();
-
-                if (err) {
-                  this._responseCallback(
-                    batch.events.map(ev => ({
-                      // eslint-disable-next-line camelcase
-                      status_code: ev.encodeError ? undefined : err.status,
+            } else {
+              let response;
+              try {
+                response = JSON.parse(res.text);
+              } catch (parseErr) {
+                this._responseCallback(
+                  batch.events.map(ev => ({
+                    // eslint-disable-next-line camelcase
+                    status_code: res.status,
+                    duration: end - start,
+                    metadata: ev.metadata,
+                    error: ev.encodeError || parseErr
+                  }))
+                );
+                resolve();
+                return;
+              }
+              let respIdx = 0;
+              this._responseCallback(
+                batch.events.map(ev => {
+                  if (ev.encodeError) {
+                    return {
                       duration: end - start,
                       metadata: ev.metadata,
-                      error: ev.encodeError || err
-                    }))
-                  );
-                } else {
-                  let response = JSON.parse(res.text);
-                  let respIdx = 0;
-                  this._responseCallback(
-                    batch.events.map(ev => {
-                      if (ev.encodeError) {
-                        return {
-                          duration: end - start,
-                          metadata: ev.metadata,
-                          error: ev.encodeError
-                        };
-                      } else {
-                        let nextResponse = response[respIdx++];
-                        return {
-                          // eslint-disable-next-line camelcase
-                          status_code: nextResponse.status,
-                          duration: end - start,
-                          metadata: ev.metadata,
-                          error: nextResponse.err
-                        };
-                      }
-                    })
-                  );
-                }
-                // we resolve unconditionally to continue the iteration in eachSeries.  errors will cause
-                // the event to be re-enqueued/dropped.
-                resolve();
-              });
-          })
-      );
+                      error: ev.encodeError
+                    };
+                  } else {
+                    let nextResponse = response[respIdx++];
+                    return {
+                      // eslint-disable-next-line camelcase
+                      status_code: nextResponse.status,
+                      duration: end - start,
+                      metadata: ev.metadata,
+                      error: nextResponse.err
+                    };
+                  }
+                })
+              );
+            }
+            // we resolve unconditionally to continue the iteration in eachSeries.  errors will cause
+            // the event to be re-enqueued/dropped.
+            resolve();
+          });
+      });
     })
       .then(finishBatch)
       .catch(finishBatch);
+  }
+
+  // POSTs an encoded batch once. Always resolves, with either an error or a
+  // response, so the caller can decide whether to try again.
+  _post(url, writeKey, userAgent, encoded) {
+    return new Promise(resolve => {
+      let req = superagent.post(url);
+      if (process.env.LIBHONEY_TARGET !== "browser") {
+        req = req.agent(this._proxyAgent);
+      }
+      req
+        .set("X-Honeycomb-Team", writeKey)
+        .set(
+          process.env.LIBHONEY_TARGET === "browser"
+            ? "X-Honeycomb-UserAgent"
+            : "User-Agent",
+          userAgent
+        )
+        .type("json")
+        .timeout(this._timeout)
+        .send(encoded)
+        .end((err, res) => resolve({ err, res }));
+    });
   }
 
   _shouldSendEvent(ev) {
